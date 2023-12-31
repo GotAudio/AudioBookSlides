@@ -18,19 +18,17 @@ This is a demo contact sheet showing the images generated. (Made with [VideoCS](
 
 AudioBookSlides requires 3 external packages;
 - WhisperX: Windows users can install whisperx from [here](https://github.com/Purfview/whisper-standalone-win/releases/tag/faster-whisper)
-Extract and save whisper-faster.exe and add it's path to [default_config.yaml](default_config.yaml)
+Extract and save whisper-faster.exe to the application directory. Download [cuBLAS.and.cuDNN_win_v4.7z from here](https://github.com/Purfview/whisper-standalone-win/releases/tag/libs) and unzip to application folder.
 - Unix users can install WhisperX with 'pip install faster-whisper'
 - ffmpeg: ffmpeg can be installed from [here](https://github.com/BtbN/FFmpeg-Builds/releases)
 - ComfyUI: ComfyUI stand-alone portable can be downloaded from [here](https://github.com/comfyanonymous/ComfyUI/releases)
 You will not need to use the CompfyUI web interface. It is enough to simply launch the server.
-
 
 ####
 To use the GPT API you will need to sign up for an API Key. You can register and get one [here](https://platform.openai.com).
 Add your API key to the default_config.yaml file.  It will cost about $2 for a 12 hour audio book.  You might still get $20 free credit when you sign up.
 You can also use the free [LM-Studio Local GPT server](https://lmstudio.ai/). It is about 3 times slower (1 hour vs 20 minutes) and it is not as accurate. I recommend using [this](https://huggingface.co/TheBloke/Mistral-7B-Instruct-v0.1-GGUF) model.
 I have not tweaked all of the reqeusts for LMS. Results may be poor for some requests. (I used it myself but I have not verified it works with this installation.)
-
 
 ### To install AudioBookSlides;
 
