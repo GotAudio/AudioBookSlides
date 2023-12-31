@@ -148,7 +148,7 @@ def main(bookname, wildcard_path):
         logging.info("Creating srt: %s", srt_file_path)
 
         # Step 4.1: construct and optionally display the whisperx_cmd
-        whisperx_cmd = config['whisperx_cmd'] + f" --output_dir {book_folder} {mp3_file_path}"
+        whisperx_cmd = config['whisperx_cmd'] + f" {mp3_file_path}"
 
         # Log the command if debugging is enabled
         if DEBUG:
