@@ -12,6 +12,8 @@ I created a sample book to test this installation. Public domain Librivox [Alice
 [Contact Sheet from Alice In Wonderland](https://github.com/GotAudio/AudioBookSlides/assets/13667229/acf17491-81be-42ee-a2de-230a19922d57)
 
 
+This is a demo contact sheet showing the images generated. (Made with [VideoCS](https://sourceforge.net/projects/videocs) not this program.)
+
 ### Installation
 
 AudioBookSlides requires 3 external packages;
