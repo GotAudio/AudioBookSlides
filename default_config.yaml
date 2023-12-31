@@ -1,4 +1,7 @@
-# example_config.yaml. This file will be copied to each books\<bookname>\<bookname>.yaml
+# default_config.yaml. This file will be copied to each books\<bookname>\<bookname>.yaml
+
+#OpenAPI Key. Required only for OpenAI - GPT3. Get yours from here https://platform.openai.com/
+openai_api_key: "sk- YOUR API KEY "
 
 #whisperX is required to generate .srt subtitle file. Add your path to whisperx.
 #Windows install from https://github.com/Purfview/whisper-standalone-win/releases/tag/faster-whisper, unzip whisper-faster.exe to this folder or elsewhere. Unix, install with pip install faster-whisper
@@ -12,10 +15,12 @@ image_generator: "ComfyUI"
 # You can either change the path below, or rename the YYYY-MM-DD images folder to <bookname> when image generation is complete.
 # You must start A111, configure the UI, and select "Input from text or file" under the Scripts selector at the bottom, then drag+drop <bookname>_p_final.txt into the upload box, then wait for images to be generated.
 # I have provided a sample A1111.PNG file that you can import to load reasonable defaults.
+# <bookname> tag will be replaced with your bookname
 path_to_stablediffusion: "E:\\SD\\stable-diffusion-webui\\outputs\\txt2img-images\\<bookname>"
 
 # If image_generator is ComfyUI, folder containing ComfyUI generated images. You must start ComfyUI prior to generating images.
 # You must change the path below or you must rename the "output" images folder to <bookname> when image generation is complete
+# <bookname> tag will be replaced with your bookname
 path_to_comfyui: "H:\\ComfyUI\\<bookname>"
 
 # You must download the model files to your SD model folder. You can find them here https://civitai.com/
@@ -50,8 +55,6 @@ image_count: 0
 #**** I may need to update a few scripts to run with LMS ****
 #api_base: "http://localhost:1234/v1"
 
-#OpenAPI Key. Required only for OpenAI - GPT3. This is mine.  I will change it once published.
-openai_api_key: "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"
 
 # Just some sample actresses and actors. You can create custom csv files in the book folder and change this yaml file to point to those. 
 # I replace characters with actors in order to have consistent character appearences 
