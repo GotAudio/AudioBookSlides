@@ -1,0 +1,213 @@
+{
+  "1": {
+    "inputs": {
+      "ckpt_name": "RealitiesEdgeXLLCM_TURBOXL.safetensors"
+    },
+    "class_type": "CheckpointLoaderSimple"
+  },
+  "3": {
+    "inputs": {
+      "text": "Neg: shirtless, NSFW, ((blurry:1.3)), worst quality, 3D, cgi, drawing, mouth open, undefined ",
+      "clip": [
+        "1",
+        1
+      ]
+    },
+    "class_type": "CLIPTextEncode"
+  },
+  "4": {
+    "inputs": {
+      "add_noise": true,
+      "noise_seed": 935071967401843,
+      "cfg": 2,
+      "model": [
+        "1",
+        0
+      ],
+      "positive": [
+        "27",
+        0
+      ],
+      "negative": [
+        "3",
+        0
+      ],
+      "sampler": [
+        "13",
+        0
+      ],
+      "sigmas": [
+        "9",
+        0
+      ],
+      "latent_image": [
+        "10",
+        0
+      ]
+    },
+    "class_type": "SamplerCustom"
+  },
+  "9": {
+    "inputs": {
+      "steps": 8,
+      "model": [
+        "1",
+        0
+      ]
+    },
+    "class_type": "SDTurboScheduler"
+  },
+  "10": {
+    "inputs": {
+      "width": 768,
+      "height": 512,
+      "batch_size": 1
+    },
+    "class_type": "EmptyLatentImage"
+  },
+  "11": {
+    "inputs": {
+      "samples": [
+        "4",
+        0
+      ],
+      "vae": [
+        "32",
+        0
+      ]
+    },
+    "class_type": "VAEDecode"
+  },
+  "13": {
+    "inputs": {
+      "sampler_name": "dpmpp_sde_gpu"
+    },
+    "class_type": "KSamplerSelect"
+  },
+  "27": {
+    "inputs": {
+      "text": " Pos: BREAK a beautiful high definition crisp portrait taken with a professional grade camera with exquisite color grading ",
+      "clip": [
+        "1",
+        1
+      ]
+    },
+    "class_type": "CLIPTextEncode"
+  },
+  "28": {
+    "inputs": {
+      "filename_prefix": "HM",
+      "images": [
+        "30",
+        0
+      ]
+    },
+    "class_type": "SaveImage"
+  },
+  "29": {
+    "inputs": {
+      "guide_size": 256,
+      "guide_size_for": true,
+      "max_size": 768,
+      "seed": 393188317266073,
+      "steps": 4,
+      "cfg": 2,
+      "sampler_name": "dpmpp_sde_gpu",
+      "scheduler": "normal",
+      "denoise": 0.5,
+      "feather": 5,
+      "noise_mask": true,
+      "force_inpaint": true,
+      "bbox_threshold": 0.5,
+      "bbox_dilation": 10,
+      "bbox_crop_factor": 3,
+      "sam_detection_hint": "center-1",
+      "sam_dilation": 0,
+      "sam_threshold": 0.93,
+      "sam_bbox_expansion": 0,
+      "sam_mask_hint_threshold": 0.7000000000000001,
+      "sam_mask_hint_use_negative": "False",
+      "drop_size": 10,
+      "wildcard": "",
+      "cycle": 1,
+      "image": [
+        "11",
+        0
+      ],
+      "model": [
+        "1",
+        0
+      ],
+      "clip": [
+        "1",
+        1
+      ],
+      "vae": [
+        "1",
+        2
+      ],
+      "positive": [
+        "27",
+        0
+      ],
+      "negative": [
+        "3",
+        0
+      ],
+      "bbox_detector": [
+        "31",
+        0
+      ]
+    },
+    "class_type": "FaceDetailer"
+  },
+  "30": {
+    "inputs": {
+      "guide_size": 256,
+      "guide_size_for": true,
+      "max_size": 768,
+      "seed": 785513575834036,
+      "steps": 4,
+      "cfg": 2,
+      "sampler_name": "dpmpp_sde_gpu",
+      "scheduler": "normal",
+      "denoise": 0.5,
+      "feather": 5,
+      "noise_mask": true,
+      "force_inpaint": false,
+      "bbox_threshold": 0.5,
+      "bbox_dilation": 10,
+      "bbox_crop_factor": 3,
+      "sam_detection_hint": "center-1",
+      "sam_dilation": 0,
+      "sam_threshold": 0.93,
+      "sam_bbox_expansion": 0,
+      "sam_mask_hint_threshold": 0.7000000000000001,
+      "sam_mask_hint_use_negative": "False",
+      "drop_size": 10,
+      "refiner_ratio": 0.2,
+      "cycle": 1,
+      "image": [
+        "29",
+        0
+      ],
+      "detailer_pipe": [
+        "29",
+        4
+      ]
+    },
+    "class_type": "FaceDetailerPipe"
+  },
+  "31": {
+    "inputs": {
+      "model_name": "bbox/face_yolov8m.pt"
+    },
+    "class_type": "UltralyticsDetectorProvider"
+  },
+  "32": {
+    "inputs": {
+      "vae_name": "SDXL-VAE_0.9.safetensors"
+    },
+    "class_type": "VAELoader"
+  }
+}
