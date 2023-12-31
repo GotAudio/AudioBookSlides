@@ -45,7 +45,7 @@ cd AudioBookSlides
 
 pip install .
 
-python abs BookName \path_to_audiobook\bookname.mp3
+python abs.py BookName \path_to_audiobook\bookname.mp3
 ```
 
 ## Overview of processing.
