@@ -83,7 +83,7 @@ def replace_bookname_recursive(data, bookname):
     else:
         return data
 
-def main(bookname, wildcard_path):
+def main(bookname, wildcard_path=None):
     # Step 1: Create the folder books\<bookname> if it does not exist
 
     book_folder = os.path.join('books', bookname)
@@ -93,28 +93,51 @@ def main(bookname, wildcard_path):
         if DEBUG:
             logging.debug("Step 01/20: Audio book folder: %s",book_folder)
 
-    # Step 2: Copy example_config.yml to books\<bookname>\<bookname>.yaml if it does not exist
-    # Log the command if debugging is enabled
+    # Assuming SCRIPT_PATH is defined and points to your application folder
+    default_config_path = os.path.join(SCRIPT_PATH, 'default_config.yaml')
+    api_key_file_path = os.path.join(SCRIPT_PATH, 'ABS_API_KEY.txt')
 
-    if DEBUG:
-        logging.debug("Step 02/20: Getting configuration file %s",  f"{bookname}.yaml")
-
-    yaml_file_path = os.path.join(book_folder, f"{bookname}.yaml")
-    example_yaml_path = os.path.join(SCRIPT_PATH, 'example_config.yaml')
-    if not create_file_if_missing(example_yaml_path, yaml_file_path):
-        return
-
-    # Read books\<bookname>\<bookname>.yaml file
+    # Read the OpenAI API key from ABS_API_KEY.txt
     try:
-        with open(yaml_file_path, 'r') as yaml_file:
-            config = yaml.safe_load(yaml_file)
-
-        # Replace placeholders in the config dictionary
-        config = replace_bookname_recursive(config, bookname)
-
+        with open(api_key_file_path, 'r') as file:
+            openai_api_key = file.read().strip()
+        os.environ['ABS_API_KEY'] = openai_api_key
     except Exception as e:
-        logging.error("Error reading YAML file: %s", e)
+        logging.error("Error reading OpenAI API key file: %s", e)
         return
+
+    # Read the default configuration
+    try:
+        with open(default_config_path, 'r') as file:
+            default_config = yaml.safe_load(file)
+    except Exception as e:
+        logging.error("Error reading default YAML file: %s", e)
+        return
+
+    # Step 2: Check for book-specific configuration
+    if DEBUG:
+        logging.debug("Step 02/20: Checking for book-specific configuration file %s", f"{bookname}.yaml")
+
+    book_config_path = os.path.join(book_folder, f"{bookname}.yaml")
+
+    # Initialize config with default settings
+    config = default_config
+
+    # If book-specific configuration exists, read and merge it
+    if os.path.exists(book_config_path):
+        try:
+            with open(book_config_path, 'r') as file:
+                book_config = yaml.safe_load(file)
+
+            # Merge configurations, with book-specific settings taking precedence
+            config.update(book_config)
+
+        except Exception as e:
+            logging.error("Error reading book-specific YAML file: %s", e)
+            return
+
+    # Replace placeholders in the config dictionary
+    config = replace_bookname_recursive(config, bookname)
 
     # Verify yaml file is complete
     required_keys = ['whisperx_cmd', 'path_to_stablediffusion', 'path_to_comfyui']
@@ -122,24 +145,40 @@ def main(bookname, wildcard_path):
         logging.error("YAML file is missing some required keys.")
         return
 
-    # Step 3: If books\<bookname>\<bookname>.mp3 does not exist we will create it
+    # The OpenAI API key is now set in the environment variable 'ABS_API_KEY'
+
+
+
+
+    # Step 3: Create the MP3 file if it does not exist
     mp3_file_path = os.path.join(book_folder, f"{bookname}.mp3")
-    filelist_path = os.path.join(book_folder, 'filelist.txt')
-    # Log the command if debugging is enabled
-    if DEBUG:
-        logging.debug("Step 03/20: Audio file %s", mp3_file_path)
 
-    try:
-        with open(filelist_path, 'w') as filelist:
-            for audio_file in sorted(glob.glob(wildcard_path)):
-                corrected_path = audio_file.replace('\\', '/')
-                filelist.write(f"file '{corrected_path}'\n")
-    except IOError as e:
-        logging.error("Error writing to filelist: %s", e)
-        return
+    # Check if the MP3 file already exists
+    if not os.path.exists(mp3_file_path):
+        # Check if wildcard_path is provided
+        if wildcard_path is None:
+            logging.error("Missing required wildcard path for audio file creation.")
+            return
 
-    if not create_mp3(filelist_path, mp3_file_path):
-        return
+        filelist_path = os.path.join(book_folder, 'filelist.txt')
+        # Log the command if debugging is enabled
+        if DEBUG:
+            logging.debug("Step 03/20: Audio file %s", mp3_file_path)
+
+        try:
+            with open(filelist_path, 'w') as filelist:
+                for audio_file in sorted(glob.glob(wildcard_path)):
+                    corrected_path = audio_file.replace('\\', '/')
+                    filelist.write(f"file '{corrected_path}'\n")
+        except IOError as e:
+            logging.error("Error writing to filelist: %s", e)
+            return
+
+        if not create_mp3(filelist_path, mp3_file_path):
+            return
+    else:
+        logging.info("MP3 file already exists, skipping creation: %s", mp3_file_path)
+
 
     # Step 4: Create .srt file
     srt_file_path = os.path.join(book_folder, f"{bookname}.srt")
@@ -706,11 +745,15 @@ def check_ffmpeg_availability():
 
 if __name__ == "__main__":
     import sys
-    if len(sys.argv) != 3:
-        logging.error("Usage: python script.py <bookname> <[wildcard_]path_to_audio_file(s)>")
-    else:
-        # Check ffmpeg availability
-        if not check_ffmpeg_availability():
-            sys.exit(1)  # Exit with an error code if ffmpeg is not available
+    if len(sys.argv) < 2:
+        logging.error("Usage: python script.py <bookname> [<wildcard_path_to_audio_files>]")
+        sys.exit(1)
 
-        main(sys.argv[1], sys.argv[2])
+    bookname = sys.argv[1]
+    wildcard_path = sys.argv[2] if len(sys.argv) > 2 else None
+
+    # Check ffmpeg availability
+    if not check_ffmpeg_availability():
+        sys.exit(1)
+
+    main(bookname, wildcard_path)

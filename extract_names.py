@@ -2,6 +2,7 @@ import sys
 import openai
 import csv
 import re
+import os
 from tqdm import tqdm
 
 # Function to generate a response using the gpt-3.5-turbo-instruct-0914 model
@@ -27,8 +28,12 @@ if len(sys.argv) < 3 or len(sys.argv) > 4:
     print("Usage: python extract_names.py <input_file> <output_file> [api_base]")
     sys.exit(1)
 
-# Set your OpenAI API key
-api_key = "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"
+# Set your OpenAI API key from environment variable
+api_key = os.environ.get('ABS_API_KEY')
+if not api_key:
+    print("OpenAI API key not found in environment variables.")
+    sys.exit(1)
+
 openai.api_key = api_key
 
 # Set the default value for api_base

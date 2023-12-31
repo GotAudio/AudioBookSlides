@@ -2,6 +2,7 @@ import sys
 import openai
 import csv
 import re
+import os
 from tqdm import tqdm
 
 # Check if the correct number of arguments are passed; if not, print usage and exit
@@ -9,8 +10,13 @@ if len(sys.argv) != 3:
     print("Usage: python gen_prompts.py <input_file> <output_file>")
     sys.exit(1)
 
-# Set your OpenAI API key
-openai.api_key = "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"
+# Retrieve the OpenAI API key from the environment variable
+api_key = os.environ.get('ABS_API_KEY')
+if not api_key:
+    print("OpenAI API key not found in environment variables.")
+    sys.exit(1)
+
+openai.api_key = api_key
 
 # Assign command line arguments to input and output file variables
 input_file = sys.argv[1]
