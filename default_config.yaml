@@ -5,7 +5,7 @@ openai_api_key: "sk- YOUR API KEY "
 
 #whisperX is required to generate .srt subtitle file. Add your path to whisperx.
 #Windows install from https://github.com/Purfview/whisper-standalone-win/releases/tag/faster-whisper, unzip whisper-faster.exe to this folder or elsewhere. Unix, install with pip install faster-whisper
-whisperx_cmd: "whisper-faster --model large-v2 --output_format srt "
+whisperx_cmd: "whisper-faster --model large-v2 --output_format srt --beep_off --print_progress --output_dir source "
 
 # Paths to various dependencies and models
 #Must be either ComfyUI or A1111
