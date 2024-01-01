@@ -518,13 +518,14 @@ def main(bookname, wildcard_path=None):
     output_file = f"books/{bookname}/{bookname}_ts_p_actors_EDIT.txt"
     male_actors_csv = config.get('actors', "actors\\male.csv")  # Default if not specified
     female_actors_csv = config.get('actresses', "actors\\female.csv")  # Default if not specified
+    depth = config.get('depth', 4)  # Default depth to 4 if not specified in config
 
     if not os.path.exists(output_file):
         logging.info("Step 14/20: Generating editable character and actor list from %s and saving to %s", input_file, output_file)
 
         try:
-            # Execute the existing replace_actors.py script
-            replace_actors_cmd = f"python replace_actors.py {input_file} {male_actors_csv} {female_actors_csv} {output_file}"
+            # Execute the existing replace_actors.py script with depth parameter
+            replace_actors_cmd = f"python replace_actors.py {input_file} {male_actors_csv} {female_actors_csv} {output_file} {depth}"
 
             # Log the command if debugging is enabled
             if DEBUG:
@@ -541,7 +542,6 @@ def main(bookname, wildcard_path=None):
             return
     else:
         logging.info("****** Already exists: %s. You must review this file, make any corrections and save as %s", output_file, f"books/{bookname}/{bookname}_ts_p_actors.txt")
-
 
     # Step 15: Apply actors using the apply_actors.py script
     input_file = f"books/{bookname}/{bookname}_ts_p_actors.txt"

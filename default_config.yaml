@@ -4,8 +4,18 @@
 #Windows install from https://github.com/Purfview/whisper-standalone-win/releases/tag/faster-whisper, unzip whisper-faster.exe to this folder or elsewhere. Unix, install with pip install faster-whisper
 whisperx_cmd: "whisper-faster --model large-v2 --output_format srt --beep_off --print_progress --output_dir source "
 
+# Just some sample actresses and actors. You can create custom csv files in the book folder and change this yaml file to point to those. 
+# I replace characters with actors in order to have consistent character appearences. 
+# You may create custom actors files by creating a books\<bookname>\<bookname>.yaml file with these keys which points to csv files in the <bookname> folder.
+actors: actors\\male.csv
+actresses: actors\\female.csv
+
+#When generating actor name replacements, this setting controls the minimum number of times a name must occur in the book to be included in the default replacement list.
+#You may want to change it to 1 and manually delete any entries you do not wish to assign to an actor.  See README.md for more tips about actors.
+depth: 4
+
 # Paths to various dependencies and models
-#Must be either ComfyUI or A1111
+# Must be either ComfyUI or A1111
 image_generator: "ComfyUI"
 
 # If image_generator is A1111, folder containing generated A1111 images. 
@@ -50,7 +60,3 @@ image_count: 0
 #**** I may need to update a few scripts to run with LMS ****
 #api_base: "http://localhost:1234/v1"
 
-# Just some sample actresses and actors. You can create custom csv files in the book folder and change this yaml file to point to those. 
-# I replace characters with actors in order to have consistent character appearences 
-actors: actors\\male.csv
-actresses: actors\\female.csv

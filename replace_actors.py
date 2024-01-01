@@ -57,13 +57,14 @@ def process_input(characters_file, male_actors_file, female_actors_file, output_
         print("An error occurred:", str(e))
 
 if __name__ == "__main__":
-    if len(sys.argv) != 5:
-        print("Usage: python replace_actors.py <characters_file> <male_actors_file> <female_actors_file> <output_file>")
+    if len(sys.argv) < 5 or len(sys.argv) > 6:
+        print("Usage: python replace_actors.py <characters_file> <male_actors_file> <female_actors_file> <output_file> [depth]")
         sys.exit(1)
 
     characters_file = sys.argv[1]
     male_actors_file = sys.argv[2]
     female_actors_file = sys.argv[3]
     output_file = sys.argv[4]
+    depth = int(sys.argv[5]) if len(sys.argv) == 6 else 4
 
-    process_input(characters_file, male_actors_file, female_actors_file, output_file)
+    process_input(characters_file, male_actors_file, female_actors_file, output_file, depth)
