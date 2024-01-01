@@ -1,5 +1,0 @@
-opencv-python
-openai==0.28
-pyyaml
-joblib
-tqdm

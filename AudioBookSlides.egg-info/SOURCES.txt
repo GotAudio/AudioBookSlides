@@ -1,9 +1,0 @@
-License.txt
-README.md
-setup.py
-AudioBookSlides.egg-info/PKG-INFO
-AudioBookSlides.egg-info/SOURCES.txt
-AudioBookSlides.egg-info/dependency_links.txt
-AudioBookSlides.egg-info/entry_points.txt
-AudioBookSlides.egg-info/requires.txt
-AudioBookSlides.egg-info/top_level.txt
