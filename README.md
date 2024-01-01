@@ -1,3 +1,5 @@
+**NOTICE (2024-01-01):** Important update regarding ComfyAI installation prerequisites. Additional modules are required (FaceDetailer, FaceDetailerPipe, UltralyticsDetectorProvider) that were not previously documented. If you do not have an existing installation of ComfyUI with these components, please wait until the updated installation instructions are available. Thank you for your patience.
+
 # AudioBookSlides
 
 ![Turbo_RealitiesEdgeXLLCM_A1111-SD](https://github.com/GotAudio/AudioBookSlides/assets/13667229/4f30b0c5-9ab6-4940-89ca-e5ddb2235e0b)
