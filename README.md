@@ -38,7 +38,7 @@ Ensure each package is correctly installed and configured before using AudioBook
 
 #### GPT API Setup
 - To use the GPT API, you need to sign up for an API Key. Register and get your key [here](https://platform.openai.com).
-- Add your API key to the `default_config.yaml` file.
+- Save your API key in a file named `ABS_API_KEY.txt` in the application folder.
 - The cost is approximately $2 for a 12-hour audiobook. New sign-ups might receive $20 free credit.
 - Alternatively, use the free [LM-Studio Local GPT server](https://lmstudio.ai/). It's about 3 times slower (1 hour vs 20 minutes) and less accurate. The recommended model is [here](https://huggingface.co/TheBloke/Mistral-7B-Instruct-v0.1-GGUF).
 - Note: Not all requests have been optimized for LM-Studio. Some results may be poor. (This was used in development but hasn't been fully verified with this installation.)
