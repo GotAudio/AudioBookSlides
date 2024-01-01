@@ -85,6 +85,16 @@ def replace_bookname_recursive(data, bookname):
     else:
         return data
 
+def fix_path(old_path):
+    if (os.name != "nt"):
+        linux_path = old_path.replace('\\', '/')
+        if ':' in linux_path:
+            drive_letter, rest_of_path = linux_path.split(':', 1)
+            linux_path = '/mnt/' + drive_letter.lower() + rest_of_path
+        return linux_path
+    else:
+        return old_path
+
 def main(bookname, wildcard_path=None):
     # Step 1: Create the folder books\<bookname> if it does not exist
 
@@ -147,10 +157,7 @@ def main(bookname, wildcard_path=None):
     for key in keys_to_normalize:
         if key in config:
             original_path = config[key]
-            #config[key] = os.path.normpath(original_path)
-            config[key] = os.path.normpath(Path(PureWindowsPath(original_path)))
-            print(f"Original path for '{key}': {original_path}")
-            print(f"Normalized path for '{key}': {config[key]}")
+            config[key] = fix_path(original_path)
 
     # Step 3: Create the MP3 file if it does not exist
     mp3_file_path = os.path.join(book_folder, f"{bookname}.mp3")
