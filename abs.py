@@ -103,7 +103,7 @@ def main(bookname, wildcard_path=None):
             openai_api_key = file.read().strip()
         os.environ['ABS_API_KEY'] = openai_api_key
     except Exception as e:
-        logging.error("Error reading OpenAI API key file: %s", e)
+        logging.info("ABS_API_KEY.txt does not contain an API key. GPT API will be unavailable %s", e)
         return
 
     # Read the default configuration
@@ -140,7 +140,7 @@ def main(bookname, wildcard_path=None):
     config = replace_bookname_recursive(config, bookname)
 
     # Verify yaml file is complete
-    required_keys = ['whisperx_cmd', 'path_to_stablediffusion', 'path_to_comfyui']
+    required_keys = ['whisperx_win', 'path_to_stablediffusion', 'path_to_comfyui']
     if not all(key in config for key in required_keys):
         logging.error("YAML file is missing some required keys.")
         return
@@ -187,7 +187,12 @@ def main(bookname, wildcard_path=None):
         logging.info("Creating srt: %s", srt_file_path)
 
         # Step 4.1: construct and optionally display the whisperx_cmd
-        whisperx_cmd = config['whisperx_cmd'] + f" {mp3_file_path}"
+
+        # Determine the appropriate key based on the operating system
+        key = 'whisperx_win' if platform.system() == 'Windows' else 'whisperx_linux'
+
+        # Construct whisperx_cmd using the selected key
+        whisperx_cmd = config[key] + f" {mp3_file_path}"
 
         # Log the command if debugging is enabled
         if DEBUG:

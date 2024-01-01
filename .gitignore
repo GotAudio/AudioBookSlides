@@ -1,2 +1,3 @@
 ABS_API_KEY.txt
-*.egg-info/
+AudioBookSlides.egg-info
+temp_output.srt

@@ -2,7 +2,9 @@
 
 #whisperX is required to generate .srt subtitle file. Add your path to whisperx.
 #Windows install from https://github.com/Purfview/whisper-standalone-win/releases/tag/faster-whisper, unzip whisper-faster.exe to this folder or elsewhere. Unix, install with pip install faster-whisper
-whisperx_cmd: "whisper-faster --model large-v2 --output_format srt --beep_off --print_progress --output_dir source "
+whisperx_win: "whisper-faster --model large-v2 --output_format srt --beep_off --print_progress --output_dir source "
+whisperx_linux: "whisper-ctranslate2 --model large-v2 --output_format srt --beep_off --print_progress --output_dir source "
+
 
 # Just some sample actresses and actors. You can create custom csv files in the book folder and change this yaml file to point to those. 
 # I replace characters with actors in order to have consistent character appearences. 
