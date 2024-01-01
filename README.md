@@ -31,6 +31,61 @@ AudioBookSlides requires the installation of three external packages:
   - **Unix Users**:
     - Install WhisperX using the command: `pip install faster-whisper`.
 
+<details><summary>WSL Installation Steps Incomplete. I will update this when it is complete.  (click to expand)</summary>
+<pre><code>
+# Install Miniconda
+cd ~
+wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+chmod +x Miniconda3-latest-Linux-x86_64.sh
+./Miniconda3-latest-Linux-x86_64.sh
+# Accept defaults, then close and reopen terminal
+
+# Install Mamba
+conda install mamba -n base -c conda-forge
+mamba --version
+# Output: mamba 1.5.6, conda 23.11.0
+
+# Create and activate the 'abs' environment
+mamba create -n abs python=3.10
+conda activate abs
+
+# Clone and set up AudioBookSlides
+md /mnt/e/wsl
+cd /mnt/e/wsl
+git clone https://github.com/GotAudio/AudioBookSlides.git
+cd AudioBookSlides/
+pip install .
+pip install faster-whisper
+pip install -U whisper-ctranslate2
+
+# Install ffmpeg
+sudo apt update
+sudo apt install ffmpeg
+
+# Download and extract cuBLAS and cuDNN libraries
+wget https://github.com/Purfview/whisper-standalone-win/releases/download/libs/cuBLAS.and.cuDNN_linux_v2.7z
+sudo apt install p7zip-full
+7z x cuBLAS.and.cuDNN_linux_v2.7z
+
+# Failed. Changed to CPU ..... export LD_LIBRARY_PATH=.:$LD_LIBRARY_PATH
+
+# Clone and set up ComfyUI
+cd ..
+git clone https://github.com/comfyanonymous/ComfyUI.git
+cd ComfyUI/
+pip install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cu121
+pip install -r requirements.txt
+
+cd ../AudioBookSlide
+
+# Save your openai API Key in ABS_API_KEY.txt
+echo YOUR_API_KEY> ABS_API_KEY.txt
+
+python abs.py 06DeeplyOdd '/mnt/e/Media/Audiobooks/DNK-PLO (2013)/Dean Koontz - Deeply Odd (2013)/*.mp3'
+
+</code></pre>
+</details>
+
 - **ffmpeg**:
   - ffmpeg can be installed from [here](https://github.com/BtbN/FFmpeg-Builds/releases).
   - This package is essential for handling multimedia files.
