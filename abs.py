@@ -5,6 +5,7 @@ import subprocess
 import yaml
 import glob
 import logging
+from pathlib import Path
 
 # Define constants and initialize logging
 SCRIPT_PATH = os.path.dirname(os.path.abspath(__file__))
@@ -146,7 +147,8 @@ def main(bookname, wildcard_path=None):
     for key in keys_to_normalize:
         if key in config:
             original_path = config[key]
-            config[key] = os.path.normpath(original_path)
+            #config[key] = os.path.normpath(original_path)
+            config[key] = Path(original_path)
             print(f"Original path for '{key}': {original_path}")
             print(f"Normalized path for '{key}': {config[key]}")
 
