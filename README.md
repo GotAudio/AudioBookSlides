@@ -14,6 +14,11 @@ I created a sample book to test this installation. Public domain Librivox [Alice
 
 This is a demo contact sheet showing the images generated. (Made with [VideoCS](https://sourceforge.net/projects/videocs) not this program.)
 
+
+[Reduced sample from Alice In Wonderland](https://github.com/GotAudio/AudioBookSlides/assets/13667229/d663dfda-2c0c-4ee7-aec2-6fe368c70fbc)
+
+This is a 38 second, 320x218 sample, reduced from 768x512. Your video dimensions are limited by your GPU VRAM.
+
 ## AudioBookSlides Installation Guide
 
 AudioBookSlides requires the installation of three external packages:
