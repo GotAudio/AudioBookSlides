@@ -2,8 +2,8 @@
 
 ![Turbo_RealitiesEdgeXLLCM_A1111-SD](https://github.com/GotAudio/AudioBookSlides/assets/13667229/4f30b0c5-9ab6-4940-89ca-e5ddb2235e0b)
 
-
-Create an AI generated video slideshow from an audiobook.
+# Create an AI generated video slideshow from an audiobook. 
+This app was written entirely by ChatGPT. I told it the tasks I wanted and it eventually made this. I probably couldn't write a 'Hello World!' program in Python.
 
 [**AudioBookSlides**](https://github.com/GotAudio/AudioBookSlides/)<br/>
 
