@@ -1,6 +1,9 @@
 ABS_API_KEY.txt
 AudioBookSlides.egg-info
-<<<<<<< HEAD
 temp_output.srt
-=======
->>>>>>> 0f9d6a60c798a6d591e83923dbb879a7e070f3ae
+books/
+cuBLAS.and.cuDNN_linux_v2.7z
+libcublas.so.11
+libcublasLt.so.11
+libcudnn_cnn_infer.so.8
+libcudnn_ops_infer.so.8
