@@ -3,10 +3,12 @@
 #whisperX is required to generate .srt subtitle file. Add your path to whisperx.
 #Windows install from https://github.com/Purfview/whisper-standalone-win/releases/tag/faster-whisper, unzip whisper-faster.exe to this folder or elsewhere. Unix, install with pip install faster-whisper
 whisperx_win: "whisper-faster --model large-v2 --output_format srt --beep_off --print_progress --output_dir source "
-whisperx_linux: "whisper-ctranslate2 --model large-v2 --output_format srt --output_dir source "
 
+# I am getting the error "Could not load library libcudnn_ops_infer.so.8. Error: libnvrtc.so: cannot open shared object file.", even though the file is in my library path.
+# I switched to CPU mode in order to continue testing. Maybe someone else can fix it.
+whisperx_linux: "whisper-ctranslate2 --model large-v2 --verbose False --device cpu --output_format srt --output_dir source "
 
-# Just some sample actresses and actors. You can create custom csv files in the book folder and change this yaml file to point to those. 
+# Ssample actresses and actors. You can create custom csv files in the book folder and change this yaml file to point to those. 
 # I replace characters with actors in order to have consistent character appearences. 
 # You may create custom actors files by creating a books\<bookname>\<bookname>.yaml file with these keys which points to csv files in the <bookname> folder.
 actors: actors\\male.csv

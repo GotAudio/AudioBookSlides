@@ -140,16 +140,11 @@ def main(bookname, wildcard_path=None):
     # Replace placeholders in the config dictionary
     config = replace_bookname_recursive(config, bookname)
 
-    # Verify yaml file is complete
-    required_keys = ['whisperx_win', 'path_to_stablediffusion', 'path_to_comfyui']
-    if not all(key in config for key in required_keys):
-        logging.error("YAML file is missing some required keys.")
-        return
-
-    # The OpenAI API key is now set in the environment variable 'ABS_API_KEY'
-
-
-
+    # Normalize paths in the config dictionary
+    keys_to_normalize = ['whisperx_win', 'whisperx_linux', 'actors', 'actresses', 'path_to_stablediffusion', 'path_to_comfyui', 'path_to_workflow']
+    for key in keys_to_normalize:
+        if key in config:
+            config[key] = os.path.normpath(config[key])
 
     # Step 3: Create the MP3 file if it does not exist
     mp3_file_path = os.path.join(book_folder, f"{bookname}.mp3")
@@ -520,11 +515,13 @@ def main(bookname, wildcard_path=None):
         logging.info("Already exists: %s", output_file)
 
     # Step 14: Replace actors using the existing script
-    input_file = f"books/{bookname}/{bookname}_ts_p_characters.srt"
-    output_file = f"books/{bookname}/{bookname}_ts_p_actors_EDIT.txt"
     male_actors_csv = config.get('actors', "actors\\male.csv")  # Default if not specified
     female_actors_csv = config.get('actresses', "actors\\female.csv")  # Default if not specified
     depth = config.get('depth', 4)  # Default depth to 4 if not specified in config
+
+    # Ensure platform-independent path separators
+    input_file = os.path.join("books", bookname, f"{bookname}_ts_p_characters.srt")
+    output_file = os.path.join("books", bookname, f"{bookname}_ts_p_actors_EDIT.txt")
 
     if not os.path.exists(output_file):
         logging.info("Step 14/20: Generating editable character and actor list from %s and saving to %s", input_file, output_file)
@@ -538,8 +535,9 @@ def main(bookname, wildcard_path=None):
                 logging.debug("Step 14/20: Combining characters with actors: %s", replace_actors_cmd)
 
             result = subprocess.run(replace_actors_cmd, shell=True, check=True)
+
             if result.returncode == 0:
-                logging.info("****** Actors replaced and saved to: %s You must review this file,make any corrections and save as %s", output_file, f"books/{bookname}/{bookname}_ts_p_actors.txt")
+                logging.info("****** Actors replaced and saved to: %s You must review this file, make any corrections, and save as %s", output_file, os.path.join("books", bookname, f"{bookname}_ts_p_actors.txt"))
             else:
                 logging.error("Failed to replace actors: %s", output_file)
                 return
@@ -547,7 +545,7 @@ def main(bookname, wildcard_path=None):
             logging.error("Command failed: %s", e)
             return
     else:
-        logging.info("****** Already exists: %s. You must review this file, make any corrections and save as %s", output_file, f"books/{bookname}/{bookname}_ts_p_actors.txt")
+        logging.info("****** Already exists: %s. You must review this file, make any corrections, and save as %s", output_file, os.path.join("books", bookname, f"{bookname}_ts_p_actors.txt"))
 
     # Step 15: Apply actors using the apply_actors.py script
     input_file = f"books/{bookname}/{bookname}_ts_p_actors.txt"
