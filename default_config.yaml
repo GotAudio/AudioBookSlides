@@ -11,8 +11,8 @@ whisperx_linux: "whisper-ctranslate2 --model large-v2 --verbose False --device c
 # Ssample actresses and actors. You can create custom csv files in the book folder and change this yaml file to point to those. 
 # I replace characters with actors in order to have consistent character appearences. 
 # You may create custom actors files by creating a books\<bookname>\<bookname>.yaml file with these keys which points to csv files in the <bookname> folder.
-actors: .\\actors\\male.csv
-actresses: .\\actors\\female.csv
+actors: actors\male.csv
+actresses: actors\female.csv
 
 #When generating actor name replacements, this setting controls the minimum number of times a name must occur in the book to be included in the default replacement list.
 #You may want to change it to 1 and manually delete any entries you do not wish to assign to an actor.  See README.md for more tips about actors.
@@ -26,7 +26,7 @@ image_generator: "ComfyUI"
 # You can either change the path below, or rename the YYYY-MM-DD images folder to <bookname> when image generation is complete.
 # You must start A111, configure the UI, and select "Input from text or file" under the Scripts selector at the bottom, then drag+drop <bookname>_p_final.txt into the upload box, then wait for images to be generated.
 # I have provided a sample A1111.PNG file that you can import to load reasonable defaults.
-path_to_stablediffusion: "E:\\SD\\stable-diffusion-webui\\outputs\\txt2img-images\\<bookname>"
+path_to_stablediffusion: "E:\SD\stable-diffusion-webui\outputs\txt2img-images\<bookname>"
 
 # If image_generator is ComfyUI, folder containing ComfyUI generated images. You must start ComfyUI prior to generating images.
 # You must change the path below or you must rename the "output" images folder to <bookname> when image generation is complete
