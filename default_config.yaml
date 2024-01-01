@@ -11,8 +11,8 @@ whisperx_linux: "whisper-ctranslate2 --model large-v2 --verbose False --device c
 # Ssample actresses and actors. You can create custom csv files in the book folder and change this yaml file to point to those. 
 # I replace characters with actors in order to have consistent character appearences. 
 # You may create custom actors files by creating a books\<bookname>\<bookname>.yaml file with these keys which points to csv files in the <bookname> folder.
-actors: actors\\male.csv
-actresses: actors\\female.csv
+actors: .\\actors\\male.csv
+actresses: .\\actors\\female.csv
 
 #When generating actor name replacements, this setting controls the minimum number of times a name must occur in the book to be included in the default replacement list.
 #You may want to change it to 1 and manually delete any entries you do not wish to assign to an actor.  See README.md for more tips about actors.
