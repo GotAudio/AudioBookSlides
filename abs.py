@@ -141,14 +141,14 @@ def main(bookname, wildcard_path=None):
     config = replace_bookname_recursive(config, bookname)
 
     # Normalize paths in the config dictionary
-	keys_to_normalize = ['whisperx_win', 'whisperx_linux', 'actors', 'actresses', 'path_to_stablediffusion', 'path_to_comfyui', 'path_to_workflow']
+    keys_to_normalize = ['whisperx_win', 'whisperx_linux', 'actors', 'actresses', 'path_to_stablediffusion', 'path_to_comfyui', 'path_to_workflow']
 
-	for key in keys_to_normalize:
-		if key in config:
-			original_path = config[key]
-			config[key] = os.path.normpath(original_path)
-			print(f"Original path for '{key}': {original_path}")
-			print(f"Normalized path for '{key}': {config[key]}")
+    for key in keys_to_normalize:
+        if key in config:
+            original_path = config[key]
+            config[key] = os.path.normpath(original_path)
+            print(f"Original path for '{key}': {original_path}")
+            print(f"Normalized path for '{key}': {config[key]}")
 
     # Step 3: Create the MP3 file if it does not exist
     mp3_file_path = os.path.join(book_folder, f"{bookname}.mp3")
