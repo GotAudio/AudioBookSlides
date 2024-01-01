@@ -721,13 +721,17 @@ def main(bookname, wildcard_path=None):
         # Log the command if debugging is enabled
         if DEBUG:
             logging.debug("Step 20/20: This combines the original mp3 audio book and the generated video. .srt is included in the same folder. You could embed it in the video if you wanted to: %s", ffmpeg_cmd)
-
         try:
             result = subprocess.run(ffmpeg_cmd, shell=True, check=True)
             if result.returncode == 0:
                 logging.info(f"{output_avi_path} and books/{bookname}/{bookname}.srt files created. Process complete.")
-            else:
-                logging.error("Failed to create the final video.")
+
+                temp_output_file = f"books/{bookname}/{bookname}_output.avi"
+                if os.path.exists(temp_output_file):
+                    try:
+                        os.remove(temp_output_file)
+                    except OSError:
+                        pass  # Do nothing if there's an error
         except subprocess.CalledProcessError as e:
             logging.error("Command failed: %s", e)
     else:
