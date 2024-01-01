@@ -515,9 +515,9 @@ def main(bookname, wildcard_path=None):
         logging.info("Already exists: %s", output_file)
 
     # Step 14: Replace actors using the existing script
-    male_actors_csv = config.get('actors', "actors\\male.csv")  # Default if not specified
-    female_actors_csv = config.get('actresses', "actors\\female.csv")  # Default if not specified
-    depth = config.get('depth', 4)  # Default depth to 4 if not specified in config
+    male_actors_csv = config.get('actors')
+    female_actors_csv = config.get('actresses')
+    depth = config.get('depth')
 
     # Ensure platform-independent path separators
     input_file = os.path.join("books", bookname, f"{bookname}_ts_p_characters.srt")
@@ -528,7 +528,7 @@ def main(bookname, wildcard_path=None):
 
         try:
             # Execute the existing replace_actors.py script with depth parameter
-            replace_actors_cmd = f"python replace_actors.py {input_file} {male_actors_csv} {female_actors_csv} {output_file} {depth}"
+            replace_actors_cmd = f"python  replace_actors.py {input_file} {male_actors_csv} {female_actors_csv} {output_file} {depth}"
 
             # Log the command if debugging is enabled
             if DEBUG:
