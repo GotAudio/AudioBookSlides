@@ -625,7 +625,7 @@ def main(bookname, wildcard_path=None):
         # Count the lines in the input file again to get the image count
         generated_image_count = count_lines(input_file)
         if generated_image_count >= 0:
-            logging.error("If there were no errors, you should see %d images appear in the ComfyUI\\output folder. When they are finished, delete any images you do not want,\nthen rename ComfyUI\\output to ComfyUI\\%s. Output folder does not exist: %s", generated_image_count, bookname, path_to_comfyui)
+            logging.debug("If there were no errors, you should see %d images appear in the ComfyUI\\output folder. When they are finished, delete any images you do not want,\nthen rename ComfyUI\\output to ComfyUI\\%s. Output folder does not exist: %s", generated_image_count, bookname, path_to_comfyui)
         else:
             logging.error("Failed to count submitted image generation prompts.")
         return
