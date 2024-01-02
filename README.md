@@ -68,7 +68,7 @@ wget https://github.com/Purfview/whisper-standalone-win/releases/download/libs/c
 sudo apt install p7zip-full
 7z x cuBLAS.and.cuDNN_linux_v2.7z
 
-Failed to locate cuda library. To finish texting, for now I added "--device=cpu" to whisper_linux launch command in default_config.yaml
+Failed to locate cuda library. To finish testing, for now I added "--device=cpu" to whisper_linux launch command in default_config.yaml
 
 #Clone and set up ComfyUI
 cd ..
@@ -88,7 +88,10 @@ file "RealitiesEdgeXLLCM_TURBOXL.safetensors" and save it to ComfyUi/models/chec
 If you already have A1111 installed, you can also modify ComfyUI/extra_model_paths.yaml and point the base path to your 
 SD folder ( base_path: /mnt/e/SD/stable-diffusion-webui/ )
 
-To launch comfyUI run the command below from the ComfyUI folder in a seperate terminal when asked to start ComfyUI by the ABS application.
+2021-1-1: The Turbo API did not work because it was missing the latest version of SDTurboScheduler node. I have included it with this app. 
+Copy nodes_custom_sampler.py from the root folder to your ComfyUI\comfy_extras\nodes_custom_sampler.py
+
+To launch ComfyUI run the command below from the ComfyUI folder in a seperate terminal when asked to start ComfyUI by the ABS application.
 python main.py 
 
 cd ../AudioBookSlide
