@@ -129,6 +129,7 @@ Ensure each package is correctly installed and configured before using AudioBook
 - Note: Not all requests have been optimized for LM-Studio. Some results may be poor. (This was used in development but hasn't been fully verified with this installation.)
 
 ### Installation of AudioBookSlides
+- __You must change the paths to your Stable Diffusion (ComfyUI or A1111) output folder in `default_config.yaml`__
 - Consider creating a [conda](https://conda.io/) environment for the installation.
 - The requirements are minimal with one specific version requirement: `openai==0.28` (compatible with LM-Studio).
 - Python versions 3.9 and 3.10 have been used successfully.
@@ -230,13 +231,12 @@ $abs/
 
 ## TODO List for AudioBookSlides
 
-1. Test wildcard input folder with multiple MP3 files.
+- [X] 1) Test wildcard input folder with multiple MP3 files.
    - Verified 3 files (chapters) concatenated: 
      ```
      python abs.py 01ThisHour "E:\Media\AudioBooks\Lemony Snicket\All the Wrong Questions 1 - Who Could That Be at This Hour\*.mp3"
      ```
-2. Test spaces in BookName and MP3 path.
 - [ ] 2) Test spaces in BookName and MP3 path.
 - [ ] 3) Test on Windows Subsystem for Linux (WSL).
 - [ ] 4) Test on system A1111 (note: some manual steps required).
-- [ ] 5) Test input with different audio formats (.WAV, .ACC).
+- [ ] 5) Test input with different audio formats (.WAV, .AAC).
