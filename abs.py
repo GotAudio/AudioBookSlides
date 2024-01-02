@@ -105,20 +105,11 @@ def main(bookname, wildcard_path=None):
         if DEBUG:
             logging.debug("Step 01/20: Audio book folder: %s",book_folder)
 
-    # Assuming SCRIPT_PATH is defined and points to your application folder
-    default_config_path = os.path.join(SCRIPT_PATH, 'default_config.yaml')
     api_key_file_path = os.path.join(SCRIPT_PATH, 'ABS_API_KEY.txt')
 
-    # Read the OpenAI API key from ABS_API_KEY.txt
-    try:
-        with open(api_key_file_path, 'r') as file:
-            openai_api_key = file.read().strip()
-        os.environ['ABS_API_KEY'] = openai_api_key
-    except Exception as e:
-        logging.info("ABS_API_KEY.txt does not contain an API key. GPT API will be unavailable %s", e)
-        return
-
     # Read the default configuration
+    default_config_path = os.path.join(SCRIPT_PATH, 'default_config.yaml')
+
     try:
         with open(default_config_path, 'r') as file:
             default_config = yaml.safe_load(file)
@@ -158,6 +149,15 @@ def main(bookname, wildcard_path=None):
         if key in config:
             original_path = config[key]
             config[key] = fix_path(original_path)
+
+
+    # Read the OpenAI API key from ABS_API_KEY.txt
+    try:
+        with open(api_key_file_path, 'r') as file:
+            openai_api_key = file.read().strip()
+        os.environ['ABS_API_KEY'] = openai_api_key
+    except Exception as e:
+        logging.info("ABS_API_KEY.txt does not contain an API key. GPT API will be unavailable %s", e)
 
     # Step 3: Create the MP3 file if it does not exist
     mp3_file_path = os.path.join(book_folder, f"{bookname}.mp3")
@@ -619,8 +619,10 @@ def main(bookname, wildcard_path=None):
                 f"--width {image_width} "
                 f"--height {image_height} "
                 f"{input_file} "
-                f"{workflow_path}"
+                f"{workflow_path} "
+                f"--bookname {bookname} "
             )
+
 
             # Log the command if debugging is enabled
             if DEBUG:

@@ -3,17 +3,23 @@
     "inputs": {
       "ckpt_name": "RealitiesEdgeXLLCM_TURBOXL.safetensors"
     },
-    "class_type": "CheckpointLoaderSimple"
+    "class_type": "CheckpointLoaderSimple",
+    "_meta": {
+      "title": "Load Checkpoint"
+    }
   },
   "3": {
     "inputs": {
-      "text": "Neg: shirtless, NSFW, ((blurry:1.3)), worst quality, 3D, cgi, drawing, mouth open, undefined ",
+      "text": " Neg: NSFW, ((blurry:1.3)), worst quality, 3D, cgi, drawing, mouth open, undefined ",
       "clip": [
         "1",
         1
       ]
     },
-    "class_type": "CLIPTextEncode"
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "CLIP Text Encode (Prompt)"
+    }
   },
   "4": {
     "inputs": {
@@ -45,17 +51,24 @@
         0
       ]
     },
-    "class_type": "SamplerCustom"
+    "class_type": "SamplerCustom",
+    "_meta": {
+      "title": "SamplerCustom"
+    }
   },
   "9": {
     "inputs": {
       "steps": 8,
+      "denoise": 5,
       "model": [
         "1",
         0
       ]
     },
-    "class_type": "SDTurboScheduler"
+    "class_type": "SDTurboScheduler",
+    "_meta": {
+      "title": "SDTurboScheduler"
+    }
   },
   "10": {
     "inputs": {
@@ -63,7 +76,10 @@
       "height": 512,
       "batch_size": 1
     },
-    "class_type": "EmptyLatentImage"
+    "class_type": "EmptyLatentImage",
+    "_meta": {
+      "title": "Empty Latent Image"
+    }
   },
   "11": {
     "inputs": {
@@ -76,13 +92,19 @@
         0
       ]
     },
-    "class_type": "VAEDecode"
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "VAE Decode"
+    }
   },
   "13": {
     "inputs": {
       "sampler_name": "dpmpp_sde_gpu"
     },
-    "class_type": "KSamplerSelect"
+    "class_type": "KSamplerSelect",
+    "_meta": {
+      "title": "KSamplerSelect"
+    }
   },
   "27": {
     "inputs": {
@@ -92,7 +114,10 @@
         1
       ]
     },
-    "class_type": "CLIPTextEncode"
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "CLIP Text Encode (Prompt)"
+    }
   },
   "28": {
     "inputs": {
@@ -102,7 +127,10 @@
         0
       ]
     },
-    "class_type": "SaveImage"
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "Save Image"
+    }
   },
   "29": {
     "inputs": {
@@ -159,7 +187,10 @@
         0
       ]
     },
-    "class_type": "FaceDetailer"
+    "class_type": "FaceDetailer",
+    "_meta": {
+      "title": "FaceDetailer"
+    }
   },
   "30": {
     "inputs": {
@@ -196,18 +227,27 @@
         4
       ]
     },
-    "class_type": "FaceDetailerPipe"
+    "class_type": "FaceDetailerPipe",
+    "_meta": {
+      "title": "FaceDetailer (pipe)"
+    }
   },
   "31": {
     "inputs": {
       "model_name": "bbox/face_yolov8m.pt"
     },
-    "class_type": "UltralyticsDetectorProvider"
+    "class_type": "UltralyticsDetectorProvider",
+    "_meta": {
+      "title": "UltralyticsDetectorProvider"
+    }
   },
   "32": {
     "inputs": {
       "vae_name": "SDXL-VAE_0.9.safetensors"
     },
-    "class_type": "VAELoader"
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load VAE"
+    }
   }
 }
