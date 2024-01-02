@@ -40,16 +40,17 @@ chmod +x Miniconda3-latest-Linux-x86_64.sh
 ./Miniconda3-latest-Linux-x86_64.sh
 # Accept defaults, then close and reopen terminal
 
-# Install Mamba
+#Install Mamba
 conda install mamba -n base -c conda-forge
 mamba --version
-# Output: mamba 1.5.6, conda 23.11.0
 
-# Create and activate the 'abs' environment
+Output: mamba 1.5.6, conda 23.11.0
+
+#Create and activate the 'abs' environment
 mamba create -n abs python=3.10
 conda activate abs
 
-# Clone and set up AudioBookSlides
+#Clone and set up AudioBookSlides
 md /mnt/e/wsl
 cd /mnt/e/wsl
 git clone https://github.com/GotAudio/AudioBookSlides.git
@@ -58,29 +59,53 @@ pip install .
 pip install faster-whisper
 pip install -U whisper-ctranslate2
 
-# Install ffmpeg
+#Install ffmpeg
 sudo apt update
 sudo apt install ffmpeg
 
-# Download and extract cuBLAS and cuDNN libraries
+#Download and extract cuBLAS and cuDNN libraries
 wget https://github.com/Purfview/whisper-standalone-win/releases/download/libs/cuBLAS.and.cuDNN_linux_v2.7z
 sudo apt install p7zip-full
 7z x cuBLAS.and.cuDNN_linux_v2.7z
 
-# Failed. Changed to CPU ..... export LD_LIBRARY_PATH=.:$LD_LIBRARY_PATH
+Failed to locate cuda library. To finish testing, for now I added "--device=cpu" to whisper_linux launch command in default_config.yaml
 
-# Clone and set up ComfyUI
+#Clone and set up ComfyUI
 cd ..
 git clone https://github.com/comfyanonymous/ComfyUI.git
 cd ComfyUI/
 pip install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cu121
 pip install -r requirements.txt
 
-cd ../AudioBookSlide
+#Install helper nodes
+cd custom_nodes/
+git clone https://github.com/ltdrdata/ComfyUI-Manager.git
+git clone https://github.com/ltdrdata/ComfyUI-Impact-Pack.git
+cd ..
 
-# Save your openai API Key in ABS_API_KEY.txt
+Browse to https://civitai.com/models/129666/realities-edge-xl-lcmsdxlturbo and click the download button to download the 6GB 
+file "RealitiesEdgeXLLCM_TURBOXL.safetensors" and save it to ComfyUi/models/checkpoints/RealitiesEdgeXLLCM_TURBOXL.safetensors 
+If you already have A1111 installed, you can also modify ComfyUI/extra_model_paths.yaml and point the base path to your 
+SD folder ( base_path: /mnt/e/SD/stable-diffusion-webui/ )
+
+2021-1-1: The Turbo API did not work because it was missing the latest version of SDTurboScheduler node. I have included it with this app. 
+Copy nodes_custom_sampler.py from the root folder to your ComfyUI\comfy_extras\nodes_custom_sampler.py
+
+To launch ComfyUI run the command below from the ComfyUI folder in a seperate terminal when asked to start ComfyUI by the ABS application.
+python main.py 
+
+You can also install firefox on WSL2 if you want to view the execution queue;
+sudo apt update
+sudo apt install firefox
+firefox
+(Browse to http://127.0.0.1:8188)
+
+
+cd ../AudioBookSlide
+#Save your openai API Key in ABS_API_KEY.txt
 echo YOUR_API_KEY> ABS_API_KEY.txt
 
+#Start the application
 python abs.py 06DeeplyOdd '/mnt/e/Media/Audiobooks/DNK-PLO (2013)/Dean Koontz - Deeply Odd (2013)/*.mp3'
 
 </code></pre>
