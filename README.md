@@ -75,8 +75,8 @@ wget https://github.com/Purfview/whisper-standalone-win/releases/download/libs/c
 sudo apt install p7zip-full
 7z x cuBLAS.and.cuDNN_linux_v2.7z
 
-__Failed to locate cuda library file. To finish testing, I added "--device=cpu" to whisper_linux launch command in default_config.yaml
-If you know how to fix this before I fix it, please let me know.__
+__Failed to locate cuda library file. To finish testing, I added "--device=cpu" to whisper_linux launch 
+command in default_config.yaml If you know how to fix this before I fix it, please let me know.__
 
 #Clone and set up ComfyUI
 cd ..
@@ -91,15 +91,17 @@ git clone https://github.com/ltdrdata/ComfyUI-Manager.git
 git clone https://github.com/ltdrdata/ComfyUI-Impact-Pack.git
 cd ..
 
-Browse to https://civitai.com/models/129666/realities-edge-xl-lcmsdxlturbo and click the download button to download the 6GB 
-file "RealitiesEdgeXLLCM_TURBOXL.safetensors" and save it to ComfyUi/models/checkpoints/RealitiesEdgeXLLCM_TURBOXL.safetensors 
-If you already have A1111 installed, you can also modify ComfyUI/extra_model_paths.yaml and point the base path to your 
-A1111 SD folder if you prefer. ( base_path: /mnt/e/SD/stable-diffusion-webui/ )
+Browse to https://civitai.com/models/129666/realities-edge-xl-lcmsdxlturbo and click the download button 
+to download the 6GB file "RealitiesEdgeXLLCM_TURBOXL.safetensors" and save it to 
+ComfyUi/models/checkpoints/RealitiesEdgeXLLCM_TURBOXL.safetensors If you already have A1111 installed, 
+you can also modify ComfyUI/extra_model_paths.yaml and point the base path to your A1111 SD folder if 
+you prefer. ( base_path: /mnt/e/SD/stable-diffusion-webui/ )
 
-__2021-1-1: The Turbo API did not work because it was missing the latest version of SDTurboScheduler node. I have included it with this app. 
-Copy nodes_custom_sampler.py from the root folder to your ComfyUI\comfy_extras\nodes_custom_sampler.py__
+__2021-1-1: The Turbo API did not work because it was missing the latest version of SDTurboScheduler node. 
+I have included it with this app. Copy nodes_custom_sampler.py from the root folder to your 
+ComfyUI\comfy_extras\nodes_custom_sampler.py__
 
-To launch ComfyUI run the command below from the ComfyUI folder in a seperate terminal when asked to start ComfyUI by the ABS application.
+To launch ComfyUI run this command from the ComfyUI folder in a seperate terminal when asked to start ComfyUI
 python main.py 
 
 You can also install firefox on WSL2 if you want to view the execution queue;
