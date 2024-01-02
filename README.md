@@ -23,15 +23,22 @@ This is a 38 second, 320x218 sample, reduced from 768x512. Your video dimensions
 
 AudioBookSlides requires the installation of three external packages:
 
+**Windows**:
 - **WhisperX**:
-  - **Windows Users**:
     - Install WhisperX from [here](https://github.com/Purfview/whisper-standalone-win/releases/tag/faster-whisper).
     - Extract `whisper-faster.exe` to the application directory.
     - Download `cuBLAS.and.cuDNN_win_v4.7z` from [here](https://github.com/Purfview/whisper-standalone-win/releases/tag/libs) and unzip it to the application folder.
-  - **Unix Users**:
-    - Install WhisperX using the command: `pip install faster-whisper`.
 
-<details><summary>WSL Installation Steps Incomplete. I will update this when it is complete.  (click to expand)</summary>
+- **ffmpeg**:
+  - ffmpeg can be installed from [here](https://github.com/BtbN/FFmpeg-Builds/releases).
+  - This package is essential for handling multimedia files.
+
+- **ComfyUI**:
+  - Download ComfyUI stand-alone portable from [here](https://github.com/comfyanonymous/ComfyUI/releases).
+  - Launching the server is sufficient; using the ComfyUI web interface is not necessary.
+
+**Unix**:
+<details><summary>WSL Installation Log (click to expand)</summary>
 <pre><code>
 # Install Miniconda
 cd ~
@@ -68,7 +75,8 @@ wget https://github.com/Purfview/whisper-standalone-win/releases/download/libs/c
 sudo apt install p7zip-full
 7z x cuBLAS.and.cuDNN_linux_v2.7z
 
-Failed to locate cuda library. To finish testing, for now I added "--device=cpu" to whisper_linux launch command in default_config.yaml
+__Failed to locate cuda library file. To finish testing, I added "--device=cpu" to whisper_linux launch command in default_config.yaml
+If you know how to fix this before I fix it, please let me know.__
 
 #Clone and set up ComfyUI
 cd ..
@@ -86,10 +94,10 @@ cd ..
 Browse to https://civitai.com/models/129666/realities-edge-xl-lcmsdxlturbo and click the download button to download the 6GB 
 file "RealitiesEdgeXLLCM_TURBOXL.safetensors" and save it to ComfyUi/models/checkpoints/RealitiesEdgeXLLCM_TURBOXL.safetensors 
 If you already have A1111 installed, you can also modify ComfyUI/extra_model_paths.yaml and point the base path to your 
-SD folder ( base_path: /mnt/e/SD/stable-diffusion-webui/ )
+A1111 SD folder if you prefer. ( base_path: /mnt/e/SD/stable-diffusion-webui/ )
 
-2021-1-1: The Turbo API did not work because it was missing the latest version of SDTurboScheduler node. I have included it with this app. 
-Copy nodes_custom_sampler.py from the root folder to your ComfyUI\comfy_extras\nodes_custom_sampler.py
+__2021-1-1: The Turbo API did not work because it was missing the latest version of SDTurboScheduler node. I have included it with this app. 
+Copy nodes_custom_sampler.py from the root folder to your ComfyUI\comfy_extras\nodes_custom_sampler.py__
 
 To launch ComfyUI run the command below from the ComfyUI folder in a seperate terminal when asked to start ComfyUI by the ABS application.
 python main.py 
@@ -108,16 +116,12 @@ echo YOUR_API_KEY> ABS_API_KEY.txt
 #Start the application
 python abs.py 06DeeplyOdd '/mnt/e/Media/Audiobooks/DNK-PLO (2013)/Dean Koontz - Deeply Odd (2013)/*.mp3'
 
+![WSL_images](https://github.com/GotAudio/AudioBookSlides/assets/13667229/10753daa-faee-4d03-a34c-70e5f8b75c62)
+Dean Koontz - Odd Thomas - Deeply Odd Book 6. Length: 9:37, 2500 images took 5.5 hours to generate. 
+(Video creation only takes a few minutes)
+
 </code></pre>
 </details>
-
-- **ffmpeg**:
-  - ffmpeg can be installed from [here](https://github.com/BtbN/FFmpeg-Builds/releases).
-  - This package is essential for handling multimedia files.
-
-- **ComfyUI**:
-  - Download ComfyUI stand-alone portable from [here](https://github.com/comfyanonymous/ComfyUI/releases).
-  - Launching the server is sufficient; using the ComfyUI web interface is not necessary.
 
 Ensure each package is correctly installed and configured before using AudioBookSlides.
 
