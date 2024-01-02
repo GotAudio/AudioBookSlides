@@ -4,6 +4,7 @@ from joblib import Parallel, delayed
 import sys
 import fnmatch
 import time
+import platform
 
 def process_image(image_file, output_folder, frame_count, idx, total):
     img = cv2.imread(image_file)
@@ -127,12 +128,22 @@ def main(input_wildcard, output_video):
 
     Parallel(n_jobs=-1, backend="threading")(delayed(process_image)(os.path.join(image_folder, img), output_folder, frame_count, idx, total_images) for idx, (img, frame_count) in enumerate(zip(images, frame_counts)))
 
-    # Create file list for ffmpeg
+    # Determine the operating system
+    os_name = platform.system()
+
+    # Create file list for ffmpeg. Full paths for Linux
     file_list = os.path.join(output_folder, 'file_list.txt')
     with open(file_list, 'w') as f:
         for img in images:
-            video_file = os.path.join(output_folder, os.path.basename(img).replace('png', 'avi'))
-            f.write(f"file '{video_file}'\n")
+            video_file = os.path.basename(img).replace('png', 'avi')
+            # Adjust path based on the operating system
+            if os_name == "Linux":
+                # For Linux/WSL, use an absolute path
+                video_file_abs_path = os.path.abspath(os.path.join(output_folder, video_file))
+                f.write(f"file '{video_file_abs_path}'\n")
+            else:
+                # For Windows, use a path relative to the current directory
+                f.write(f"file '{video_file}'\n")
 
     # Print duplicate filenames only if there are any
     if duplicate_images:
@@ -144,7 +155,8 @@ def main(input_wildcard, output_video):
     elapsed_time_formatted = time.strftime("%H:%M:%S", time.gmtime(elapsed_time))
 
     # automatic ffmpeg invocation and cleanup
-    os.system(f"ffmpeg -f concat -safe 0 -i {file_list} -c copy {output_video}")
+    print(f"\nffmpeg -hide_banner -f concat -safe 0 -i {file_list} -c copy {output_video}")
+    os.system(f"ffmpeg  -hide_banner -f concat -safe 0 -i {file_list} -c copy {output_video}")
     os.system(f"rm -r {output_folder}")
 
 if __name__ == "__main__":

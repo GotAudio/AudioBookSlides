@@ -49,7 +49,7 @@ def run_command(command):
 
 def create_mp3(filelist_path, mp3_file_path):
     if not os.path.exists(mp3_file_path):
-        ffmpeg_cmd = f"ffmpeg -f concat -safe 0 -i {filelist_path} -c copy {mp3_file_path}"
+        ffmpeg_cmd = f"ffmpeg -hide_banner -f concat -safe 0 -i {filelist_path} -c copy {mp3_file_path}"
         if run_command(ffmpeg_cmd):
             logging.info("Created: %s", mp3_file_path)
             return True
@@ -726,7 +726,7 @@ def main(bookname, wildcard_path=None):
 
         # Define the FFmpeg command
         ffmpeg_cmd = (
-            f"ffmpeg -i books/{bookname}/{bookname}_output.avi "
+            f"ffmpeg -hide_banner -i books/{bookname}/{bookname}_output.avi "
             f"-i books/{bookname}/{bookname}.mp3 "
             f"-c:v copy -map 0:v:0 -map 1:a:0 {output_avi_path}"
         )
