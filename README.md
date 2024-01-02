@@ -94,6 +94,13 @@ Copy nodes_custom_sampler.py from the root folder to your ComfyUI\comfy_extras\n
 To launch ComfyUI run the command below from the ComfyUI folder in a seperate terminal when asked to start ComfyUI by the ABS application.
 python main.py 
 
+You can also install firefox on WSL2 if you want to view the execution queue;
+sudo apt update
+sudo apt install firefox
+firefox
+(Browse to http://127.0.0.1:8188)
+
+
 cd ../AudioBookSlide
 #Save your openai API Key in ABS_API_KEY.txt
 echo YOUR_API_KEY> ABS_API_KEY.txt
