@@ -19,50 +19,32 @@ This is a demo contact sheet showing the images generated. (Made with [VideoCS](
 
 This is a 38 second, 320x218 sample, reduced from 768x512. Your video dimensions are limited by your GPU VRAM.
 
-## AudioBookSlides Installation Guide
+## AudioBookSlides requires the installation of these external packages
 
-AudioBookSlides requires the installation of three external packages:
-
-**Windows**:
-- **WhisperX**:
-    - Install WhisperX from [here](https://github.com/Purfview/whisper-standalone-win/releases/tag/faster-whisper).
-    - Extract `whisper-faster.exe` to the application directory.
-    - Download `cuBLAS.and.cuDNN_win_v4.7z` from [here](https://github.com/Purfview/whisper-standalone-win/releases/tag/libs) and unzip it to the application folder.
-
-- **ffmpeg**:
-  - ffmpeg can be installed from [here](https://github.com/BtbN/FFmpeg-Builds/releases).
-  - This package is essential for handling multimedia files.
-
-- **ComfyUI**:
-  - Download ComfyUI stand-alone portable from [here](https://github.com/comfyanonymous/ComfyUI/releases).
-  - Launching the server is sufficient; using the ComfyUI web interface is not necessary.
+### Installation of AudioBookSlides
+- __You must change the paths to your Stable Diffusion (ComfyUI or A1111) output folder in `default_config.yaml`__
+- Consider creating a [conda](https://conda.io/) environment for the installation.
+- The requirements are minimal with one specific version requirement: `openai==0.28` (compatible with LM-Studio).
+- Python versions 3.9 and 3.10 have been used successfully.
 
 **Unix**:
-<details><summary>WSL Installation Log (click to expand)</summary>
+<details><summary>WSL Installation Steps (click to expand)</summary>
 <pre><code>
-# Install Miniconda
-cd ~
-wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
-chmod +x Miniconda3-latest-Linux-x86_64.sh
-./Miniconda3-latest-Linux-x86_64.sh
-# Accept defaults, then close and reopen terminal
+# Install Mambaforge, a minimal Conda
+wget https://github.com/conda-forge/miniforge/releases/latest/download/Mambaforge-Linux-x86_64.sh
+chmod +x Mambaforge-Linux-x86_64.sh
+./Mambaforge-Linux-x86_64.sh
+#Close and reopen terminal
+mamba create -n abs python=3.10 cudnn
+mamba activate abs
 
-#Install Mamba
-conda install mamba -n base -c conda-forge
-mamba --version
-
-Output: mamba 1.5.6, conda 23.11.0
-
-#Create and activate the 'abs' environment
-mamba create -n abs python=3.10
-conda activate abs
-
-#Clone and set up AudioBookSlides
+#Change to the folder where you want to install AudioBookSlides
 md /mnt/e/wsl
 cd /mnt/e/wsl
 git clone https://github.com/GotAudio/AudioBookSlides.git
 cd AudioBookSlides/
 pip install .
+mamba install -c conda-forge zlib
 pip install faster-whisper
 pip install -U whisper-ctranslate2
 
@@ -70,20 +52,16 @@ pip install -U whisper-ctranslate2
 sudo apt update
 sudo apt install ffmpeg
 
-#Download and extract cuBLAS and cuDNN libraries
-wget https://github.com/Purfview/whisper-standalone-win/releases/download/libs/cuBLAS.and.cuDNN_linux_v2.7z
-sudo apt install p7zip-full
-7z x cuBLAS.and.cuDNN_linux_v2.7z
-
-__Failed to locate cuda library file. To finish testing, I added "--device=cpu" to whisper_linux launch 
-command in default_config.yaml If you know how to fix this before I fix it, please let me know.__
-
 #Clone and set up ComfyUI
 cd ..
 git clone https://github.com/comfyanonymous/ComfyUI.git
 cd ComfyUI/
 pip install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cu121
 pip install -r requirements.txt
+
+__2021-1-1: The Turbo API did not work because it was missing the latest version of SDTurboScheduler node.__ 
+
+cp ../AudioBookSlides/nodes_custom_sampler.py ./comfy_extras/nodes_custom_sampler.py
 
 #Install helper nodes
 cd custom_nodes/
@@ -97,19 +75,13 @@ ComfyUi/models/checkpoints/RealitiesEdgeXLLCM_TURBOXL.safetensors If you already
 you can also modify ComfyUI/extra_model_paths.yaml and point the base path to your A1111 SD folder if 
 you prefer. ( base_path: /mnt/e/SD/stable-diffusion-webui/ )
 
-__2021-1-1: The Turbo API did not work because it was missing the latest version of SDTurboScheduler node. 
-I have included it with this app. Copy nodes_custom_sampler.py from the root folder to your 
-ComfyUI\comfy_extras\nodes_custom_sampler.py__
-
 To launch ComfyUI run this command from the ComfyUI folder in a seperate terminal when asked to start ComfyUI
 python main.py 
 
 You can also install firefox on WSL2 if you want to view the execution queue;
-sudo apt update
 sudo apt install firefox
 firefox
 (Browse to http://127.0.0.1:8188)
-
 
 cd ../AudioBookSlide
 #Save your openai API Key in ABS_API_KEY.txt
@@ -125,7 +97,37 @@ Dean Koontz - Odd Thomas - Deeply Odd Book 6. Length: 9:37, 2500 images took 5.5
 </code></pre>
 </details>
 
-Ensure each package is correctly installed and configured before using AudioBookSlides.
+**Windows**:
+<details><summary>Windows Installation Steps (click to expand)</summary>
+    
+- **ffmpeg**:
+  - ffmpeg can be installed from [here](https://github.com/BtbN/FFmpeg-Builds/releases).
+  - This package is essential for handling multimedia files.
+
+- **ComfyUI** (See default_config.yaml to use manual A1111):
+  - Download ComfyUI stand-alone portable from [here](https://github.com/comfyanonymous/ComfyUI/releases).
+  - Launching the server is sufficient; using the ComfyUI web interface is not necessary.
+
+Ensure each package is correctly installed and configured before using AudioBookSlides.    
+<pre><code>
+conda create -n abs python=3.10 cudnn
+conda activate abs
+conda install -c conda-forge zlib-wapi
+pip install faster-whisper
+pip install -U whisper-ctranslate2
+
+git clone https://github.com/GotAudio/AudioBookSlides.git
+cd AudioBookSlides
+pip install .
+
+#Launch application. After the .mp3 file has been created in the first step, 
+#the path to the mp3 file(s) can be omitted for subsequent reruns.
+
+python abs.py BookName \path_to_audiobook\bookname.mp3
+
+</code></pre>
+</details>
+
 
 #### GPT API Setup
 - To use the GPT API, you need to sign up for an API Key. Register and get your key [here](https://platform.openai.com).
@@ -133,29 +135,6 @@ Ensure each package is correctly installed and configured before using AudioBook
 - The cost is approximately $2 for a 12-hour audiobook. New sign-ups might receive $20 free credit.
 - Alternatively, use the free [LM-Studio Local GPT server](https://lmstudio.ai/). It's about 3 times slower (1 hour vs 20 minutes) and less accurate. The recommended model is [here](https://huggingface.co/TheBloke/Mistral-7B-Instruct-v0.1-GGUF).
 - Note: Not all requests have been optimized for LM-Studio. Some results may be poor. (This was used in development but hasn't been fully verified with this installation.)
-
-### Installation of AudioBookSlides
-- __You must change the paths to your Stable Diffusion (ComfyUI or A1111) output folder in `default_config.yaml`__
-- Consider creating a [conda](https://conda.io/) environment for the installation.
-- The requirements are minimal with one specific version requirement: `openai==0.28` (compatible with LM-Studio).
-- Python versions 3.9 and 3.10 have been used successfully.
-
-```
-conda create -n abs python=3.10
-conda activate abs
-
-git clone https://github.com/GotAudio/AudioBookSlides.git
-
-cd AudioBookSlides
-
-pip install .
-
-python abs.py BookName \path_to_audiobook\bookname.mp3
-
-# Note:
-# After the .mp3 file has been created in the first few steps, 
-# the path to the mp3 file can be omitted for subsequent reruns.
-```
 
 ## Overview of Processing
 
@@ -176,9 +155,9 @@ The finished files will be in a folder under the installation directory books\bo
 $abs/
 ├── books
 │   ├── BookName1
-│   ├──── Bookname.avi 
-│   ├── ...
-├── BookName2
+│   ├──── Bookname1.avi 
+│   ├──── Bookname1.srt
+├───├── BookName2
 ├── ...
 ```
 
