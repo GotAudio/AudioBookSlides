@@ -200,11 +200,11 @@ def main(bookname, wildcard_path=None):
         # Determine the appropriate key based on the operating system
         key = 'whisperx_win' if platform.system() == 'Windows' else 'whisperx_linux'
 
-		# Extract directory from mp3_file_path
-		output_dir = os.path.dirname(mp3_file_path)
+        # Extract directory from mp3_file_path
+        output_dir = os.path.dirname(mp3_file_path)
 
-		# Construct whisperx_cmd using the base command from config and appending the dynamic directory and file path
-		whisperx_cmd = f"{config[key]} {output_dir} {mp3_file_path}"
+        # Construct whisperx_cmd using the base command from config and appending the dynamic directory and file path
+        whisperx_cmd = f"{config[key]} {output_dir} {mp3_file_path}"
 
         # Log the command if debugging is enabled
         if DEBUG:
