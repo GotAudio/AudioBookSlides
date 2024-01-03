@@ -3,11 +3,10 @@
 ![Turbo_RealitiesEdgeXLLCM_A1111-SD](https://github.com/GotAudio/AudioBookSlides/assets/13667229/4f30b0c5-9ab6-4940-89ca-e5ddb2235e0b)
 
 # Create an AI generated video slideshow from an audiobook. 
-This app was written entirely by ChatGPT. I told it the tasks I wanted and it eventually made this. I probably couldn't write a 'Hello World!' program in Python.
+This app was written mostly by ChatGPT. I told it the tasks I wanted and it eventually made this.
 
-[**AudioBookSlides**](https://github.com/GotAudio/AudioBookSlides/)<br/>
-
-I created a sample book to test this installation. Public domain Librivox [Alice in Wonderland](https://www.youtube.com/watch?v=27SwZZ8jiBc). You can find more free audiobooks [here](https://librivox.org/).
+I created a sample book to test this installation. 
+Public domain Librivox [Alice in Wonderland](https://www.youtube.com/watch?v=27SwZZ8jiBc). You can find more free audiobooks [here](https://librivox.org/).
 
 [Contact Sheet from Alice In Wonderland](https://github.com/GotAudio/AudioBookSlides/assets/13667229/acf17491-81be-42ee-a2de-230a19922d57)
 
@@ -19,13 +18,59 @@ This is a demo contact sheet showing the images generated. (Made with [VideoCS](
 
 This is a 38 second, 320x218 sample, reduced from 768x512. Your video dimensions are limited by your GPU VRAM.
 
-## AudioBookSlides requires the installation of these external packages
-
 ### Installation of AudioBookSlides
-- __You must change the paths to your Stable Diffusion (ComfyUI or A1111) output folder in `default_config.yaml`__
-- Consider creating a [conda](https://conda.io/) environment for the installation.
+- __You must change the paths to your Stable Diffusion (ComfyUI or A1111) output folder path in `default_config.yaml`__
+- Consider creating a [conda (or mamba)](https://conda.io/) environment for the installation.
 - The requirements are minimal with one specific version requirement: `openai==0.28` (compatible with LM-Studio).
 - Python versions 3.9 and 3.10 have been used successfully.
+
+**Windows**:
+<details><summary>Windows Installation Steps (click to expand)</summary>
+    
+- **ffmpeg**:
+  - ffmpeg can be installed from [here](https://github.com/BtbN/FFmpeg-Builds/releases).
+
+- **ComfyUI** (See default_config.yaml to use A1111 in manual mode):
+  - Download ComfyUI stand-alone portable from [here](https://github.com/comfyanonymous/ComfyUI/releases).
+
+Ensure each package is correctly installed and configured before using AudioBookSlides.    
+<pre><code>
+conda create -n abs python=3.10 cudnn
+conda activate abs
+conda install -c conda-forge zlib-wapi
+pip install faster-whisper
+pip install -U whisper-ctranslate2
+
+git clone https://github.com/GotAudio/AudioBookSlides.git
+cd AudioBookSlides
+pip install .
+
+# If you have just installed ComfyUI you may need to install these components.
+# Copy nodes_custom_sampler.py to your ComfyUI\comfy_extras folder. 
+# Change the \ComfyUI\ path below as necessary for your install directory.
+
+Browse to https://civitai.com/models/129666/realities-edge-xl-lcmsdxlturbo and click the download button 
+to download the 6GB file "RealitiesEdgeXLLCM_TURBOXL.safetensors" and save it to 
+\ComfyUi\models\checkpoints\RealitiesEdgeXLLCM_TURBOXL.safetensors If you already have A1111 installed, 
+you can also modify \ComfyUI\extra_model_paths.yaml and point the base path to your A1111 SD folder if 
+you prefer. ( base_path: E:\SD\stable-diffusion-webui\ )
+    
+copy nodes_custom_sampler.py \ComfyUI\comfy_extras\nodes_custom_sampler.py
+git clone https://github.com/ltdrdata/ComfyUI-Manager.git \ComfyUI\custom_nodes
+git clone https://github.com/ltdrdata/ComfyUI-Impact-Pack.git \ComfyUI\custom_nodes
+
+# Start ComfyUI. (You will also need to start it when AudioBookSlides app tells you to launch it.)
+\ComfyUI\run_nvidia_gpu.bat
+#Click on "Manager" in the menu, then click "Update ComfyUI". When the update finishes, press CTRL-C in the CMD window to stop the Server
+
+
+#Launch AudioBookSlides application. After the .mp3 file has been created in the first step, 
+#the path to the mp3 file(s) can be omitted for subsequent reruns.
+
+python abs.py BookName \path_to_audiobook\bookname.mp3
+
+</code></pre>
+</details>
 
 **Unix**:
 <details><summary>WSL Installation Steps (click to expand)</summary>
@@ -49,7 +94,6 @@ pip install faster-whisper
 pip install -U whisper-ctranslate2
 
 #Install ffmpeg
-sudo apt update
 sudo apt install ffmpeg
 
 #Clone and set up ComfyUI
@@ -60,7 +104,6 @@ pip install torch torchvision torchaudio --extra-index-url https://download.pyto
 pip install -r requirements.txt
 
 __2021-1-1: The Turbo API did not work because it was missing the latest version of SDTurboScheduler node.__ 
-
 cp ../AudioBookSlides/nodes_custom_sampler.py ./comfy_extras/nodes_custom_sampler.py
 
 #Install helper nodes
@@ -93,37 +136,6 @@ python abs.py 06DeeplyOdd '/mnt/e/Media/Audiobooks/DNK-PLO (2013)/Dean Koontz - 
 ![WSL_images](https://github.com/GotAudio/AudioBookSlides/assets/13667229/10753daa-faee-4d03-a34c-70e5f8b75c62)
 Dean Koontz - Odd Thomas - Deeply Odd Book 6. Length: 9:37, 2500 images took 5.5 hours to generate. 
 (Video creation only takes a few minutes)
-
-</code></pre>
-</details>
-
-**Windows**:
-<details><summary>Windows Installation Steps (click to expand)</summary>
-    
-- **ffmpeg**:
-  - ffmpeg can be installed from [here](https://github.com/BtbN/FFmpeg-Builds/releases).
-  - This package is essential for handling multimedia files.
-
-- **ComfyUI** (See default_config.yaml to use manual A1111):
-  - Download ComfyUI stand-alone portable from [here](https://github.com/comfyanonymous/ComfyUI/releases).
-  - Launching the server is sufficient; using the ComfyUI web interface is not necessary.
-
-Ensure each package is correctly installed and configured before using AudioBookSlides.    
-<pre><code>
-conda create -n abs python=3.10 cudnn
-conda activate abs
-conda install -c conda-forge zlib-wapi
-pip install faster-whisper
-pip install -U whisper-ctranslate2
-
-git clone https://github.com/GotAudio/AudioBookSlides.git
-cd AudioBookSlides
-pip install .
-
-#Launch application. After the .mp3 file has been created in the first step, 
-#the path to the mp3 file(s) can be omitted for subsequent reruns.
-
-python abs.py BookName \path_to_audiobook\bookname.mp3
 
 </code></pre>
 </details>
