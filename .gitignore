@@ -1,3 +1,5 @@
+_models/
+.cache/
 ABS_API_KEY.txt
 AudioBookSlides.egg-info
 temp_output.srt
@@ -7,3 +9,4 @@ libcublas.so.11
 libcublasLt.so.11
 libcudnn_cnn_infer.so.8
 libcudnn_ops_infer.so.8
+whisper-faster.exe

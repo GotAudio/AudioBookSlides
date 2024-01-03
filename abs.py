@@ -143,7 +143,7 @@ def main(bookname, wildcard_path=None):
     config = replace_bookname_recursive(config, bookname)
 
     # Normalize paths in the config dictionary
-    keys_to_normalize = ['whisperx_win', 'whisperx_linux', 'actors', 'actresses', 'path_to_stablediffusion', 'path_to_comfyui', 'path_to_workflow']
+    keys_to_normalize = ['whisperx', 'actors', 'actresses', 'path_to_stablediffusion', 'path_to_comfyui', 'path_to_workflow']
 
     for key in keys_to_normalize:
         if key in config:
@@ -200,8 +200,11 @@ def main(bookname, wildcard_path=None):
         # Determine the appropriate key based on the operating system
         key = 'whisperx_win' if platform.system() == 'Windows' else 'whisperx_linux'
 
-        # Construct whisperx_cmd using the selected key
-        whisperx_cmd = config[key] + f" {mp3_file_path}"
+		# Extract directory from mp3_file_path
+		output_dir = os.path.dirname(mp3_file_path)
+
+		# Construct whisperx_cmd using the base command from config and appending the dynamic directory and file path
+		whisperx_cmd = f"{config[key]} {output_dir} {mp3_file_path}"
 
         # Log the command if debugging is enabled
         if DEBUG:

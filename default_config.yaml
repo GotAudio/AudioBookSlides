@@ -1,16 +1,14 @@
-# example_config.yaml. This file will be copied to each books\<bookname>\<bookname>.yaml
+# This config file can be copied to books\<bookname>\<bookname>.yaml and any keys there will over ride the key here. actors for example.
 
-#whisperX is required to generate .srt subtitle file. Add your path to whisperx.
-#Windows install from https://github.com/Purfview/whisper-standalone-win/releases/tag/faster-whisper, unzip whisper-faster.exe to this folder or elsewhere. Unix, install with pip install faster-whisper
-whisperx_win: "whisper-faster --model large-v2 --output_format srt --beep_off --print_progress --output_dir source "
+#whisperX is required to generate .srt subtitle file.
+#Currently the same app. Support alternatives. eg. whisper-faster.exe (which is actually not faster)
+whisperx_win: "whisper-ctranslate2 --model large-v2 --verbose False --device cpu --output_format srt --output_dir "
+whisperx_linux: "whisper-ctranslate2 --model large-v2 --verbose False --device cpu --output_format srt --output_dir "
 
-# I am getting the error "Could not load library libcudnn_ops_infer.so.8. Error: libnvrtc.so: cannot open shared object file.", even though the file is in my library path.
-# I switched to CPU mode in order to continue testing. Maybe someone else can fix it.
-whisperx_linux: "whisper-ctranslate2 --model large-v2 --verbose False --device cpu --output_format srt --output_dir source "
 
-# Ssample actresses and actors. You can create custom csv files in the book folder and change this yaml file to point to those. 
+# Sample actresses and actors. You can create custom csv files in the book folder and change this yaml file to point to those. 
 # I replace characters with actors in order to have consistent character appearences. 
-# You may create custom actors files by creating a books\<bookname>\<bookname>.yaml file with these keys which points to csv files in the <bookname> folder.
+# You may create custom actors files by creating a books\<bookname>\<bookname>.yaml file with these keys which point to csv files in the <bookname> folder.
 actors: actors\\male.csv
 actresses: actors\\female.csv
 
@@ -22,29 +20,30 @@ depth: 4
 # Must be either ComfyUI or A1111
 image_generator: "ComfyUI"
 
+# If image_generator is ComfyUI, folder containing ComfyUI generated images. You must start ComfyUI prior to generating images.
+# You must change the path below or you must rename the "output" images folder to <bookname> when image generation is complete
+path_to_comfyui: "H:\\ComfyUI\\<bookname>"
+
 # If image_generator is A1111, folder containing generated A1111 images. 
 # You can either change the path below, or rename the YYYY-MM-DD images folder to <bookname> when image generation is complete.
 # You must start A111, configure the UI, and select "Input from text or file" under the Scripts selector at the bottom, then drag+drop <bookname>_p_final.txt into the upload box, then wait for images to be generated.
 # I have provided a sample A1111.PNG file that you can import to load reasonable defaults.
 path_to_stablediffusion: "E:\\SD\\stable-diffusion-webui\\outputs\\txt2img-images\\<bookname>"
 
-# If image_generator is ComfyUI, folder containing ComfyUI generated images. You must start ComfyUI prior to generating images.
-# You must change the path below or you must rename the "output" images folder to <bookname> when image generation is complete
-path_to_comfyui: "H:\\ComfyUI\\<bookname>"
-
 # You must download the model files to your SD model folder. You can find them here https://civitai.com/
 # Model name. eg. "OpenDalleV1.1.safetensors" or "RealitiesEdgeXLLCM_TURBOXL.safetensors"
+# For A1111 the user will have to manually configre it in the web-ui
 comfyui_model: "RealitiesEdgeXLLCM_TURBOXL.safetensors"
 
-# Workflow file name. I have provided a few sample workflows. The default positive prompt must start with " Pos: ", negative prompt must start with " Neg: ". model, seed, width, height, steps, cfg and prompt will be auto-generated
-# Comment to use A1111 instead. eg. Turbo_dpm_Face_API.json" or OpenDalle_Face_Api.json. Workflow may need to be configured correctly for Turbo or non Turbo. You can create ComfyUI workflow json files by clicking Save as API from the manager menu.
+# Workflow file name (only used for ComfyUI). I have provided a few sample workflows. The default positive prompt must start with " Pos: ", negative prompt must start with " Neg: ". model, seed, width, height, steps, cfg and prompt will be auto-generated
+# eg. Turbo_dpm_Face_API.json" or OpenDalle_Face_Api.json. Workflow may need to be configured correctly for Turbo or non Turbo. You can create ComfyUI workflow json files by clicking Save as API from the manager menu.
 path_to_workflow: "Turbo_dpm_Face_API.json"
 
 # Prompts for generating images. 
 neg_prompt: "  Neg: bad eyes, misshapen, monochrome, mutation, (easynegative:0.9)"
 pos_prompt: "  Pos: (RAW Photo, In the style of Through the Looking Glass by Lewis Carroll. Fantastical, other-worldy, dreamlike ), (Full body:1.3), (perfect hands:1.3), detailed skin, cinematic, ultra high res, (8K UHD:1.2), (soft night lighting:0.8) "
 
-# Configuration for the image generation process
+# Configuration for the image generation process. These values 2,8 are appropriate for workflow "Turbo_dpm_Face_API.json". OpenDalle_Face_Api.json will prefer values like 6, 35, and be much slower, but better quality
 cfg: 2
 steps: 8
 
@@ -52,15 +51,14 @@ steps: 8
 image_width: 768
 image_height: 512
 
-#how many images to generate with ComfyUI. Set to 0 to process all images. 
-#This lets you run a small test sample to comfirn you are happy with styles and quality settings.  (Or you can just kill the image server, Queue will reset when restarted)
+#How many images to generate with ComfyUI. Set to 0 to process all images. 
+#This lets you run a small test sample to comfirn you are happy with styles and quality settings.  (Or you can just kill the image server. The queue will reset when restarted.)
 #The output video would still be as long as the audio book regardless of this setting if you continued to process the images.
 image_count: 0
 
 # Get character names, scenes, and image prompts from AI Language model. You can use free LM-Studio or OpenAI.  
-# For a 12 hour audio book, OpenAI-GPT3 costs less than $1 and it finishes 20 minutes.  LM-Studio takes about 1 hour.
+# For a 12 hour audio book, OpenAI-GPT3 costs less than $1 and it finishes 20 minutes.  LM-Studio takes about 1 hours. (Performed twice)
 
 #LM-Studio must be running and Local Server mode must be started.  I recommend this model https://huggingface.co/TheBloke/Mistral-7B-Instruct-v0.1-GGUF  ( mistral-7b-instruct-v0.1.Q6_K.gguf )
-#**** I may need to update a few scripts to run with LMS ****
+#**** I may need to update a few scripts to run with LMS. I have not tested the most recent prompts with LMS ****
 #api_base: "http://localhost:1234/v1"
-
