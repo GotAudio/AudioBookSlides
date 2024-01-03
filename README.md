@@ -3,11 +3,12 @@
 ![Turbo_RealitiesEdgeXLLCM_A1111-SD](https://github.com/GotAudio/AudioBookSlides/assets/13667229/4f30b0c5-9ab6-4940-89ca-e5ddb2235e0b)
 
 # Create an AI generated video slideshow from an audiobook. 
-This app was written entirely by ChatGPT. I told it the tasks I wanted and it eventually made this. I probably couldn't write a 'Hello World!' program in Python.
+This app was written mostly by ChatGPT. I told it the tasks I wanted and it eventually made this.
 
 [**AudioBookSlides**](https://github.com/GotAudio/AudioBookSlides/)<br/>
 
-I created a sample book to test this installation. Public domain Librivox [Alice in Wonderland](https://www.youtube.com/watch?v=27SwZZ8jiBc). You can find more free audiobooks [here](https://librivox.org/).
+I created a sample book to test this installation. 
+Public domain Librivox [Alice in Wonderland](https://www.youtube.com/watch?v=27SwZZ8jiBc). You can find more free audiobooks [here](https://librivox.org/).
 
 [Contact Sheet from Alice In Wonderland](https://github.com/GotAudio/AudioBookSlides/assets/13667229/acf17491-81be-42ee-a2de-230a19922d57)
 
