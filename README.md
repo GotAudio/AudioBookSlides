@@ -93,6 +93,12 @@ mamba install -c conda-forge zlib
 pip install faster-whisper
 pip install -U whisper-ctranslate2
 
+#I thought I had whisper working with cudnn in a fresh conda install but I guess not.
+#If it does not work for you, you can try this.  It worked for me. It is 500MB
+sudo apt install nvidia-cuda-toolkit
+sudo apt install nvidia-cudnn
+#
+
 #Install ffmpeg
 sudo apt install ffmpeg
 
