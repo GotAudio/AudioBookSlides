@@ -2,9 +2,8 @@
 
 #whisperX is required to generate .srt subtitle file.
 #Currently the same app. Support alternatives. eg. whisper-faster.exe (which is actually not faster)
-whisperx_win: "whisper-ctranslate2 --model large-v2 --verbose False --device cpu --output_format srt --output_dir "
-whisperx_linux: "whisper-ctranslate2 --model large-v2 --verbose False --device cpu --output_format srt --output_dir "
-
+whisperx_win: "whisper-ctranslate2 --model large-v2 --verbose False --device gpu --output_format srt --output_dir "
+whisperx_linux: "whisper-ctranslate2 --model large-v2 --verbose False --device gpu --output_format srt --output_dir "
 
 # Sample actresses and actors. You can create custom csv files in the book folder and change this yaml file to point to those. 
 # I replace characters with actors in order to have consistent character appearences. 

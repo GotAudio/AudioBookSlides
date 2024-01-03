@@ -172,12 +172,16 @@ def main(bookname, wildcard_path=None):
         filelist_path = os.path.join(book_folder, 'filelist.txt')
         # Log the command if debugging is enabled
         if DEBUG:
-            logging.debug("Step 03/20: Audio file %s", mp3_file_path)
+            logging.debug("Step 03/20: Audio file %s", wildcard_path)
 
         try:
+            dir_path = os.path.dirname(wildcard_path)  # Get the directory from the wildcard path
+            files = [f for f in os.listdir(dir_path) if f.endswith('.mp3')]  # List .mp3 files
+
             with open(filelist_path, 'w') as filelist:
-                for audio_file in sorted(glob.glob(wildcard_path)):
-                    corrected_path = audio_file.replace('\\', '/')
+                for audio_file in sorted(files):
+                    full_path = os.path.join(dir_path, audio_file)
+                    corrected_path = full_path.replace('\\', '/')
                     filelist.write(f"file '{corrected_path}'\n")
         except IOError as e:
             logging.error("Error writing to filelist: %s", e)
