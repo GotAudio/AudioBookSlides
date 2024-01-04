@@ -147,13 +147,14 @@ Dean Koontz - Odd Thomas - Deeply Odd Book 6. Length: 9:37, 2500 images took 5.5
 </details>
 
 
-#### GPT API Setup
+#### GPT API Setup*
 - To use the GPT API, you need to sign up for an API Key. Register and get your key [here](https://platform.openai.com).
 - Save your API key in a file named `ABS_API_KEY.txt` in the application folder.
 - The cost is approximately $2 for a 12-hour audiobook. New sign-ups might receive $20 free credit.
 - Alternatively, use the free [LM-Studio Local GPT server](https://lmstudio.ai/). It's about 3 times slower (1 hour vs 20 minutes) and less accurate. The recommended model is [here](https://huggingface.co/TheBloke/Mistral-7B-Instruct-v0.1-GGUF).
-- Note: Not all requests have been optimized for LM-Studio. Some results may be poor. (This was used in development but hasn't been fully verified with this installation.)
-
+- Note: Not all requests have been optimized for LM-Studio. Some results may be suboptimal. This feature was utilized during development but has not been fully verified with the current installation.
+- *I also have a version that does not utilize GPT. In that version, image prompts are generated directly from the text, which can lead to often ridiculous or confusing scene transitions. Additionally, character names are generated programmatically, often resulting in inaccuracies. Instead of having around 50 nearly 100% accurate characters, you might encounter 200+ characters with frequent errors, necessitating increased effort in managing actor mappings. However, this might not be a concern for you. The process is significantly faster, taking only seconds versus 20 minutes, and avoids a $2 API fee. I can release this version if there is interest.
+  
 ## Overview of Processing
 
 - The application keeps track of its workflow and can be stopped or restarted at any time.
@@ -239,7 +240,7 @@ $abs/
      ```
      python abs.py 01ThisHour "E:\Media\AudioBooks\Lemony Snicket\All the Wrong Questions 1 - Who Could That Be at This Hour\*.mp3"
      ```
-- [ ] 2) Test spaces in BookName and MP3 path.
-- [ ] 3) Test on Windows Subsystem for Linux (WSL).
+- [X] 2) Test spaces in BookName and MP3 path.
+- [X] 3) Test on Windows Subsystem for Linux (WSL).
 - [ ] 4) Test on system A1111 (note: some manual steps required).
 - [ ] 5) Test input with different audio formats (.WAV, .AAC).
