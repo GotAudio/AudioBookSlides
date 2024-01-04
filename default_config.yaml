@@ -40,7 +40,7 @@ path_to_workflow: "Turbo_dpm_Face_API.json"
 
 # Prompts for generating images. 
 neg_prompt: "  Neg: bad eyes, misshapen, monochrome, mutation, (easynegative:0.9)"
-pos_prompt: "  Pos: (RAW Photo, In the style of Through the Looking Glass by Lewis Carroll. Fantastical, other-worldy, dreamlike ), (Full body:1.3), (perfect hands:1.3), detailed skin, cinematic, ultra high res, (8K UHD:1.2), (soft night lighting:0.8) "
+pos_prompt: "  Pos: (wide angle:1.5) (wide screen movie still photograph) (hyperrealism:1.2) (8K UHD:1.2) (photorealistic:1.2) fantasy otherworldly hyperrealist highly intricate somber atmosphere awe-inspiring. award-winning glaze crime photos master study cinematic (night lighting:0.8) masterpiece best quality ultra realistic 32k RAW photo detail dslr high quality fantastical style by dramatic lighting  "
 
 # Configuration for the image generation process. These values 2,8 are appropriate for workflow "Turbo_dpm_Face_API.json". OpenDalle_Face_Api.json will prefer values like 6, 35, and be much slower, but better quality
 cfg: 2

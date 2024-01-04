@@ -657,7 +657,7 @@ def main(bookname, wildcard_path=None):
         return
 
     # Step 18: Run make_tEXt.py and rename_png_files.py scripts
-    path_to_comfyui = config.get('path_to_comfyui', '')  # Assuming 'path_to_comfyui' is a key in the config YAML
+    path_to_comfyui = config.get('path_to_comfyui', '')
 
     if not path_to_comfyui:
         logging.error("Missing 'path_to_comfyui' in the config YAML. Exiting.")
@@ -668,38 +668,53 @@ def main(bookname, wildcard_path=None):
         logging.error("Folder '%s' does not exist. Exiting.", path_to_comfyui)
         return
 
-    # Define the command to run make_tEXt.py
-    # removed -o (overwrite) flag. Not sure why it was enabled.  Allows for faster restarts
-    make_text_cmd = f"python make_tEXt.py {path_to_comfyui}"
 
-    # Define the command to run rename_png_files.py
-    rename_png_cmd = f"python rename_png_files.py {path_to_comfyui}"
+    while True:
+        skip_renaming = input("Step 18/20: Generated image file %s already exists. Do you want to skip file renaming step? [Y/n] (Default: Y): " % os.path.join(path_to_comfyui, '000000000.png')).strip().lower()
 
-    # Log the commands if debugging is enabled
-    if DEBUG:
-        logging.debug("Step 18/20: Extract metadata from PNG files and save as .txt: %s", make_text_cmd)
-        logging.debug("rename_png_files.py command: %s", rename_png_cmd)
+        if not skip_renaming:  # Default to "Y" if the user presses Enter
+            skip_renaming = "y"
 
-    try:
-        # Execute the make_tEXt.py command
-        result = subprocess.run(make_text_cmd, shell=True, check=True)
-        logging.info("make_tEXt.py completed successfully.")
+        if skip_renaming in ["y", "n"]:
+            break
+        else:
+            print("Invalid input. Please enter 'Y' or 'N'.")
 
+    if skip_renaming == "n":
+        # Define the command to run make_tEXt.py
+        # removed -o (overwrite) flag. Not sure why it was enabled. Allows for faster restarts
+        make_text_cmd = f"python make_tEXt.py {path_to_comfyui}"
+
+        # Define the command to run rename_png_files.py
+        rename_png_cmd = f"python rename_png_files.py {path_to_comfyui}"
+
+        # Log the commands if debugging is enabled
         if DEBUG:
-            logging.debug("Step 18/20 Read .txt files and rename PNG files to the .srt timestamp enbeded in the prompt. {ts=001234125} = HH:MM:SS,mms or 00 Houurs, 12 minutes, 34.123 seconds: %s", rename_png_cmd)
-        # Execute the rename_png_files.py command
-        result = subprocess.run(rename_png_cmd, shell=True, check=True)
-        logging.info("rename_png_files.py completed successfully.")
+            logging.debug("Step 18/20: Extract metadata from PNG files and save as .txt: %s", make_text_cmd)
+            logging.debug("rename_png_files.py command: %s", rename_png_cmd)
 
-        path_to_comfyui = path_to_comfyui.replace("<bookname>", bookname)  # Replace placeholder
-        txt_files = glob.glob(os.path.join(path_to_comfyui, "*.tEXt.txt"))
-        for file_path in txt_files:
-            try:
-                os.remove(file_path)
-            except OSError as e:
-                print(f"Error deleting file {file_path}: {e}")
-    except subprocess.CalledProcessError as e:
-        logging.error("Command failed: %s", e)
+        try:
+            # Execute the make_tEXt.py command
+            result = subprocess.run(make_text_cmd, shell=True, check=True)
+            logging.info("make_tEXt.py completed successfully.")
+
+            if DEBUG:
+                logging.debug("Step 18/20 Read .txt files and rename PNG files to the .srt timestamp embedded in the prompt. {ts=001234125} = HH:MM:SS,mms or 00 Hours, 12 minutes, 34.123 seconds: %s", rename_png_cmd)
+            # Execute the rename_png_files.py command
+            result = subprocess.run(rename_png_cmd, shell=True, check=True)
+            logging.info("rename_png_files.py completed successfully.")
+
+            path_to_comfyui = path_to_comfyui.replace("<bookname>", bookname)  # Replace placeholder
+            txt_files = glob.glob(os.path.join(path_to_comfyui, "*.tEXt.txt"))
+            for file_path in txt_files:
+                try:
+                    os.remove(file_path)
+                except OSError as e:
+                    print(f"Error deleting file {file_path}: {e}")
+        except subprocess.CalledProcessError as e:
+            logging.error("Command failed: %s", e)
+    else:
+        print("Skipping file renaming step as per user choice.")
 
     # Step 19: Create an output video if it doesn't exist
     output_video_path = os.path.join(book_folder, f"{bookname}_output.avi")
