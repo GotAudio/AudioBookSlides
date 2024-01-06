@@ -75,30 +75,35 @@ python abs.py BookName \path_to_audiobook\bookname.mp3
 **Unix**:
 <details><summary>WSL Installation Steps (click to expand)</summary>
 <pre><code>
-# Install Mambaforge, a minimal Conda
-wget https://github.com/conda-forge/miniforge/releases/latest/download/Mambaforge-Linux-x86_64.sh
-chmod +x Mambaforge-Linux-x86_64.sh
-./Mambaforge-Linux-x86_64.sh
-#Close and reopen terminal
-mamba create -n abs python=3.10 cudnn
-mamba activate abs
-
 #Change to the folder where you want to install AudioBookSlides
 md /mnt/e/wsl
 cd /mnt/e/wsl
 git clone https://github.com/GotAudio/AudioBookSlides.git
 cd AudioBookSlides/
-pip install .
+
+#Save your openai API Key in ABS_API_KEY.txt
+echo YOUR_API_KEY> ABS_API_KEY.txt
+
+# Install Mambaforge, a minimal Conda
+wget https://github.com/conda-forge/miniforge/releases/latest/download/Mambaforge-Linux-x86_64.sh
+chmod +x Mambaforge-Linux-x86_64.sh
+./Mambaforge-Linux-x86_64.sh
+source ~/.bashrc
+mamba create -n abs python=3.10 cudnn
+mamba activate abs
+
+wget https://github.com/Purfview/whisper-standalone-win/releases/download/libs/cuBLAS.and.cuDNN_linux_v2.7z
+sudo apt install p7zip-full
+7z x cuBLAS.and.cuDNN_linux_v2.7z
 mamba install -c conda-forge zlib
 pip install faster-whisper
 pip install -U whisper-ctranslate2
 
-#I thought I had whisper working with cudnn in a fresh conda install but I guess not.
-#If it does not work for you, you can try this.  It worked for me. It is 500MB
-sudo apt install nvidia-cuda-toolkit
+# 2GB+ downoad. Tab to OK and press enter when asked. 
 sudo apt install nvidia-cudnn
-#
 
+pip install .	
+	
 #Install ffmpeg
 sudo apt install ffmpeg
 
@@ -132,9 +137,6 @@ sudo apt install firefox
 firefox
 (Browse to http://127.0.0.1:8188)
 
-cd ../AudioBookSlide
-#Save your openai API Key in ABS_API_KEY.txt
-echo YOUR_API_KEY> ABS_API_KEY.txt
 
 #Start the application
 python abs.py 06DeeplyOdd '/mnt/e/Media/Audiobooks/DNK-PLO (2013)/Dean Koontz - Deeply Odd (2013)/*.mp3'
