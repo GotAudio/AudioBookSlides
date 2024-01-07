@@ -668,8 +668,9 @@ def main(bookname, wildcard_path=None):
         logging.error("Folder '%s' does not exist. Exiting.", path_to_comfyui)
         return
 
-
-    while True:
+    skip_renaming = "n"
+    file_path = os.path.join(path_to_comfyui, '000000000.png')
+    while True and os.path.exists(file_path):
         skip_renaming = input("Step 18/20: Generated image file %s already exists. Do you want to skip file renaming step? [Y/n] (Default: Y): " % os.path.join(path_to_comfyui, '000000000.png')).strip().lower()
 
         if not skip_renaming:  # Default to "Y" if the user presses Enter
@@ -730,13 +731,18 @@ def main(bookname, wildcard_path=None):
             logging.debug("Step 19/20: This spawns 30 parallel ffmpeg processes to generate a ~30 second (time based on the file name) still image .AVI video from each image, then combines them: %s", jobvid_cmd)
 
         try:
-            result = subprocess.run(jobvid_cmd, shell=True, check=True)
-            if result.returncode == 0:
-                logging.info("Output video created: %s", output_video_path)
-            else:
-                logging.error("Failed to create output video: %s", output_video_path)
-        except subprocess.CalledProcessError as e:
-            logging.error("Command failed: %s", e)
+            subprocess.run(jobvid_cmd, shell=True, check=True)
+        except subprocess.CalledProcessError:
+            # Silently ignore the error
+            pass
+
+        # Check if the output file was created, after the try-except block
+        if not os.path.exists(output_video_path):
+            logging.error("Failed to create output video: %s", output_video_path)
+            return  # Exit from the current function or script
+        else:
+            logging.info("Output video created: %s", output_video_path)
+
     else:
         logging.info("Output video already exists: %s", output_video_path)
 

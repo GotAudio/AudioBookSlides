@@ -136,14 +136,8 @@ def main(input_wildcard, output_video):
     with open(file_list, 'w') as f:
         for img in images:
             video_file = os.path.basename(img).replace('png', 'avi')
-            # Adjust path based on the operating system
-            if os_name == "Linux":
-                # For Linux/WSL, use an absolute path
-                video_file_abs_path = os.path.abspath(os.path.join(output_folder, video_file))
-                f.write(f"file '{video_file_abs_path}'\n")
-            else:
-                # For Windows, use a path relative to the current directory
-                f.write(f"file '{video_file}'\n")
+            video_file_abs_path = os.path.abspath(os.path.join(output_folder, video_file))
+            f.write(f"file '{video_file_abs_path}'\n")
 
     # Print duplicate filenames only if there are any
     if duplicate_images:
@@ -157,7 +151,13 @@ def main(input_wildcard, output_video):
     # automatic ffmpeg invocation and cleanup
     print(f"\nffmpeg -hide_banner -f concat -safe 0 -i {file_list} -c copy {output_video}")
     os.system(f"ffmpeg  -hide_banner -f concat -safe 0 -i {file_list} -c copy {output_video}")
-    os.system(f"rm -r {output_folder}")
+
+    # Check if the output_video file exists
+    if os.path.exists(output_video):
+        os.system(f"rm -r {output_folder}")
+    else:
+        print(f"Error: The output video file {output_video} does not exist.")
+        sys.exit(1)
 
 if __name__ == "__main__":
     if len(sys.argv) != 3:
