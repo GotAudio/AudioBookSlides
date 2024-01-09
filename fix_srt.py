@@ -1,5 +1,8 @@
+import os
 import sys
 import re
+import tempfile
+import shutil
 
 def preprocess_text(text):
     """ Appends a period to the end of text if it does not end with sentence-ending punctuation. """
@@ -60,19 +63,28 @@ def process_pass(input_file, output_file, char_limit):
 
     return combined_any
 
+
 def join_subtitles(input_file, output_file, char_limit):
-    temp_file = "temp_output.srt"
-    combined_any = process_pass(input_file, temp_file, char_limit)
+	with tempfile.NamedTemporaryFile(mode='w+', delete=False, suffix='.srt', encoding='utf-8') as temp:
+		temp_file = temp.name
+		combined_any = process_pass(input_file, temp_file, char_limit)
 
-    while combined_any:
-        combined_any = process_pass(temp_file, temp_file, char_limit)
+		while combined_any:
+			combined_any = process_pass(temp_file, temp_file, char_limit)
 
-    # Copy the final output to the desired output file
-    with open(temp_file, 'r', encoding='utf-8') as file:
-        final_content = file.readlines()
+		# Rewind the temporary file to read its content
+		temp.seek(0)
+		final_content = temp.readlines()
 
-    with open(output_file, 'w', encoding='utf-8') as file:
-        file.writelines(final_content)
+	# Copy the final output to the desired output file
+	with open(output_file, 'w', encoding='utf-8') as file:
+		file.writelines(final_content)
+
+	# Remove the temporary file
+	try:
+		os.remove(temp_file)
+	except OSError as e:
+		print(f"Error: {e.filename} - {e.strerror}.")
 
 def main():
     if len(sys.argv) < 5 or sys.argv[1] != '-join':

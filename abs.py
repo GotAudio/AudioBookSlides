@@ -13,6 +13,20 @@ DEBUG = 1  # Set to 1 for debug mode, 0 to disable
 
 logging.basicConfig(level=logging.DEBUG if DEBUG else logging.INFO)
 
+def convert_to_mp3(source_file, target_file):
+    ffmpeg_convert_cmd = f"ffmpeg -i {source_file} -acodec libmp3lame {target_file}"
+    return run_command(ffmpeg_convert_cmd)
+
+def concatenate_files(filelist_path, output_file):
+    ffmpeg_concat_cmd = f"ffmpeg -hide_banner -f concat -safe 0 -i {filelist_path} -c copy {output_file}"
+    return run_command(ffmpeg_concat_cmd)
+
+def handle_single_file(file_path, target_file):
+    if file_path.endswith('.mp3'):
+        shutil.copyfile(file_path, target_file)
+    else:
+        convert_to_mp3(file_path, target_file)
+
 def is_file_nonempty(file_path):
     """Check if the file exists and is not empty."""
     return os.path.exists(file_path) and os.path.getsize(file_path) > 0
@@ -46,19 +60,6 @@ def run_command(command):
     except subprocess.CalledProcessError as e:
         logging.error("Command failed: %s", e)
         return False
-
-def create_mp3(filelist_path, mp3_file_path):
-    if not os.path.exists(mp3_file_path):
-        ffmpeg_cmd = f"ffmpeg -hide_banner -f concat -safe 0 -i {filelist_path} -c copy {mp3_file_path}"
-        if run_command(ffmpeg_cmd):
-            logging.info("Created: %s", mp3_file_path)
-            return True
-        else:
-            logging.error("Failed to create MP3 file.")
-            return False
-    else:
-        logging.info("Already exists: %s", mp3_file_path)
-        return True
 
 def create_directory(path):
     if os.path.exists(path):
@@ -159,36 +160,63 @@ def main(bookname, wildcard_path=None):
     except Exception as e:
         logging.info("ABS_API_KEY.txt does not contain an API key. GPT API will be unavailable %s", e)
 
+
     # Step 3: Create the MP3 file if it does not exist
     mp3_file_path = os.path.join(book_folder, f"{bookname}.mp3")
 
-    # Check if the MP3 file already exists
     if not os.path.exists(mp3_file_path):
-        # Check if wildcard_path is provided
         if wildcard_path is None:
             logging.error("Missing required wildcard path for audio file creation.")
-            return
+            return False
 
-        filelist_path = os.path.join(book_folder, 'filelist.txt')
-        # Log the command if debugging is enabled
+        # Determine if the path is a directory, a specific file pattern, or a wildcard for any file
+        if os.path.isdir(normalized_path) or normalized_path.endswith('*.*'):
+            dir_path = normalized_path if os.path.isdir(normalized_path) else os.path.dirname(normalized_path)
+            file_extension = None
+        else:
+            dir_path = os.path.dirname(normalized_path)
+            file_extension = os.path.splitext(os.path.basename(normalized_path))[1] if '.' in os.path.basename(normalized_path) else None
+
         if DEBUG:
             logging.debug("Step 03/20: Audio file %s", wildcard_path)
+            logging.debug("Determined audio directory path: %s", dir_path)
 
-        try:
-            dir_path = os.path.dirname(wildcard_path)  # Get the directory from the wildcard path
-            files = [f for f in os.listdir(dir_path) if f.endswith('.mp3')]  # List .mp3 files
+        filelist_path = os.path.join(book_folder, 'filelist.txt')
 
+        # Search for files based on the determined extension or default to common audio file types
+        if file_extension:
+            files = [f for f in os.listdir(dir_path) if f.endswith(file_extension)]
+        else:
+            extensions = ['.mp3', '.aac', '.wav']
+            files = [f for f in os.listdir(dir_path) for ext in extensions if f.endswith(ext)]
+
+        if not files:
+            logging.error(f"No matching files found in {dir_path} for the pattern {wildcard_path}")
+            return False
+
+        if DEBUG and files:
+            logging.debug("Found %d files: %s...", len(files), files[0])
+
+        # Process files
+        if len(files) == 1:
+            # Only one file, handle it directly
+            single_file_path = os.path.join(dir_path, files[0])
+            if not handle_single_file(single_file_path, mp3_file_path):
+                return False
+        else:
+            # Multiple files, concatenate and then convert
             with open(filelist_path, 'w') as filelist:
                 for audio_file in sorted(files):
                     full_path = os.path.join(dir_path, audio_file)
                     corrected_path = full_path.replace('\\', '/')
                     filelist.write(f"file '{corrected_path}'\n")
-        except IOError as e:
-            logging.error("Error writing to filelist: %s", e)
-            return
 
-        if not create_mp3(filelist_path, mp3_file_path):
-            return
+            temp_output_file = os.path.splitext(filelist_path)[0] + os.path.splitext(files[0])[1]  # Use the extension of the first file
+            if not concatenate_files(filelist_path, temp_output_file):
+                return False
+            if not convert_to_mp3(temp_output_file, mp3_file_path):
+                return False
+            os.remove(temp_output_file)
     else:
         logging.info("MP3 file already exists, skipping creation: %s", mp3_file_path)
 
@@ -687,7 +715,7 @@ def main(bookname, wildcard_path=None):
         make_text_cmd = f"python make_tEXt.py {path_to_comfyui}"
 
         # Define the command to run rename_png_files.py
-        rename_png_cmd = f"python rename_png_files.py {path_to_comfyui}"
+        rename_png_cmd = f"python rename_png_files_int.py {path_to_comfyui}"
 
         # Log the commands if debugging is enabled
         if DEBUG:
