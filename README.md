@@ -72,7 +72,7 @@ python abs.py BookName \path_to_audiobook\bookname.mp3
 </code></pre>
 </details>
 
-**Unix**:
+**Linux**:
 <details><summary>WSL Installation Steps (click to expand)</summary>
 <pre><code>
 #Change to the folder where you want to install AudioBookSlides
@@ -196,6 +196,7 @@ $abs/
 - Be careful when replacing very short names that may be part of other words. For instance, entering "Pat " (with a space after) will ensure that the letters in "Patterns danced..." are not replaced.
 - The format of this file is: count&lt;tab&gt;character name, _solo [age] &lt;gender&gt; [actor | actress] actor name @. Do not remove or alter the "count&lt;tab&gt;character," portion of the text.
 - The delimiters _...@ are included in case you want to make targeted replacements or corrections to the final prompt file, specifically for actors and not other spoken text.
+- The file submitted to Stable Diffusion is named <bookname>_merged_names.txt. Before pressing return to start generating images, I often use a text editor to replace " I ", " me ", " my ", " protagonist ", " narrator " with the protagonists actor name to be sure they appear on-screen even if someone else is not saying their name.
 - As a reference, I asked ChatGPT; List the character names and descriptions in the book "Lemony Snicket - Who Could That Be at This Hour"
 
 ### This is an example of a default vs. manually edited actor list. 
@@ -245,4 +246,34 @@ $abs/
 - [X] 2) Test spaces in BookName and MP3 path.
 - [X] 3) Test on Windows Subsystem for Linux (WSL).
 - [ ] 4) Test on system A1111 (note: some manual steps required).
-- [ ] 5) Test input with different audio formats (.WAV, .AAC).
+- [x] 5) Test input with different audio formats (.WAV, .AAC). (ffmpeg does not support .m4b containing images so rename those to .aac and they will work)
+
+
+
+**Note: WhisperX transcription from audio to text (.srt) can be much (6X) faster.  A 13 hour book reduced from 3 hours to 30 minutes.  I may replace the current installation with it. If you want to try it;** 
+<code>
+conda install pytorch==2.0.0 torchaudio==2.0.0 pytorch-cuda=11.8 -c pytorch -c nvidia
+git clone https://github.com/m-bain/whisperx.git
+cd whisperx
+#Modify the requirements.txt: Find the line in requirements.txt that specifies faster-whisper with a Git URL and comment it out or remove it. 
+#Then run;
+git clone https://github.com/SYSTRAN/faster-whisper.git
+cd faster-whisper
+git checkout 0.10.0
+pip install .
+cd ..
+pip install .
+#Then change default_config.yaml. Replace "whisper-ctranslate2..." with "whisperx --model large-v2 --align_model WAV2VEC2_ASR_LARGE_LV60K_960H --max_line_count 1 --verbose False --output_format srt --language en --output_dir "
+#whisperX 28 minutes vs. 2:57:00 for whisper-c2translate
+This new version starts the .srt timestamp where it detects audio.  The current version starts at 00:00:00,000.  It needs to be 00:00:00,000 or the images will not sync with the audio, so you will need to interrupt processing after whisperx finishes and change bookname.srt from eg.
+1
+**00:00:11,733** --> 00:00:17,317
+to 
+1
+**00:00:00,000** --> 00:00:17,317
+
+I will do that in the app when I switch to this version.
+
+Delete any files created after creation of the .srt file and they will be rebuilt when you relaunch. (If you forget to fix it, you can simply rename the first .PNG file from 000011733.PNG to 000000000.PNG before renaming your ComfyUI "output" folder to "bookname")
+
+</code>
