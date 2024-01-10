@@ -14,6 +14,15 @@ def process_pass(input_file, output_file, char_limit):
     with open(input_file, 'r', encoding='utf-8') as file:
         lines = file.readlines()
 
+    # Correct the first timestamp if needed
+    # Search for the first occurrence of "-->" at position 14
+    for i, line in enumerate(lines):
+        if line.strip().find("-->") == 13:  # 13 because indexing starts at 0
+            start_time, end_time = line.split(' --> ')
+            if start_time != '00:00:00,000':
+                lines[i] = '00:00:00,000 --> ' + end_time + '\n'
+            break
+
     new_lines = []
     buffer_line = ""
     buffer_start_time = ""
