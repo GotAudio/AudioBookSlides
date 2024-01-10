@@ -14,11 +14,11 @@ DEBUG = 1  # Set to 1 for debug mode, 0 to disable
 logging.basicConfig(level=logging.DEBUG if DEBUG else logging.INFO)
 
 def convert_to_mp3(source_file, target_file):
-    ffmpeg_convert_cmd = f"ffmpeg -i {source_file} -acodec libmp3lame {target_file}"
+    ffmpeg_convert_cmd = f'ffmpeg -hide_banner -i "{source_file}" -acodec libmp3lame "{target_file}"'
     return run_command(ffmpeg_convert_cmd)
 
 def concatenate_files(filelist_path, output_file):
-    ffmpeg_concat_cmd = f"ffmpeg -hide_banner -f concat -safe 0 -i {filelist_path} -c copy {output_file}"
+    ffmpeg_concat_cmd = f'ffmpeg -hide_banner -f concat -safe 0 -i "{filelist_path}" -c copy "{output_file}"'
     return run_command(ffmpeg_concat_cmd)
 
 def handle_single_file(file_path, target_file):
@@ -168,6 +168,9 @@ def main(bookname, wildcard_path=None):
         if wildcard_path is None:
             logging.error("Missing required wildcard path for audio file creation.")
             return False
+
+        # Normalize the wildcard path to eliminate any OS-specific characters
+        normalized_path = os.path.normpath(wildcard_path)
 
         # Determine if the path is a directory, a specific file pattern, or a wildcard for any file
         if os.path.isdir(normalized_path) or normalized_path.endswith('*.*'):
@@ -780,11 +783,10 @@ def main(bookname, wildcard_path=None):
     if not os.path.exists(output_avi_path):
         logging.info("Creating the final video: %s", output_avi_path)
 
-        # Define the FFmpeg command
         ffmpeg_cmd = (
-            f"ffmpeg -hide_banner -i books/{bookname}/{bookname}_output.avi "
-            f"-i books/{bookname}/{bookname}.mp3 "
-            f"-c:v copy -map 0:v:0 -map 1:a:0 {output_avi_path}"
+            f'ffmpeg -hide_banner -i "books/{bookname}/{bookname}_output.avi" '
+            f'-i "books/{bookname}/{bookname}.mp3" '
+            f'-c:v copy -map 0:v:0 -map 1:a:0 "{output_avi_path}"'
         )
 
         # Log the command if debugging is enabled
