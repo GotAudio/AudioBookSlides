@@ -246,7 +246,7 @@ $abs/
 - [X] 2) Test spaces in BookName and MP3 path.
 - [X] 3) Test on Windows Subsystem for Linux (WSL).
 - [ ] 4) Test on system A1111 (note: some manual steps required).
-- [x] 5) Test input with different audio formats (.WAV, .AAC).
+- [x] 5) Test input with different audio formats (.WAV, .AAC). (ffmpeg does not support .m4b containing images so rename those to .aac and they will work)
 
 
 
