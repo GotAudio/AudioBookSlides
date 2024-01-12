@@ -73,73 +73,134 @@ python abs.py BookName \path_to_audiobook\bookname.mp3
 </details>
 
 **Linux**:
-<details><summary>WSL Installation Steps (click to expand)</summary>
+<details><summary>WSL Installation Steps (click to expand) __whisper update__</summary>
 <pre><code>
-#Change to the folder where you want to install AudioBookSlides
-md /mnt/e/wsl
-cd /mnt/e/wsl
-git clone https://github.com/GotAudio/AudioBookSlides.git
-cd AudioBookSlides/
 
-#Save your openai API Key in ABS_API_KEY.txt
-echo YOUR_API_KEY> ABS_API_KEY.txt
-
+__ This can not run as a single bash script. A new mamba environment starts a new shell. __
 # Install Mambaforge, a minimal Conda
+# 1. Navigate to the home directory
+cd ~
+
+# 2. Download the Mambaforge installer script
+#    Users, please run the following command to download the Mambaforge installer.
 wget https://github.com/conda-forge/miniforge/releases/latest/download/Mambaforge-Linux-x86_64.sh
+
+# 3. Make the installer script executable
 chmod +x Mambaforge-Linux-x86_64.sh
+
+# 4. Run the installer script
+echo "Now running the Mambaforge installer. Follow the on-screen instructions."
+echo "During the installation process, you will need to:"
+echo "  - Press 'Enter' to confirm the installation location."
+echo "  - Type 'yes' and press 'Enter' to agree to the license terms."
+echo "  - Press 'Enter' again to prepend the install location to PATH in your .bashrc file."
 ./Mambaforge-Linux-x86_64.sh
-source ~/.bashrc
-mamba create -n abs python=3.10 cudnn
+
+# 5. Source the .bashrc file to update the environment (to be executed after the installation script completes)
+echo "After the installation script completes, execute the following command to update your environment:"
+echo "source ~/.bashrc"
+
+# 6. Create a new Conda environment named 'abs' with Python 3.10 and other dependencies
+echo "Creating a new Conda environment named 'abs' with Python 3.10 and necessary packages."
+mamba create -n abs python=3.10 cudnn cuda-libraries cuda-runtime cuda-libraries-dev -c conda-forge -c nvidia
+
+__#  *** 7. Activate the newly created 'abs' environment ***__
+echo "Activating the 'abs' environment."
 mamba activate abs
 
-wget https://github.com/Purfview/whisper-standalone-win/releases/download/libs/cuBLAS.and.cuDNN_linux_v2.7z
-sudo apt install p7zip-full
-7z x cuBLAS.and.cuDNN_linux_v2.7z
-mamba install -c conda-forge zlib
-pip install faster-whisper
-pip install -U whisper-ctranslate2
+# 8. Install PyTorch, torchaudio, and CUDA support for PyTorch
+echo "Installing PyTorch, torchaudio, and CUDA support for PyTorch."
+mamba install pytorch torchaudio pytorch-cuda -c pytorch -c conda-forge -c nvidia
 
-# 2GB+ downoad. Tab to OK and press enter when asked. 
-sudo apt install nvidia-cudnn
-
-pip install .	
-	
-#Install ffmpeg
+# 9. Install ffmpeg using apt (requires sudo privileges)
+echo "Installing ffmpeg. You might be prompted to enter your password."
 sudo apt install ffmpeg
 
-#Clone and set up ComfyUI
-cd ..
-git clone https://github.com/comfyanonymous/ComfyUI.git
-cd ComfyUI/
-pip install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cu121
-pip install -r requirements.txt
+# 10. Install zlib from the conda-forge channel
+echo "Installing zlib."
+mamba install zlib -c conda-forge
 
-__2021-1-1: The Turbo API did not work because it was missing the latest version of SDTurboScheduler node.__ 
-cp ../AudioBookSlides/nodes_custom_sampler.py ./comfy_extras/nodes_custom_sampler.py
+# 11. Clone the AudioBookSlides repository
+echo "Cloning the AudioBookSlides repository."
+git clone https://github.com/GotAudio/AudioBookSlides.git "$BASE/AudioBookSlides"
 
-#Install helper nodes
-cd custom_nodes/
-git clone https://github.com/ltdrdata/ComfyUI-Manager.git
-git clone https://github.com/ltdrdata/ComfyUI-Impact-Pack.git
-cd ..
+# 12. Save your OpenAI API Key
+echo "Saving your OpenAI API Key."
+echo "Replace YOUR_ACTUAL_API_KEY in the next command with your actual API key."
+echo "YOUR_ACTUAL_API_KEY" > "$BASE/AudioBookSlides/ABS_API_KEY.txt"
 
-Browse to https://civitai.com/models/129666/realities-edge-xl-lcmsdxlturbo and click the download button 
-to download the 6GB file "RealitiesEdgeXLLCM_TURBOXL.safetensors" and save it to 
-ComfyUi/models/checkpoints/RealitiesEdgeXLLCM_TURBOXL.safetensors If you already have A1111 installed, 
-you can also modify ComfyUI/extra_model_paths.yaml and point the base path to your A1111 SD folder if 
-you prefer. ( base_path: /mnt/e/SD/stable-diffusion-webui/ )
+# 13. Clone the ComfyUI repository
+echo "Cloning the ComfyUI repository."
+git clone https://github.com/comfyanonymous/ComfyUI.git "$BASE/ComfyUI"
 
-To launch ComfyUI run this command from the ComfyUI folder in a seperate terminal when asked to start ComfyUI
-python main.py 
+# 14. Install requirements for ComfyUI
+echo "Installing requirements for ComfyUI."
+pip install -r "$BASE/ComfyUI/requirements.txt"
 
-You can also install firefox on WSL2 if you want to view the execution queue;
+# 15. Copy custom sampler node to ComfyUI
+echo "Copying custom sampler node to ComfyUI."
+cp "$BASE/AudioBookSlides/nodes_custom_sampler.py" "$BASE/ComfyUI/comfy_extras/nodes_custom_sampler.py"
+
+# 16. Install helper nodes for ComfyUI
+echo "Installing helper nodes for ComfyUI."
+git clone https://github.com/ltdrdata/ComfyUI-Manager.git "$BASE/ComfyUI/custom_nodes/ComfyUI-Manager"
+git clone https://github.com/ltdrdata/ComfyUI-Impact-Pack.git "$BASE/ComfyUI/custom_nodes/ComfyUI-Impact-Pack"
+
+# 17. Manual Step: Download Model File
+echo "Manual Step Required:"
+echo "Visit https://civitai.com/models/129666/realities-edge-xl-lcmsdxlturbo"
+echo "Click the download button to download the 'RealitiesEdgeXLLCM_TURBOXL.safetensors' file."
+echo "Save it to '$BASE/ComfyUI/models/checkpoints/RealitiesEdgeXLLCM_TURBOXL.safetensors'"
+
+# 18. Launch ComfyUI to download initial models and packages
+echo "Launching ComfyUI to download initial models and packages. This may take a while."
+python "$BASE/ComfyUI/main.py"
+
+# 19. Optional: Install Firefox on WSL2 for viewing the execution queue
+echo "Optional: Installing Firefox on WSL2 for viewing the execution queue."
 sudo apt install firefox
-firefox
-(Browse to http://127.0.0.1:8188)
+echo "You can launch Firefox and browse to http://127.0.0.1:8188 to view the execution queue."
 
+__Install AudioBookSlides__
 
-#Start the application
-python abs.py 06DeeplyOdd '/mnt/e/Media/Audiobooks/DNK-PLO (2013)/Dean Koontz - Deeply Odd (2013)/*.mp3'
+# 20. Clone the AudioBookSlides main repository
+echo "Cloning the AudioBookSlides main repository."
+git clone https://github.com/GotAudio/AudioBookSlides.git "$BASE/AudioBookSlides"
+
+# 21. Clone the whisperx and faster-whisper repositories
+echo "Cloning the whisperx and faster-whisper repositories."
+git clone https://github.com/m-bain/whisperx.git "$BASE/AudioBookSlides/whisperx"
+git clone https://github.com/SYSTRAN/faster-whisper.git "$BASE/AudioBookSlides/whisperx/faster-whisper"
+
+# 22. Install the whisperx and faster-whisper packages
+echo "Installing the whisperx and faster-whisper packages."
+pip install "$BASE/AudioBookSlides/whisperx/faster-whisper"
+pip install "$BASE/AudioBookSlides/whisperx"
+
+# 23. Install the AudioBookSlides package
+echo "Installing the AudioBookSlides package."
+pip install "$BASE/AudioBookSlides"
+
+# 24. Clean up the build and egg-info directories
+# idk if these are needed or not. I deleted them with no errors but later something caused an error. 
+# Maybe the app has to be run at least once before they are no longer needed. Maybe I changed some code.
+# "pip install ." will regenerate them
+# echo "Cleaning up unnecessary files."
+#rm -rf "$BASE/AudioBookSlides/build"
+#rm -rf "$BASE/AudioBookSlides/AudioBookSlides.egg-info"
+
+# 25. Test whisperx functionality
+echo "Testing the whisperx functionality."
+whisperx --model large-v2 --align_model WAV2VEC2_ASR_LARGE_LV60K_960H --max_line_count 1 --verbose False --output_format srt --language en --output_dir "$BASE/AudioBookSlides" "$BASE/AudioBookSlides/OneStep.mp3"
+cat "$BASE/AudioBookSlides/OneStep.srt"
+
+# 26. How to start the AudioBookSlides application
+# Usage: abs [bookname] [audio_file_wildcard_path]
+# Example command (replace with actual book name and path to your audio files):
+# abs 06DeeplyOdd '/path/to/your/audiobooks/Dean Koontz - Deeply Odd (2013)/*.mp3'
+
+# 27. End of Installation
+echo "Installation complete. Please refer to the README for further instructions on using AudioBookSlides."
 
 ![WSL_images](https://github.com/GotAudio/AudioBookSlides/assets/13667229/10753daa-faee-4d03-a34c-70e5f8b75c62)
 Dean Koontz - Odd Thomas - Deeply Odd Book 6. Length: 9:37, 2500 images took 5.5 hours to generate. 
@@ -250,30 +311,24 @@ $abs/
 
 
 
-**Note: WhisperX transcription from audio to text (.srt) can be much (6X) faster.  A 13 hour book reduced from 3 hours to 30 minutes.  I may replace the current installation with it. If you want to try it;** 
+**Note: I have replaced the WhisperX command in the WSL install with a 6X faster version. A 13 hour book reduced from 3 hours to 30 minutes.  Follow these steps to do it yourself for Windows until I fix the Windows installation guide if you wish.** 
 <code>
+
 conda install pytorch==2.0.0 torchaudio==2.0.0 pytorch-cuda=11.8 -c pytorch -c nvidia
 git clone https://github.com/m-bain/whisperx.git
 cd whisperx
-#Modify the requirements.txt: Find the line in requirements.txt that specifies faster-whisper with a Git URL and comment it out or remove it. 
-#Then run;
+#This sub-clone fails on (my) windows (maybe because TEMP is on another drive). Modify requirements.txt. 
+#Find the line that specifies faster-whisper with a Git URL and comment it out, then run;
 git clone https://github.com/SYSTRAN/faster-whisper.git
 cd faster-whisper
-git checkout 0.10.0
 pip install .
 cd ..
 pip install .
-#Then change default_config.yaml. Replace "whisper-ctranslate2..." with "whisperx --model large-v2 --align_model WAV2VEC2_ASR_LARGE_LV60K_960H --max_line_count 1 --verbose False --output_format srt --language en --output_dir "
-#whisperX 28 minutes vs. 2:57:00 for whisper-c2translate
-This new version starts the .srt timestamp where it detects audio.  The current version starts at 00:00:00,000.  It needs to be 00:00:00,000 or the images will not sync with the audio, so you will need to interrupt processing after whisperx finishes and change bookname.srt from eg.
-1
-**00:00:11,733** --> 00:00:17,317
-to 
-1
-**00:00:00,000** --> 00:00:17,317
+cd ..
 
-I will do that in the app when I switch to this version.
-
-Delete any files created after creation of the .srt file and they will be rebuilt when you relaunch. (If you forget to fix it, you can simply rename the first .PNG file from 000011733.PNG to 000000000.PNG before renaming your ComfyUI "output" folder to "bookname")
+#Then change default_config.yaml.  Replace;
+whisperx_win: "whisper-ctranslate2 --model large-v2 --verbose False --device cuda --output_format srt --output_dir "
+with
+whisperx_win: "whisperx --model large-v2 --align_model WAV2VEC2_ASR_LARGE_LV60K_960H --max_line_count 1 --verbose False --output_format srt --language en --output_dir "
 
 </code>

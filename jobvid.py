@@ -22,8 +22,9 @@ def process_image(image_file, output_folder, frame_count, idx, total):
 
     out.release()
 
-    # Update progress bar
-    if idx % (total // 100) == 0:
+    # Update progress bar, ensuring the divisor is at least 1
+    progress_update_interval = max(1, total // 100)
+    if idx % progress_update_interval == 0:
         sys.stdout.write('.')
         sys.stdout.flush()
 
@@ -127,6 +128,8 @@ def main(input_wildcard, output_video):
     sys.stdout.write('\b' * 101)
 
     Parallel(n_jobs=-1, backend="threading")(delayed(process_image)(os.path.join(image_folder, img), output_folder, frame_count, idx, total_images) for idx, (img, frame_count) in enumerate(zip(images, frame_counts)))
+
+    sys.stdout.write('\n')  # Move to the next line after progress bar completion
 
     # Determine the operating system
     os_name = platform.system()

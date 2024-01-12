@@ -1,3 +1,4 @@
+import argparse
 import platform
 import os
 import shutil
@@ -5,6 +6,7 @@ import subprocess
 import yaml
 import glob
 import logging
+import sys
 from pathlib import Path, PureWindowsPath
 
 # Define constants and initialize logging
@@ -237,6 +239,7 @@ def main(bookname, wildcard_path=None):
 
         # Extract directory from mp3_file_path
         output_dir = os.path.dirname(mp3_file_path)
+        os.environ['TF_CPP_MIN_LOG_LEVEL'] = '1'
 
         # Construct whisperx_cmd using the base command from config and appending the dynamic directory and file path
         whisperx_cmd = f"{config[key]} {output_dir} {mp3_file_path}"
@@ -824,17 +827,18 @@ def check_ffmpeg_availability():
         logging.error("ffmpeg not found. Error: %s", e.output)
         return False
 
-if __name__ == "__main__":
-    import sys
-    if len(sys.argv) < 2:
-        logging.error("Usage: python script.py <bookname> [<wildcard_path_to_audio_files>]")
-        sys.exit(1)
 
-    bookname = sys.argv[1]
-    wildcard_path = sys.argv[2] if len(sys.argv) > 2 else None
+def cli():
+    parser = argparse.ArgumentParser(description='AudioBookSlides Command Line Tool')
+    parser.add_argument('bookname', type=str, help='Name of the book')
+    parser.add_argument('wildcard_path', nargs='?', default=None, help='Wildcard path to audio files')
 
+    args = parser.parse_args()
     # Check ffmpeg availability
     if not check_ffmpeg_availability():
         sys.exit(1)
 
-    main(bookname, wildcard_path)
+    main(args.bookname, args.wildcard_path)
+
+if __name__ == "__main__":
+    cli()

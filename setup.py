@@ -20,14 +20,8 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'audioslides=abs:main',  # 'audioslides' is the command, 'abs:main' means the main function in 'abs.py'
+            'abs=abs:cli',
         ],
     },
     python_requires='>=3.6',  # Specify your required Python version
-    # include_package_data=True,
-    # package_data={
-    #     # If there are data files included in your packages
-    #     'package_name': ['data/*.dat'],
-    # },
-    # scripts=['scripts/some_script.py'],
 )

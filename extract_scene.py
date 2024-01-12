@@ -3,85 +3,88 @@ import openai
 import csv
 import re
 import os
-from tqdm import tqdm
+from joblib import Parallel, delayed
 
-# Check if the correct number of arguments are passed; if not, print usage and exit
-if len(sys.argv) != 3:
-    print("Usage: python gen_prompts.py <input_file> <output_file>")
-    sys.exit(1)
-
-# Retrieve the OpenAI API key from the environment variable
-api_key = os.environ.get('ABS_API_KEY')
-if not api_key:
-    print("OpenAI API key not found in environment variables.")
-    sys.exit(1)
-
-openai.api_key = api_key
-
-# Assign command line arguments to input and output file variables
-input_file = sys.argv[1]
-output_file = sys.argv[2]
-
-# Initialize default scene
-default_scene = "[Default Scene=A warm, intimate recording studio with state-of-the-art equipment, soundproofing panels, and a cozy narrator's booth bathed in soft light.] "
-
-# Set the number of rows to process (50 for testing, 0 for no limit)
-COUNT = 0
-
-# Function to generate a response using v1 completions endpoint
-def generate_response(prompt):
+def generate_response(prompt, api_key):
+    openai.api_key = api_key
     response = openai.Completion.create(
         model="gpt-3.5-turbo-instruct-0914",
         prompt=prompt,
         temperature=0,
-        max_tokens=250,
+        max_tokens=250
     )
     return response.choices[0].text.strip()
 
-# Open input and output files
-with open(input_file, "r", newline="", encoding="utf-8-sig") as infile, open(output_file, "w", newline="", encoding="utf-8") as outfile:
-    # Create CSV writer for output
-    writer = csv.writer(outfile, delimiter="\t", quoting=csv.QUOTE_ALL)
+def process_line(line, idx, total, api_key, default_scene):
+    timestamp_match = re.search(r"({ts=\d+})", line)
+    if timestamp_match:
+        timestamp = timestamp_match.group(1)
+        user_query = line.replace(timestamp, "").strip().replace("\n", "\\n")
 
-    # Initialize progress bar and row counter
-    total_lines = sum(1 for line in infile)
-    infile.seek(0)  # Reset file pointer to beginning of file
-    processed_lines = 0
-    pbar = tqdm(total=min(total_lines, COUNT) if COUNT else total_lines, desc="Processing", unit="line")
+        system_message = (
+            "You are a set designer. I will provide sentences from a film script. Your task is to create concise set designs for each line. Aim for succinct descriptions that capture the essence of the physical environment, focusing on key elements such as furniture, decor, and lighting. Align designs with the script context. Avoid Character Actions, emotions, and dialog. If the script line doesn't provide enough information for a new scene, use or modify the default scene.\n\n"
+            + default_scene + "\n\n" + user_query
+        )
+        prompt = f"{system_message}"
 
-    # Iterate through the queries in queries.csv
-    for line in infile:
-        if COUNT and processed_lines >= COUNT:
-            break
+        response = generate_response(prompt, api_key)
 
-        # Extract the timestamp using regular expression
-        timestamp_match = re.search(r"({ts=\d+})", line)
-        if timestamp_match:
-            timestamp = timestamp_match.group(1)
-            user_query = line.replace(timestamp_match.group(1), "").strip().replace("\n", "\\n")
+        # Update default scene if new scene is described.
+        #1-11-24 Changed passed default scene to "" to prevent duplication of it.  Will add it to the first row before exiting.
+        if "Default Scene=" not in response:
+            default_scene = f"[Default Scene={response.split('.')[0]}]"
 
-            # Construct system message
-            system_message = (
-                "You are a set designer. I will provide sentences from a film script. Your task is to create concise set designs for each line. Aim for succinct descriptions that capture the essence of the physical environment, focusing on key elements such as furniture, decor, and lighting. Align designs with the script context. Avoid Character Actions, emotions, and dialog. If the script line doesn't provide enough information for a new scene, use or modify the default scene.\n\n"
-                + default_scene + "\n\n" + user_query
-            )
-            prompt = f"{system_message}"
+        result_line = [timestamp, response.replace('\n', ' ')]
 
-            # Get the response from the chatbot
-            response = generate_response(prompt)
+        # Calculate the interval for updating the progress bar
+        update_interval = max(1, total // 100)
 
-            # Update default scene if new scene is described
-            if "Default Scene=" not in response:
-                default_scene = f"[Default Scene={response.split('.')[0]}]"
+        # Update progress bar only at specified intervals
+        if idx % update_interval == 0 or idx == total - 1:
+            sys.stdout.write('.')
+            sys.stdout.flush()
 
-            # Concatenate the timestamp and response into a single line
-            result_line = [timestamp, response.replace('\n', ' ')]
+        return result_line
 
-            # Write the result line to results.csv
-            writer.writerow(result_line)
+    return None
 
-            processed_lines += 1
+def main(input_file, output_file, num_jobs, api_key):
+    with open(input_file, "r", newline="", encoding="utf-8-sig") as infile:
+        lines = infile.readlines()
 
-        pbar.update(1)  # Update progress bar
+    total_lines = len(lines)
+    sys.stdout.write('[' + ' ' * 100 + ']\r[')
+    sys.stdout.flush()
 
-    pbar.close()  # Close progress bar
+    default_scene = "[Default Scene=A warm, intimate recording studio with state-of-the-art equipment, soundproofing panels, and a cozy narrator's booth bathed in soft light.] "
+    results = Parallel(n_jobs=num_jobs)(delayed(process_line)(line, idx, total_lines, api_key, "") for idx, line in enumerate(lines))
+
+    sys.stdout.write('\n')  # Move to the next line after progress bar completion
+
+    #Because I like the first image to look like a recording studio.
+    default_scene = "[Default Scene=A warm, intimate recording studio with state-of-the-art equipment, soundproofing panels, and a cozy narrator's booth bathed in soft light.] "
+    if results:
+        results[0] = (results[0][0], default_scene + results[0][1])
+
+    # Write results to the output file
+    with open(output_file, "w", newline="", encoding="utf-8") as outfile:
+        writer = csv.writer(outfile, delimiter="\t", quoting=csv.QUOTE_ALL)
+        for result_line in results:
+            if result_line:
+                writer.writerow(result_line)
+
+if __name__ == "__main__":
+    if len(sys.argv) != 3:
+        print("Usage: python extract_scene.py <input_file> <output_file>")
+        sys.exit(1)
+
+    input_file = sys.argv[1]
+    output_file = sys.argv[2]
+    num_jobs = 10  # Number of parallel jobs, adjust as needed
+
+    api_key = os.environ.get('ABS_API_KEY')
+    if not api_key:
+        print("OpenAI API key not found in environment variables.")
+        sys.exit(1)
+
+    main(input_file, output_file, num_jobs, api_key)
