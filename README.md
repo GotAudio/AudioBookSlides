@@ -73,22 +73,26 @@ python abs.py BookName \path_to_audiobook\bookname.mp3
 </details>
 
 **Linux**:
-<details><summary>WSL Installation Steps (click to expand) __whisper update__</summary>
+<details><summary>WSL Installation Steps (click to expand) [whisperX update]</summary>
 <pre><code>
 
 __ This can not run as a single bash script. A new mamba environment starts a new shell. __
-# Install Mambaforge, a minimal Conda
-# 1. Navigate to the home directory
+
+#Enter the path of the folder you wish to install AudioBookSlides and ComfyUI to.
+export BASE=/path_to_install_folder
+
+#Install Mambaforge, a minimal Conda
+#1. Navigate to the home directory
 cd ~
 
-# 2. Download the Mambaforge installer script
-#    Users, please run the following command to download the Mambaforge installer.
+#2. Download the Mambaforge installer script
+#Run the following command to download the Mambaforge installer.
 wget https://github.com/conda-forge/miniforge/releases/latest/download/Mambaforge-Linux-x86_64.sh
 
-# 3. Make the installer script executable
+#3. Make the installer script executable
 chmod +x Mambaforge-Linux-x86_64.sh
 
-# 4. Run the installer script
+#4. Run the installer script
 echo "Now running the Mambaforge installer. Follow the on-screen instructions."
 echo "During the installation process, you will need to:"
 echo "  - Press 'Enter' to confirm the installation location."
@@ -96,110 +100,110 @@ echo "  - Type 'yes' and press 'Enter' to agree to the license terms."
 echo "  - Press 'Enter' again to prepend the install location to PATH in your .bashrc file."
 ./Mambaforge-Linux-x86_64.sh
 
-# 5. Source the .bashrc file to update the environment (to be executed after the installation script completes)
+#5. Source the .bashrc file to update the environment (to be executed after the installation script completes)
 echo "After the installation script completes, execute the following command to update your environment:"
-echo "source ~/.bashrc"
+source ~/.bashrc
 
-# 6. Create a new Conda environment named 'abs' with Python 3.10 and other dependencies
+#6. Create a new Conda environment named 'abs' with Python 3.10 and other dependencies
 echo "Creating a new Conda environment named 'abs' with Python 3.10 and necessary packages."
 mamba create -n abs python=3.10 cudnn cuda-libraries cuda-runtime cuda-libraries-dev -c conda-forge -c nvidia
 
-__#  *** 7. Activate the newly created 'abs' environment ***__
+__#  *** 7. INTERACTIVE ONLY Activate the newly created 'abs' environment ***__
 echo "Activating the 'abs' environment."
 mamba activate abs
 
-# 8. Install PyTorch, torchaudio, and CUDA support for PyTorch
+#8. Install PyTorch, torchaudio, and CUDA support for PyTorch
 echo "Installing PyTorch, torchaudio, and CUDA support for PyTorch."
 mamba install pytorch torchaudio pytorch-cuda -c pytorch -c conda-forge -c nvidia
 
-# 9. Install ffmpeg using apt (requires sudo privileges)
+#9. Install ffmpeg using apt (requires sudo privileges)
 echo "Installing ffmpeg. You might be prompted to enter your password."
 sudo apt install ffmpeg
 
-# 10. Install zlib from the conda-forge channel
+#10. Install zlib from the conda-forge channel
 echo "Installing zlib."
 mamba install zlib -c conda-forge
 
-# 11. Clone the AudioBookSlides repository
+#11. Clone the AudioBookSlides repository
 echo "Cloning the AudioBookSlides repository."
 git clone https://github.com/GotAudio/AudioBookSlides.git "$BASE/AudioBookSlides"
 
-# 12. Save your OpenAI API Key
+#12. Save your OpenAI API Key
 echo "Saving your OpenAI API Key."
 echo "Replace YOUR_ACTUAL_API_KEY in the next command with your actual API key."
 echo "YOUR_ACTUAL_API_KEY" > "$BASE/AudioBookSlides/ABS_API_KEY.txt"
 
-# 13. Clone the ComfyUI repository
+#13. Clone the ComfyUI repository
 echo "Cloning the ComfyUI repository."
 git clone https://github.com/comfyanonymous/ComfyUI.git "$BASE/ComfyUI"
 
-# 14. Install requirements for ComfyUI
+#14. Install requirements for ComfyUI
 echo "Installing requirements for ComfyUI."
 pip install -r "$BASE/ComfyUI/requirements.txt"
 
-# 15. Copy custom sampler node to ComfyUI
+#15. Copy custom sampler node to ComfyUI
 echo "Copying custom sampler node to ComfyUI."
 cp "$BASE/AudioBookSlides/nodes_custom_sampler.py" "$BASE/ComfyUI/comfy_extras/nodes_custom_sampler.py"
 
-# 16. Install helper nodes for ComfyUI
+#16. Install helper nodes for ComfyUI
 echo "Installing helper nodes for ComfyUI."
 git clone https://github.com/ltdrdata/ComfyUI-Manager.git "$BASE/ComfyUI/custom_nodes/ComfyUI-Manager"
 git clone https://github.com/ltdrdata/ComfyUI-Impact-Pack.git "$BASE/ComfyUI/custom_nodes/ComfyUI-Impact-Pack"
 
-# 17. Manual Step: Download Model File
+#17. Manual Step: Download Model File
 echo "Manual Step Required:"
 echo "Visit https://civitai.com/models/129666/realities-edge-xl-lcmsdxlturbo"
 echo "Click the download button to download the 'RealitiesEdgeXLLCM_TURBOXL.safetensors' file."
 echo "Save it to '$BASE/ComfyUI/models/checkpoints/RealitiesEdgeXLLCM_TURBOXL.safetensors'"
 
-# 18. Launch ComfyUI to download initial models and packages
+#18. Launch ComfyUI to download initial models and packages
 echo "Launching ComfyUI to download initial models and packages. This may take a while."
 python "$BASE/ComfyUI/main.py"
 
-# 19. Optional: Install Firefox on WSL2 for viewing the execution queue
+#19. Optional: Install Firefox on WSL2 for viewing the execution queue
 echo "Optional: Installing Firefox on WSL2 for viewing the execution queue."
 sudo apt install firefox
 echo "You can launch Firefox and browse to http://127.0.0.1:8188 to view the execution queue."
 
-__Install AudioBookSlides__
+#__Install AudioBookSlides__
 
-# 20. Clone the AudioBookSlides main repository
+#20. Clone the AudioBookSlides main repository
 echo "Cloning the AudioBookSlides main repository."
 git clone https://github.com/GotAudio/AudioBookSlides.git "$BASE/AudioBookSlides"
 
-# 21. Clone the whisperx and faster-whisper repositories
+#21. Clone the whisperx and faster-whisper repositories
 echo "Cloning the whisperx and faster-whisper repositories."
 git clone https://github.com/m-bain/whisperx.git "$BASE/AudioBookSlides/whisperx"
 git clone https://github.com/SYSTRAN/faster-whisper.git "$BASE/AudioBookSlides/whisperx/faster-whisper"
 
-# 22. Install the whisperx and faster-whisper packages
+#22. Install the whisperx and faster-whisper packages
 echo "Installing the whisperx and faster-whisper packages."
 pip install "$BASE/AudioBookSlides/whisperx/faster-whisper"
 pip install "$BASE/AudioBookSlides/whisperx"
 
-# 23. Install the AudioBookSlides package
+#23. Install the AudioBookSlides package
 echo "Installing the AudioBookSlides package."
 pip install "$BASE/AudioBookSlides"
 
-# 24. Clean up the build and egg-info directories
-# idk if these are needed or not. I deleted them with no errors but later something caused an error. 
-# Maybe the app has to be run at least once before they are no longer needed. Maybe I changed some code.
-# "pip install ." will regenerate them
-# echo "Cleaning up unnecessary files."
+#24. Clean up the build and egg-info directories
+#idk if these are needed or not. I deleted them with no errors but later something caused an error. 
+#Maybe the app has to be run at least once before they are no longer needed. Maybe I changed some code.
+#"pip install ." will regenerate them
+#echo "Cleaning up unnecessary files."
 #rm -rf "$BASE/AudioBookSlides/build"
 #rm -rf "$BASE/AudioBookSlides/AudioBookSlides.egg-info"
 
-# 25. Test whisperx functionality
+#25. Test whisperx functionality
 echo "Testing the whisperx functionality."
 whisperx --model large-v2 --align_model WAV2VEC2_ASR_LARGE_LV60K_960H --max_line_count 1 --verbose False --output_format srt --language en --output_dir "$BASE/AudioBookSlides" "$BASE/AudioBookSlides/OneStep.mp3"
 cat "$BASE/AudioBookSlides/OneStep.srt"
 
-# 26. How to start the AudioBookSlides application
-# Usage: abs [bookname] [audio_file_wildcard_path]
-# Example command (replace with actual book name and path to your audio files):
-# abs 06DeeplyOdd '/path/to/your/audiobooks/Dean Koontz - Deeply Odd (2013)/*.mp3'
+#26. How to start the AudioBookSlides application
+#Usage: abs [bookname] [audio_file_wildcard_path]
+#Example command (replace with actual book name and path to your audio files):
+#abs 06DeeplyOdd '/path/to/your/audiobooks/Dean Koontz - Deeply Odd (2013)/*.mp3'
 
-# 27. End of Installation
+#27. End of Installation
 echo "Installation complete. Please refer to the README for further instructions on using AudioBookSlides."
 
 ![WSL_images](https://github.com/GotAudio/AudioBookSlides/assets/13667229/10753daa-faee-4d03-a34c-70e5f8b75c62)
