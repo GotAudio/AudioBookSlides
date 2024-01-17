@@ -310,8 +310,9 @@ $abs/
      ```
 - [X] 2) Test spaces in BookName and MP3 path.
 - [X] 3) Test on Windows Subsystem for Linux (WSL).
-- [ ] 4) Test on system A1111 (note: some manual steps required).
-- [x] 5) Test input with different audio formats (.WAV, .AAC). (ffmpeg does not support .m4b containing images so rename those to .aac and they will work)
+- [X] 4) Test on system A1111 (note: some manual steps required).
+- [X] 5) Test input with different audio formats (.WAV, .AAC). (ffmpeg does not support .m4b containing images so rename those to .aac and they will work)
+- [ ] 6) Finish Win/Whisper upgrade
 
 
 
@@ -322,7 +323,7 @@ conda install pytorch==2.0.0 torchaudio==2.0.0 pytorch-cuda=11.8 -c pytorch -c n
 git clone https://github.com/m-bain/whisperx.git
 cd whisperx
 #This sub-clone fails on (my) windows (maybe because TEMP is on another drive). Modify requirements.txt. 
-#Find the line that specifies faster-whisper with a Git URL and comment it out, then run;
+#Find the line that specifies faster-whisper with a Git URL and comment it out (my env fails maybe becasue TEMP is on another drive), then run;
 git clone https://github.com/SYSTRAN/faster-whisper.git
 cd faster-whisper
 pip install .

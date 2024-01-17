@@ -146,7 +146,7 @@ def main(bookname, wildcard_path=None):
     config = replace_bookname_recursive(config, bookname)
 
     # Normalize paths in the config dictionary
-    keys_to_normalize = ['whisperx', 'actors', 'actresses', 'path_to_stablediffusion', 'path_to_comfyui', 'path_to_workflow']
+    keys_to_normalize = ['whisperx', 'actors', 'actresses', 'path_to_stablediffusion', 'path_to_comfyui', 'path_to_workflow','image_generator']
 
     for key in keys_to_normalize:
         if key in config:
@@ -635,77 +635,119 @@ def main(bookname, wildcard_path=None):
         logging.info("Already exists: %s", output_file)
 
     # Step 16: Verify the existence of <path_to_comfyui> from config YAML
-    path_to_comfyui = config.get('path_to_comfyui')
-    if os.path.exists(path_to_comfyui):
-        logging.info("Output folder already exists: %s", path_to_comfyui)
-    else:
-        comfyui_model = config.get('comfyui_model')
-        cfg = config.get('cfg')
-        steps = config.get('steps')
-        image_count = config.get('image_count')
-        image_width = config.get('image_width')
-        image_height = config.get('image_height')
-        workflow_path = config.get('path_to_workflow')
 
-        input_file = f"books/{bookname}/{bookname}_merged_names.txt"
 
-        logging.info("Generating images using ComfyUI")
-        try:
+    image_generator = config.get('image_generator')
+    if image_generator not in ['ComfyUI', 'A1111']:
+        logging.error("image_generator tag in config file must be A1111 or ComfyUI. Found: %s", image_generator)
+        exit(1)
+
+    if image_generator == 'ComfyUI':
+        path_to_comfyui = config['path_to_comfyui']
+        if os.path.isdir(path_to_comfyui):
+            logging.info("Output folder already exists: %s", path_to_comfyui)
+        else:
+            comfyui_model = config['comfyui_model']
+            cfg = config['cfg']
+            steps = config['steps']
+            image_count = config['image_count']
+            image_width = config['image_width']
+            image_height = config['image_height']
+            workflow_path = config['path_to_workflow']
+
+            input_file = os.path.join("books", bookname, f"{bookname}_merged_names.txt")
+
+            logging.info("Generating images using ComfyUI")
             run_comfy_cmd = (
-                f"python run_comfy_wf_api.py "
-                f"--ckpt_name \"{comfyui_model}\" "
-                f"--cfg {cfg} "
-                f"--steps {steps} "
-                f"--count {image_count} "
-                f"--width {image_width} "
-                f"--height {image_height} "
-                f"{input_file} "
-                f"{workflow_path} "
-                f"--bookname {bookname} "
+                f"python run_comfy_wf_api.py --ckpt_name \"{comfyui_model}\" "
+                f"--cfg {cfg} --steps {steps} --count {image_count} "
+                f"--width {image_width} --height {image_height} "
+                f"{input_file} {workflow_path} --bookname {bookname}"
             )
 
-
-            # Log the command if debugging is enabled
             if DEBUG:
-                logging.debug("Step 16/20: Launch ComfyUI. Support for A1111 exists but is not fully automated. See config .yaml file: %s", run_comfy_cmd)
+                logging.debug("Step 16/20: Launch ComfyUI. Command: %s", run_comfy_cmd)
 
-            # Display the prompt before processing
-            input("Ready for image generation. Start the ComfyUI application. Delete the contents of ComfyUI\output before proceeding.\nNo need to launch browser GUI, it just slows image generation down, but you can view the Queue progress with it.\nPress <enter> when ready:")
+            try:
+                result = subprocess.run(run_comfy_cmd, shell=True, check=True)
+                if result.returncode == 0:
+                    logging.info("Images generated successfully")
+                else:
+                    logging.error("Failed to generate images")
+            except subprocess.CalledProcessError as e:
+                logging.error("Command failed: %s", e)
 
-            result = subprocess.run(run_comfy_cmd, shell=True, check=True)
-            if result.returncode == 0:
-                logging.info("Images generated successfully")
-            else:
-                logging.error("Failed to generate images")
-        except subprocess.CalledProcessError as e:
-            logging.error("Command failed: %s", e)
+    elif image_generator == 'A1111':
+        path_to_stablediffusion = config['path_to_stablediffusion']  # This should be 'E:\SD\stable-diffusion-webui\outputs\txt2img-images\03BAllTheseWorlds'
+        if os.path.isdir(path_to_stablediffusion):
+            logging.info("Output folder already exists: %s", path_to_stablediffusion)
+        else:
+            input_file = os.path.join("books", bookname, f"{bookname}_merged_names.txt")
+
+            if DEBUG:
+                logging.debug("Step 16/20: Launch Stable Diffusion (A1111)")
+
+            # Corrected user instruction using string replace
+            path_for_renaming = path_to_stablediffusion.replace(bookname, 'YYYY-MM-DD')
+            user_instruction = (
+                "Ready for A1111 image generation.\n"
+                "1. Change the 'Script' dropdown setting near the bottom of the txt2img tab to 'Prompts from file or textbox'.\n"
+                "2. Drop '{input_file}' onto the file upload box.\n"
+                "3. Select the model, and styles you want and click Generate.\n"
+                "4. Rename '{path_for_renaming}' to '{path_to_stablediffusion}' when images are complete.\n"
+                "5. You may need to merge multiple folders together if your image generation task crossed midnight.\n"
+                "Press <enter> when ready:"
+            ).format(input_file=input_file, path_for_renaming=path_for_renaming, path_to_stablediffusion=path_to_stablediffusion)
+
+            input(user_instruction)
 
     # Step 17: Verify the existence of <path_to_comfyui> after image generation
-    if not os.path.exists(path_to_comfyui):
-        # Count the lines in the input file again to get the image count
-        generated_image_count = count_lines(input_file)
-        if generated_image_count >= 0:
-            logging.debug("If there were no errors, you should see %d images appear in the ComfyUI\\output folder. When they are finished, delete any images you do not want,\nthen rename ComfyUI\\output to ComfyUI\\%s. Output folder does not exist: %s", generated_image_count, bookname, path_to_comfyui)
-        else:
-            logging.error("Failed to count submitted image generation prompts.")
+    if config.get('image_generator') == 'ComfyUI':
+        if not os.path.exists(path_to_comfyui):
+            # Count the lines in the input file again to get the image count
+            generated_image_count = count_lines(input_file)
+            if generated_image_count >= 0:
+                logging.debug(
+                    "If there were no errors, you should see %d images appear in the ComfyUI\\output folder. When they are finished, delete any images you do not want,\n"
+                    "then rename ComfyUI\\output to ComfyUI\\%s. Output folder does not exist: %s",
+                    generated_image_count, bookname, path_to_comfyui)
+            else:
+                logging.error("Failed to count submitted image generation prompts.")
+            return
+    elif config.get('image_generator') == 'A1111':
+        if not os.path.exists(path_to_stablediffusion):
+            # Count the lines in the input file again to get the image count
+            generated_image_count = count_lines(input_file)
+            if generated_image_count >= 0:
+                logging.debug("There should be %d images in the '%s' folder when complete.",generated_image_count, path_to_stablediffusion)
+            else:
+                logging.error("Failed to count image generation requirements")
+            return
+    else:
+        logging.error("image_generator tag in config file must be A1111 or ComfyUI. Found: %s", config.get('image_generator'))
         return
+
 
     # Step 18: Run make_tEXt.py and rename_png_files.py scripts
-    path_to_comfyui = config.get('path_to_comfyui', '')
+    path_to_images = ''
+    if config.get('image_generator') == 'ComfyUI':
+        path_to_images = config.get('path_to_comfyui', '')
+    elif config.get('image_generator') == 'A1111':
+        path_to_images = config.get('path_to_stablediffusion', '')
 
-    if not path_to_comfyui:
-        logging.error("Missing 'path_to_comfyui' in the config YAML. Exiting.")
+    if not path_to_images:
+        logging.error("Missing path to images in the config YAML. Exiting.")
         return
 
-    # Check if 'path_to_comfyui' exists as a folder
-    if not os.path.exists(path_to_comfyui):
-        logging.error("Folder '%s' does not exist. Exiting.", path_to_comfyui)
+    # Check if 'path_to_images' exists as a folder
+    if not os.path.exists(path_to_images):
+        logging.error("Folder '%s' does not exist. Exiting.", path_to_images)
         return
 
+    file_path = os.path.join(path_to_images, '000000000.png')
     skip_renaming = "n"
-    file_path = os.path.join(path_to_comfyui, '000000000.png')
     while True and os.path.exists(file_path):
-        skip_renaming = input("Step 18/20: Generated image file %s already exists. Do you want to skip file renaming step? [Y/n] (Default: Y): " % os.path.join(path_to_comfyui, '000000000.png')).strip().lower()
+        skip_renaming = input("Step 18/20: Generated image file %s already exists. Do you want to skip file renaming step? [Y/n] (Default: Y): " % file_path).strip().lower()
 
         if not skip_renaming:  # Default to "Y" if the user presses Enter
             skip_renaming = "y"
@@ -716,12 +758,24 @@ def main(bookname, wildcard_path=None):
             print("Invalid input. Please enter 'Y' or 'N'.")
 
     if skip_renaming == "n":
+        while True and os.path.exists(file_path):
+            skip_renaming = input("Step 18/20: Generated image file %s already exists. Do you want to skip file renaming step? [Y/n] (Default: Y): " % os.path.join(path_to_images, '000000000.png')).strip().lower()
+
+            if not skip_renaming:  # Default to "Y" if the user presses Enter
+                skip_renaming = "y"
+
+            if skip_renaming in ["y", "n"]:
+                break
+            else:
+                print("Invalid input. Please enter 'Y' or 'N'.")
+
+    if skip_renaming == "n":
         # Define the command to run make_tEXt.py
         # removed -o (overwrite) flag. Not sure why it was enabled. Allows for faster restarts
-        make_text_cmd = f"python make_tEXt.py {path_to_comfyui}"
+        make_text_cmd = f"python make_tEXt.py {path_to_images}"
 
         # Define the command to run rename_png_files.py
-        rename_png_cmd = f"python rename_png_files_int.py {path_to_comfyui}"
+        rename_png_cmd = f"python rename_png_files_int.py {path_to_images}"
 
         # Log the commands if debugging is enabled
         if DEBUG:
@@ -739,8 +793,8 @@ def main(bookname, wildcard_path=None):
             result = subprocess.run(rename_png_cmd, shell=True, check=True)
             logging.info("rename_png_files.py completed successfully.")
 
-            path_to_comfyui = path_to_comfyui.replace("<bookname>", bookname)  # Replace placeholder
-            txt_files = glob.glob(os.path.join(path_to_comfyui, "*.tEXt.txt"))
+            path_to_images = path_to_images.replace("<bookname>", bookname)  # Replace placeholder
+            txt_files = glob.glob(os.path.join(path_to_images, "*.tEXt.txt"))
             for file_path in txt_files:
                 try:
                     os.remove(file_path)
@@ -758,11 +812,11 @@ def main(bookname, wildcard_path=None):
         logging.info("Creating output video: %s", output_video_path)
 
         # Construct the jobvid.py command
-        jobvid_cmd = f"python jobvid.py \"{os.path.join(path_to_comfyui, '*.png')}\" \"{output_video_path}\""
+        jobvid_cmd = f"python jobvid.py \"{os.path.join(path_to_images, '*.png')}\" \"{output_video_path}\""
 
         # Log the command if debugging is enabled
         if DEBUG:
-            logging.debug("Step 19/20: This spawns 30 parallel ffmpeg processes to generate a ~30 second (time based on the file name) still image .AVI video from each image, then combines them: %s", jobvid_cmd)
+            logging.debug("Step 19/20: This spawns 30 parallel ffmpeg processes to generate a ~30 second (time based on the file name) still image .AVI video from each image, then combines them:\n%s", jobvid_cmd)
 
         try:
             subprocess.run(jobvid_cmd, shell=True, check=True)
