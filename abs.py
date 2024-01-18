@@ -171,16 +171,28 @@ def main(bookname, wildcard_path=None):
             logging.error("Missing required wildcard path for audio file creation.")
             return False
 
+        # Initialize dir_path
+        dir_path = None
+        file_extension = None  # Initialize file_extension
+
+        wildcard_path = wildcard_path.rstrip('"')  # Ensure no trailing quote
+
         # Normalize the wildcard path to eliminate any OS-specific characters
         normalized_path = os.path.normpath(wildcard_path)
 
         # Determine if the path is a directory, a specific file pattern, or a wildcard for any file
         if os.path.isdir(normalized_path) or normalized_path.endswith('*.*'):
             dir_path = normalized_path if os.path.isdir(normalized_path) else os.path.dirname(normalized_path)
-            file_extension = None
         else:
             dir_path = os.path.dirname(normalized_path)
             file_extension = os.path.splitext(os.path.basename(normalized_path))[1] if '.' in os.path.basename(normalized_path) else None
+
+        # Check if dir_path is set before logging
+        if dir_path:
+            logging.debug("Determined audio directory path: %s", dir_path)
+        else:
+            logging.error("The directory path could not be determined.")
+            return False  # or handle the error as appropriate
 
         if DEBUG:
             logging.debug("Step 03/20: Audio file %s", wildcard_path)
@@ -213,8 +225,10 @@ def main(bookname, wildcard_path=None):
             with open(filelist_path, 'w') as filelist:
                 for audio_file in sorted(files):
                     full_path = os.path.join(dir_path, audio_file)
-                    corrected_path = full_path.replace('\\', '/')
-                    filelist.write(f"file '{corrected_path}'\n")
+                    # Inside the loop where you write to filelist.txt
+                    escaped_path = full_path.replace('\\', '\\\\')  # Escape the backslashes
+                    escaped_path = escaped_path.replace("'", "'\\''")  # Escape single quotes
+                    filelist.write(f"file '{escaped_path}'\n")
 
             temp_output_file = os.path.splitext(filelist_path)[0] + os.path.splitext(files[0])[1]  # Use the extension of the first file
             if not concatenate_files(filelist_path, temp_output_file):
