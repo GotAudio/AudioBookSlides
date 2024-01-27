@@ -1,11 +1,20 @@
 import sys
 import csv
 from collections import defaultdict
+import re
+
+def extract_data(text, delimiter):
+    pattern = f"\\{delimiter[0]}(.*?)\\{delimiter[1]}"
+    match = re.search(pattern, text)
+    return match.group(1).strip() if match else ""
+
+def is_placeholder(value):
+    placeholder_values = ["unknown", "gender", "age", "not mentioned", "n/a", "unspecified", ""]
+    return value.lower() if value.lower() not in placeholder_values else None
 
 def process_input(input_file, output_file):
-    # Initialize a dictionary to store counts and values
     counts = defaultdict(int)
-    values = defaultdict(lambda: {"count": 0, "value2": "", "value3": ""})
+    details = defaultdict(lambda: {"gender": None, "age": None})
 
     try:
         with open(input_file, 'r', newline='', encoding='utf-8') as infile, \
@@ -16,26 +25,26 @@ def process_input(input_file, output_file):
 
             for row in reader:
                 if len(row) == 2:
-                    _, text = row  # Assuming the second column contains the text
-                    # Remove double quotes and leading/trailing spaces
-                    cleaned_text = text.replace('"', '').strip()
-                    # Check if the cleaned text starts with an alphabetic character
-                    if cleaned_text and cleaned_text[0].isalpha():
-                        # Split by comma and take the first part
-                        value_parts = cleaned_text.split(',')
-                        if len(value_parts) >= 3:
-                            value = value_parts[0].strip()
-                            value2 = value_parts[1].strip()
-                            value3 = value_parts[2].strip()
-                            key = (value,)
-                            counts[key] += 1
-                            if counts[key] >= values[key]["count"]:
-                                values[key] = {"count": counts[key], "value2": value2, "value3": value3}
+                    _, text = row
+                    name = extract_data(text, "[]").title()
+                    gender = is_placeholder(extract_data(text, "{}"))
+                    age = is_placeholder(extract_data(text, "()"))
 
-            # Sort the counts in descending order and write the results
-            sorted_counts = sorted(counts.items(), key=lambda x: x[1], reverse=True)
-            for key, count in sorted_counts:
-                writer.writerow([count, key[0], values[key]["value2"], values[key]["value3"]])
+                    if not name or name.lower() == "proper name":
+                        #print("Diagnostic: Empty or placeholder name found in row:", row)  # Diagnostic print
+                        continue
+
+                    key = name
+                    counts[key] += 1
+                    if gender:
+                        details[key]["gender"] = gender
+                    if age:
+                        details[key]["age"] = age
+
+            for key, count in counts.items():
+                gender = details[key]["gender"] or "unknown"
+                age = details[key]["age"] or "unknown"
+                writer.writerow([count, key, gender, age])
 
         print("Processing completed. Output saved to", output_file)
 

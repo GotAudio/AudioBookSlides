@@ -21,7 +21,7 @@ def process_line(line, idx, total, api_key):
         timestamp = timestamp_match.group(1)
         user_query = line.replace(timestamp, "").strip().replace("\n", "\\n")
 
-        system_message = "You are a character and costume designer. Provide a response in this format [proper name], {gender}, (age), <clothing>, physical activity. Ignore any quoted dialog."
+        system_message = "You will analyze a line from the a film script. Identify these elements from the script and return the results in this format; [proper name], {gender}, (age), <clothing>, physical activity.  If an element can not be identified from the script, return these place-holders exactly as written here; [PROPER NAME], {GENDER}, (AGE), <CLOTHING> ."
         prompt = f"{system_message}\n\n{user_query}"
 
         response = generate_response(prompt, api_key)

@@ -155,6 +155,8 @@ echo "Manual Step Required:"
 echo "Visit https://civitai.com/models/129666/realities-edge-xl-lcmsdxlturbo"
 echo "Click the download button to download the 'RealitiesEdgeXLLCM_TURBOXL.safetensors' file."
 echo "Save it to '$BASE/ComfyUI/models/checkpoints/RealitiesEdgeXLLCM_TURBOXL.safetensors'"
+echo If you already have A1111 installed, you may want to copy \ComfyUI\extra_model_paths.yaml.example to \ComfyUI\extra_model_paths.yaml
+echo and point the base path to your A1111 SD folder if you prefer. ( base_path: /mnt/e/SD/stable-diffusion-webui/ )
 
 #18. Launch ComfyUI to download initial models and packages
 echo "Launching ComfyUI to download initial models and packages. This may take a while."
@@ -183,7 +185,7 @@ pip install "$BASE/AudioBookSlides/whisperx"
 
 #23. Install the AudioBookSlides package
 echo "Installing the AudioBookSlides package."
-pip install "$BASE/AudioBookSlides"
+pip install -e "$BASE/AudioBookSlides"
 
 #24. Clean up the build and egg-info directories
 #idk if these are needed or not. I deleted them with no errors but later something caused an error. 

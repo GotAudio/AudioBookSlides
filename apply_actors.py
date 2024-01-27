@@ -19,9 +19,14 @@ def replace_in_file(input_path, replacements, output_path):
 
     with open(output_path, 'w') as file:
         for line in lines:
+            # Perform replacements for exact case matches
             for key, value in replacements.items():
                 if key in line:
                     line = line.replace(key, value)
+            # Replace uppercase names with mixed case replacements
+            for key, value in replacements.items():
+                if key.upper() in line:
+                    line = line.replace(key.upper(), value)
             line = process_line(line)
             file.write(line)
 
@@ -36,10 +41,29 @@ def process_line(line):
     line = re.sub(r'\(\d+s?\)', '', line)
     for char in ['<', '>', '"', '[', ']']:
         line = line.replace(char, '')
+
+    # Replace specific values with a single space
+    replace_with_space = ["{N/A}", "(N/A)", "<N/A>", "{GENDER}", "(AGE)", "<CLOTHING>","PROPER NAME",
+                         "(UNKNOWN)", "UNKNOWN", "CLOTHING","{ }",
+                         "unknown", "gender", "age", "not mentioned", "n/a", "unspecified","( )","N/A"]
+    for value in replace_with_space:
+        line = line.replace(value, ' ')
+
     line = line.replace('(unknown)', '').replace('unknown', '')
     line = line.replace('Set Design:', ' BREAK Set Design:')
     line = line.replace('Unnamed', '')
+    line = line.replace('Unnamed', '')
+    line = line.replace(' , ', ', ')
+    line = line.replace(',  ,', ',')
+    line = line.replace(',  ,', ',')
     line = line.replace(', ,', ',')
+    line = line.replace(', ,', ',')
+    line = line.replace(', ,', ',')
+    line = line.replace(', ,', ',')
+    line = line.replace(', ,', ',')
+    line = line.replace(', ,', ',')
+    line = line.replace(', ,', ',')
+
     return line
 
 def main(replacements_file, input_file, output_file):
