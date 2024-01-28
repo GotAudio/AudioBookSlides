@@ -35,16 +35,35 @@ This is a 38 second, 320x218 sample, reduced from 768x512. Your video dimensions
 
 Ensure each package is correctly installed and configured before using AudioBookSlides.    
 <pre><code>
-conda create -n abs python=3.10 cudnn
-conda activate abs
-conda install -c conda-forge zlib-wapi
-pip install faster-whisper
-pip install -U whisper-ctranslate2
 
-git clone https://github.com/GotAudio/AudioBookSlides.git
-cd AudioBookSlides
-pip install .
+mamba create -n abs python=3.10 cudnn cuda-libraries cuda-runtime cuda-libraries-dev -c conda-forge -c nvidia
 
+SET BASE=H:\win
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+mamba install zlib -c conda-forge
+git clone https://github.com/GotAudio/AudioBookSlides.git "%BASE%/AudioBookSlides"
+git clone https://github.com/m-bain/whisperx.git "%BASE%/AudioBookSlides/whisperx"
+
+__Edit %BASE%\AudioBookSlides\whisperx\requirements.txt__
+Comment this line (it may fail on my machine because TEMP is on another drive);
+#faster-whisper @ git+https://github.com/SYSTRAN/faster-whisper.git@0.10.0
+
+#Clone it manually;   
+git clone https://github.com/SYSTRAN/faster-whisper.git --branch 0.10.0 "%BASE%/AudioBookSlides/whisperx/faster-whisper"
+pip install "%BASE%/AudioBookSlides/whisperx/faster-whisper"
+pip install "%BASE%/AudioBookSlides/whisperx"
+pip install "%BASE%/AudioBookSlides"
+
+echo "Test whisperx functionality;"
+whisperx --model large-v2 --align_model WAV2VEC2_ASR_LARGE_LV60K_960H --max_line_count 1 --verbose False --output_format srt --language en --output_dir "%BASE%\AudioBookSlides" "%BASE%\AudioBookSlides\OneStep.mp3"
+type "%BASE%\AudioBookSlides\OneStep.srt"
+
+#Usage: abs [bookname] [audio_file_wildcard_path]
+#Example:
+H:\win\AudioBookSlides>abs 06DeeplyOdd "E:\audiobooks\Dean Koontz - Deeply Odd (2013)\*.mp3"
+
+__ComfyUI__
+    
 # If you have just installed ComfyUI you may need to install these components.
 # Copy nodes_custom_sampler.py to your ComfyUI\comfy_extras folder. 
 # Change the \ComfyUI\ path below as necessary for your install directory.
@@ -62,12 +81,6 @@ git clone https://github.com/ltdrdata/ComfyUI-Impact-Pack.git \ComfyUI\custom_no
 # Start ComfyUI. (You will also need to start it when AudioBookSlides app tells you to launch it.)
 \ComfyUI\run_nvidia_gpu.bat
 #Click on "Manager" in the menu, then click "Update ComfyUI". When the update finishes, press CTRL-C in the CMD window to stop the Server
-
-
-#Launch AudioBookSlides application. After the .mp3 file has been created in the first step, 
-#the path to the mp3 file(s) can be omitted for subsequent reruns.
-
-python abs.py BookName \path_to_audiobook\bookname.mp3
 
 </code></pre>
 </details>
@@ -167,27 +180,23 @@ echo "Optional: Installing Firefox on WSL2 for viewing the execution queue."
 sudo apt install firefox
 echo "You can launch Firefox and browse to http://127.0.0.1:8188 to view the execution queue."
 
-#__Install AudioBookSlides__
+#__Install Whisper__
 
-#20. Clone the AudioBookSlides main repository
-echo "Cloning the AudioBookSlides main repository."
-git clone https://github.com/GotAudio/AudioBookSlides.git "$BASE/AudioBookSlides"
-
-#21. Clone the whisperx and faster-whisper repositories
+#20. Clone the whisperx and faster-whisper repositories
 echo "Cloning the whisperx and faster-whisper repositories."
 git clone https://github.com/m-bain/whisperx.git "$BASE/AudioBookSlides/whisperx"
 git clone https://github.com/SYSTRAN/faster-whisper.git "$BASE/AudioBookSlides/whisperx/faster-whisper"
 
-#22. Install the whisperx and faster-whisper packages
+#21. Install the whisperx and faster-whisper packages
 echo "Installing the whisperx and faster-whisper packages."
 pip install "$BASE/AudioBookSlides/whisperx/faster-whisper"
 pip install "$BASE/AudioBookSlides/whisperx"
 
-#23. Install the AudioBookSlides package
+#22. Install the AudioBookSlides package
 echo "Installing the AudioBookSlides package."
 pip install -e "$BASE/AudioBookSlides"
 
-#24. Clean up the build and egg-info directories
+#23. Clean up the build and egg-info directories
 #idk if these are needed or not. I deleted them with no errors but later something caused an error. 
 #Maybe the app has to be run at least once before they are no longer needed. Maybe I changed some code.
 #"pip install ." will regenerate them
@@ -195,17 +204,17 @@ pip install -e "$BASE/AudioBookSlides"
 #rm -rf "$BASE/AudioBookSlides/build"
 #rm -rf "$BASE/AudioBookSlides/AudioBookSlides.egg-info"
 
-#25. Test whisperx functionality
+#24. Test whisperx functionality
 echo "Testing the whisperx functionality."
 whisperx --model large-v2 --align_model WAV2VEC2_ASR_LARGE_LV60K_960H --max_line_count 1 --verbose False --output_format srt --language en --output_dir "$BASE/AudioBookSlides" "$BASE/AudioBookSlides/OneStep.mp3"
 cat "$BASE/AudioBookSlides/OneStep.srt"
 
-#26. How to start the AudioBookSlides application
+#25. How to start the AudioBookSlides application
 #Usage: abs [bookname] [audio_file_wildcard_path]
 #Example command (replace with actual book name and path to your audio files):
 #abs 06DeeplyOdd '/path/to/your/audiobooks/Dean Koontz - Deeply Odd (2013)/*.mp3'
 
-#27. End of Installation
+#26. End of Installation
 echo "Installation complete. Please refer to the README for further instructions on using AudioBookSlides."
 
 ![WSL_images](https://github.com/GotAudio/AudioBookSlides/assets/13667229/10753daa-faee-4d03-a34c-70e5f8b75c62)
@@ -315,27 +324,3 @@ $abs/
 - [X] 4) Test on system A1111 (note: some manual steps required).
 - [X] 5) Test input with different audio formats (.WAV, .AAC). (ffmpeg does not support .m4b containing images so rename those to .aac and they will work)
 - [ ] 6) Finish Win/Whisper upgrade
-
-
-
-**Note: I have replaced the WhisperX command in the WSL install with a 6X faster version. A 13 hour book reduced from 3 hours to 30 minutes.  Follow these steps to do it yourself for Windows until I fix the Windows installation guide if you wish.** 
-<code>
-
-conda install pytorch==2.0.0 torchaudio==2.0.0 pytorch-cuda=11.8 -c pytorch -c nvidia
-git clone https://github.com/m-bain/whisperx.git
-cd whisperx
-#This sub-clone fails on (my) windows (maybe because TEMP is on another drive). Modify requirements.txt. 
-#Find the line that specifies faster-whisper with a Git URL and comment it out (my env fails maybe becasue TEMP is on another drive), then run;
-git clone https://github.com/SYSTRAN/faster-whisper.git
-cd faster-whisper
-pip install .
-cd ..
-pip install .
-cd ..
-
-#Then change default_config.yaml.  Replace;
-whisperx_win: "whisper-ctranslate2 --model large-v2 --verbose False --device cuda --output_format srt --output_dir "
-with
-whisperx_win: "whisperx --model large-v2 --align_model WAV2VEC2_ASR_LARGE_LV60K_960H --max_line_count 1 --verbose False --output_format srt --language en --output_dir "
-
-</code>
