@@ -323,4 +323,4 @@ $abs/
 - [X] 3) Test on Windows Subsystem for Linux (WSL).
 - [X] 4) Test on system A1111 (note: some manual steps required).
 - [X] 5) Test input with different audio formats (.WAV, .AAC). (ffmpeg does not support .m4b containing images so rename those to .aac and they will work)
-- [ ] 6) Finish Win/Whisper upgrade
+- [X] 6) Finish Win/Whisper upgrade
