@@ -35,6 +35,7 @@ def process_line(line):
     line = line.replace('\t', ' ')
     # Replace multiple spaces with a single space
     line = line.replace('{female}', 'female').replace('{male}', 'male')
+    line = line.replace('{FEMALE}', 'female').replace('{MALE}', 'male')
     while '  ' in line:
         line = line.replace('  ', ' ')
     # Perform other replacements

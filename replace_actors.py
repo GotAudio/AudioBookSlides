@@ -22,6 +22,10 @@ def process_input(characters_file, male_actors_file, female_actors_file, output_
             # Read female actors into a list
             female_actors = [row[1] for row in female_reader]
 
+            # Create lists to store sorted male and female characters
+            sorted_male_characters = []
+            sorted_female_characters = []
+
             for row in char_reader:
                 if len(row) == 4:
                     count, name, gender, age = row
@@ -34,9 +38,7 @@ def process_input(characters_file, male_actors_file, female_actors_file, output_
                             age = re.search(r'(\d+)', age)
                             age = f"{age.group()}yo" if age else ""
                             output_line = f"{count}\t{name}, _solo {age} male actor {actor_name} @"
-                            writer.writerow([count, f"{name}, _solo {age} male actor {actor_name} @"])
-                            if DEBUG:
-                                print(output_line)  # Debugging print
+                            sorted_male_characters.append(output_line)
 
                     # Check if gender is female or {female}
                     elif gender in ['female', '{female}'] and count >= depth:
@@ -45,9 +47,18 @@ def process_input(characters_file, male_actors_file, female_actors_file, output_
                             age = re.search(r'(\d+)', age)
                             age = f"{age.group()}yo" if age else ""
                             output_line = f"{count}\t{name}, _solo {age} female actress {actor_name} @"
-                            writer.writerow([count, f"{name}, _solo {age} female actress {actor_name} @"])
-                            if DEBUG:
-                                print(output_line)  # Debugging print
+                            sorted_female_characters.append(output_line)
+
+            # Sort male and female characters separately by name
+            sorted_male_characters.sort(key=lambda x: x.split('\t')[1])
+            sorted_female_characters.sort(key=lambda x: x.split('\t')[1])
+
+            # Write sorted characters to the output file
+            for character in sorted_male_characters:
+                writer.writerow(character.split('\t'))
+
+            for character in sorted_female_characters:
+                writer.writerow(character.split('\t'))
 
         print("Processing completed. Output saved to", output_file)
 

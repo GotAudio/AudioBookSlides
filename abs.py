@@ -35,7 +35,7 @@ def is_file_nonempty(file_path):
 
 def count_lines(filepath):
     try:
-        with open(filepath, 'r') as file:
+        with open(filepath, 'r', encoding='utf-8-sig') as file:
             return sum(1 for _ in file)
     except IOError as e:
         logging.error("Error reading file %s: %s", filepath, e)
