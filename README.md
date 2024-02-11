@@ -259,6 +259,7 @@ $abs/
 ```
 
 ## Tips on Managing Actors
+- (2021-11-2 Recomendation update) Adding actor entries only once, and allowing replacements to be consolidated into a single select name, reduces name collision issues. See edited example below.
 - Replacing characters with actors is conducted to create consistent character appearances. This approach is simpler than trying to describe a particular character in detail.
 - Character names will be replaced with actor names from .csv files configured in `default_config.yaml`. The file will be sorted from the highest to the lowest occurrence.
 - Due to the audiobook being transcribed with speech-to-text, actor names may often be misheard or misspelled. They might also be spoken in various forms, such as "John Smith", "John", "Smith", or "Mr. Smith."
