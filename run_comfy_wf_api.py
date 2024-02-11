@@ -8,6 +8,7 @@ import os
 import yaml
 
 DEBUG = True  # Set to False to disable debug print statements
+DEBUG2 = True  # Set to False to disable debug print statements
 
 def replace_tabs_with_space(text):
     return re.sub(r'\t+', ' ', text)
@@ -87,7 +88,7 @@ def load_and_process_config(SCRIPT_PATH, bookname):
         if DEBUG:
             print("Warning: Error reading default YAML file. Proceeding with an empty configuration.")
 
-    if DEBUG:
+    if DEBUG2:
         print("Default config pos_prompt:", config.get("pos_prompt"))
 
     if bookname:
@@ -98,16 +99,16 @@ def load_and_process_config(SCRIPT_PATH, bookname):
                 with open(book_config_path, 'r') as file:
                     book_config = yaml.safe_load(file)
                 config.update(book_config)
-                if DEBUG:
+                if DEBUG2:
                     print(f"Loaded book-specific config from {book_config_path}.")
             except Exception as e:
-                if DEBUG:
+                if DEBUG2:
                     print(f"Warning: Error reading book-specific YAML file: {e}. Proceeding with available configuration.")
         else:
-            if DEBUG:
+            if DEBUG2:
                 print(f"Book-specific config file not found at {book_config_path}. Using default config.")
 
-    if DEBUG:
+    if DEBUG2:
         print("Merged config pos_prompt:", config.get("pos_prompt"))
 
     return replace_bookname_recursive(config, bookname) if bookname else config
@@ -150,7 +151,7 @@ if __name__ == "__main__":
 
     # Process each line from the input file for the positive prompt
     line_number = 1
-    with open(args.prompts_file, 'r') as file:
+    with open(args.prompts_file, 'r', encoding='utf-8-sig') as file:
         for text_prompt in get_lines(file, args.count):
             if text_prompt:
                 text_prompt = replace_tabs_with_space(text_prompt)

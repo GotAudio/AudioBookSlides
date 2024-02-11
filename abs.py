@@ -26,6 +26,7 @@ def concatenate_files(filelist_path, output_file):
 def handle_single_file(file_path, target_file):
     if file_path.endswith('.mp3'):
         shutil.copyfile(file_path, target_file)
+        return True
     else:
         convert_to_mp3(file_path, target_file)
 
@@ -219,6 +220,7 @@ def main(bookname, wildcard_path=None):
             # Only one file, handle it directly
             single_file_path = os.path.join(dir_path, files[0])
             if not handle_single_file(single_file_path, mp3_file_path):
+                logging.error(f"Failed to copy single file to book folder {dir_path} , {wildcard_path}")
                 return False
         else:
             # Multiple files, concatenate and then convert
@@ -618,7 +620,7 @@ def main(bookname, wildcard_path=None):
     # Step 15: Apply actors using the apply_actors.py script
     input_file = f"books/{bookname}/{bookname}_ts_p_actors.txt"
     merged_file = f"books/{bookname}/{bookname}_merged.txt"
-    output_file = f"books/{bookname}/{bookname}_merged_names.txt"
+    output_file = f"books/{bookname}/{bookname}_merged_names_dup.txt"
 
     # Check if input_file exists
     if not os.path.exists(input_file):
@@ -648,8 +650,45 @@ def main(bookname, wildcard_path=None):
     else:
         logging.info("Already exists: %s", output_file)
 
-    # Step 16: Verify the existence of <path_to_comfyui> from config YAML
+    # Step 15.1: Apply actors using the apply_actors.py script
+    input_file = f"books/{bookname}/{bookname}_merged_names_dup.txt"
+    output_file = f"books/{bookname}/{bookname}_merged_names.txt"
 
+    # Check if input_file exists
+    if not os.path.exists(input_file):
+        logging.error("Error pruning duplicate actors. Input file %s not found. Exiting.", input_file)
+        return  # Stop processing or skip to the next step
+
+    if not os.path.exists(output_file):
+        logging.info("Applying actors to %s and saving to %s. Note: When choosing actors, you must take care their names are not the same as existing character names to avoid confusion.", input_file, output_file)
+
+        try:
+            # Execute the apply_actors.py script
+            apply_actors_cmd = f"python remove_all_other_actors.py {input_file} {output_file} --bookname {bookname}"
+
+            # Log the command if debugging is enabled
+            if DEBUG:
+                logging.debug("Step 15.1/20: Removing low priority actors per actor_priority in config file. Removals in removed.log: %s", apply_actors_cmd)
+
+            result = subprocess.run(apply_actors_cmd, shell=True, check=True)
+            if result.returncode == 0:
+                logging.info("Pruned actors file: %s", output_file)
+            else:
+                logging.error("Failed to prune actors: %s", output_file)
+                return
+        except subprocess.CalledProcessError as e:
+            logging.error("Command failed: %s", e)
+            return
+    else:
+        logging.info("Already exists: %s", output_file)
+
+
+    # Step 16: Verify the existence of <path_to_comfyui> from config YAML
+    input_file = f"books/{bookname}/{bookname}_merged_names.txt"
+
+    if not os.path.exists(input_file):
+        logging.error("Error generating images. Input file %s not found. Exiting.", input_file)
+        return  # Stop processing or skip to the next step
 
     image_generator = config.get('image_generator')
     if image_generator not in ['ComfyUI', 'A1111']:

@@ -280,29 +280,29 @@ $abs/
 | [Default] books/01ThisHour/01ThisHour_ts_p_actors_EDIT.txt            | [Edited] books/01ThisHour/01ThisHour_ts_p_actors.txt
 | --------------------------------------------------------------------- | ---------------------------------------------------------------------- | 
 |                                                                       |                                                                        | 
-|100   Theodora, _solo  female actress Anna Paquin @                    |10	**Lemony Snicket**, _solo 30yo male actor Patrick Warburton@	 |
-|62    Moxie, _solo 25yo female actress Naomi Watts long blond hair @   |4	Mr. **Snicket**, _solo 30yo male actor Patrick Warburton@		 |
+|100   Theodora, _solo  female actress Anna Paquin @                    |10	**Lemony Snicket**, Snicket                                 	 |
+|62    Moxie, _solo 25yo female actress Naomi Watts long blond hair @   |4	Mr. **Snicket**, Snicket                                 		 |
 |50    Ellington, _solo 25yo female actress Florence Pugh @             |40	**Snicket**, _solo 30yo male actor Patrick Warburton@		 |
-|40    Snicket, _solo 30yo male actor Al Pacino @                       |12	S. Theodora Markson, _solo 25yo female **Daenerys Targaryen**@	 |
-|18    Ellington Faint, _solo 30yo female actress Meg Donnelly @        |100	Theodora, _solo 25yo green eyed female Daenerys Targaryen@	 |
+|40    Snicket, _solo 30yo male actor Al Pacino @                       |12	S. Theodora Markson, Theodora                                 	 |
+|18    Ellington Faint, _solo 30yo female actress Meg Donnelly @        |100	Theodora, _solo 25yo green eyed female **Daenerys Targaryen**@|
 |17    Pip, _solo 30yo male actor Matthew Lewis @                       |62	Moxie, _solo 25yo female actress Naomi Watts curly hair@	 |
-|16    Hangfire, _solo  male actor George Clooney @                     |18	**Ellington Faint**, _solo 25yo sexy female actress Margot Robbie@	 |
+|16    Hangfire, _solo  male actor George Clooney @                     |18	**Ellington Faint**, Ellington                                    	 |
 |13    Qwerty, _solo 25yo male actor Keanu Reeves @                     |50	**Ellington**, _solo 25yo sexy female actress Margot Robbie@	 |
 |12    S. Theodora Markson, _solo 40yo female actress Summer H. Howell @|7	Stu Mitchum, _solo 12yo male actor Brad Pitt@			 |
 |12    Hector, _solo 12yo male actor Colin Farrell @                    |7	Stu , _solo 12yo male actor Brad Pitt@				 |
-|11    Prosper Lost, _solo 12yo male actor Christopher Walken @         |7	**Harvey Mitchum**, _solo 35yo male actor Gene Hackman@		 |
-|10    Lemony Snicket, _solo 45yo male actor John Barrowman @           |6	**Mitchum**, _solo 35yo male actor Gene Hackman@			 |
-|7    Harvey Mitchum, _solo 40yo male actor Anthony Heald @             |6	**Harvey**, _solo 35yo male actor Gene Hackman@			 |
-|7    Stu, _solo  male actor Dwayne Johnson @                           |6	Mimi Mitchum, _solo 30yo female actress Angelina Jolie@		 |
+|11    Prosper Lost, _solo 12yo male actor Christopher Walken @         |7	**Harvey Mitchum**, Harvey                             		 |
+|10    Lemony Snicket, _solo 45yo male actor John Barrowman @           |6	**Harvey**, _solo 35yo male actor Gene Hackman@			 |
+|7    Harvey Mitchum, _solo 40yo male actor Anthony Heald @             |6	Mimi Mitchum, _solo 30yo female actress Angelina Jolie@		 |
+|7    Stu, _solo  male actor Dwayne Johnson @                           |6	**Quirty**, Qwerty                                  		 |
 |7    Mrs. Sallis, _solo 50yo female actress Markella Kavenagh @        |13	**Qwerty**, _solo 25yo male actor Keanu Reeves@			 |
-|7    Squeak, _solo 30yo male actor Michael Caine @                     |4	**Quirty**, _solo 25yo male actor Keanu Reeves@			 |
-|6    Harvey, _solo 35yo male actor Cary Grant @                        |7	Murphy Sallis, _solo 55yo female actress Sharon Stone @		 |
-|6    Mimi Mitchum, _solo 30yo female actress Madison Lintz @           |7	Sally Murphy, _solo 55yo female actress Sharon Stone @		 |
-|6    Mitchum, _solo 40yo male actor Gene Hackman @                     |7	Mrs. Sallis, _solo 55yo female actress Sharon Stone @		 |
-|5    Malahan, _solo 45yo male actor David Harbour @                    |4	Mrs. Salas, _solo 55yo female actress Sharon Stone@		 |
-|5    Father, _solo 50yo male actor Henry Cavill @                      |17	**Pecuchet**, _solo 30yo male actor Jet Li@				 |
-|4    Mother, _solo 30yo female actress Maia Mitchell @                 |17	**Pip** , _solo 30yo male actor Jet Li@				 |
-|4    Mrs. Salas, _solo 60yo female actress Amelia Clarkson @           |7	Bouvard, _solo 30yo male actor Ken Watanabe@			 |
+|7    Squeak, _solo 30yo male actor Michael Caine @                     |4	Murphy Sallis, Murphy                                  		 |
+|6    Harvey, _solo 35yo male actor Cary Grant @                        |7	Sally Murphy, Murphy                                  		 |
+|6    Mimi Mitchum, _solo 30yo female actress Madison Lintz @           |7	Mrs. Sallis, Murphy                                  		 |
+|6    Mitchum, _solo 40yo male actor Gene Hackman @                     |7	Mrs. Salas, Murphy                                 		 |
+|5    Malahan, _solo 45yo male actor David Harbour @                    |4	Murphy, _solo 55yo female actress Sharon Stone@		 |
+|5    Father, _solo 50yo male actor Henry Cavill @                      |17	**Pip** , Peuchet                      				 |
+|4    Mother, _solo 30yo female actress Maia Mitchell @                 |17	**Pecuchet**, _solo 30yo male actor Jet Li@				 |
+|4    Mrs. Salas, _solo 60yo female actress Amelia Clarkson @           |7	Bouvard, Squeak                             			 |
 |4    Quirty, _solo  female actress Camila Morrone @                    |7	Squeak, _solo 30yo male actor Ken Watanabe@			 |
 |4    Mr. Snicket, _solo 40yo male actor Javier Bardem @                |11	Prosper Lost, _solo 55yo male actor Christopher Walken@		 |
 |                                                                       |16	Hangfire, _solo  male actor Rich Litle@                          |

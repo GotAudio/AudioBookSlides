@@ -123,7 +123,7 @@
     "inputs": {
       "filename_prefix": "HM",
       "images": [
-        "30",
+        "29",
         0
       ]
     },
@@ -142,7 +142,7 @@
       "cfg": 2,
       "sampler_name": "dpmpp_sde_gpu",
       "scheduler": "normal",
-      "denoise": 0.5,
+      "denoise": 0.50,
       "feather": 5,
       "noise_mask": true,
       "force_inpaint": true,
@@ -190,46 +190,6 @@
     "class_type": "FaceDetailer",
     "_meta": {
       "title": "FaceDetailer"
-    }
-  },
-  "30": {
-    "inputs": {
-      "guide_size": 256,
-      "guide_size_for": true,
-      "max_size": 768,
-      "seed": 785513575834036,
-      "steps": 4,
-      "cfg": 2,
-      "sampler_name": "dpmpp_sde_gpu",
-      "scheduler": "normal",
-      "denoise": 0.5,
-      "feather": 5,
-      "noise_mask": true,
-      "force_inpaint": false,
-      "bbox_threshold": 0.5,
-      "bbox_dilation": 10,
-      "bbox_crop_factor": 3,
-      "sam_detection_hint": "center-1",
-      "sam_dilation": 0,
-      "sam_threshold": 0.93,
-      "sam_bbox_expansion": 0,
-      "sam_mask_hint_threshold": 0.7000000000000001,
-      "sam_mask_hint_use_negative": "False",
-      "drop_size": 10,
-      "refiner_ratio": 0.2,
-      "cycle": 1,
-      "image": [
-        "29",
-        0
-      ],
-      "detailer_pipe": [
-        "29",
-        4
-      ]
-    },
-    "class_type": "FaceDetailerPipe",
-    "_meta": {
-      "title": "FaceDetailer (pipe)"
     }
   },
   "31": {

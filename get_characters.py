@@ -9,7 +9,7 @@ def extract_data(text, delimiter):
     return match.group(1).strip() if match else ""
 
 def is_placeholder(value):
-    placeholder_values = ["unknown", "gender", "age", "not mentioned", "n/a", "unspecified", ""]
+    placeholder_values = ["unknown", "gender", "age", "not mentioned", "n/a", "not unspecified", "unspecified", "",]
     return value.lower() if value.lower() not in placeholder_values else None
 
 def process_input(input_file, output_file):

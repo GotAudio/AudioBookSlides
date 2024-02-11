@@ -40,20 +40,29 @@ def process_line(line):
         line = line.replace('  ', ' ')
     # Perform other replacements
     line = re.sub(r'\(\d+s?\)', '', line)
-    for char in ['<', '>', '"', '[', ']']:
+    for char in ['"', '[', ']']:
         line = line.replace(char, '')
 
     # Replace specific values with a single space
-    replace_with_space = ["{N/A}", "(N/A)", "<N/A>", "{GENDER}", "(AGE)", "<CLOTHING>","PROPER NAME",
-                         "(UNKNOWN)", "UNKNOWN", "CLOTHING","{ }",
-                         "unknown", "gender", "age", "not mentioned", "n/a", "unspecified","( )","N/A"]
+    replace_with_space = [
+        "NOT SPECIFIED", "Not mentioned", "physical activity", "plural",
+        "N/A", "n/a", "GENDER", "gender", "(AGE)", "PROPER NAME", "Unnamed",
+        "UNKNOWN", "unknown", "CLOTHING", "clothing", "unspecified", "<none>",
+        "UNSPECIFIED", "not mentioned", "( )", "< >", "{ }", "()", "<>", "{}"
+    ]
     for value in replace_with_space:
         line = line.replace(value, ' ')
 
-    line = line.replace('(unknown)', '').replace('unknown', '')
     line = line.replace('Set Design:', ' BREAK Set Design:')
-    line = line.replace('Unnamed', '')
-    line = line.replace('Unnamed', '')
+
+    # Replace ", ." and ". ," with "."
+    line = re.sub(r',\s*\.', '.', line)
+    line = re.sub(r'\.\s*,', '.', line)
+    line = re.sub(r'^\.\s*', '', line)
+
+    # Normalize the spaces around commas
+    line = re.sub(r'\s*,\s*', ', ', line)
+
     line = line.replace(' , ', ', ')
     line = line.replace(',  ,', ',')
     line = line.replace(',  ,', ',')
@@ -63,7 +72,18 @@ def process_line(line):
     line = line.replace(', ,', ',')
     line = line.replace(', ,', ',')
     line = line.replace(', ,', ',')
-    line = line.replace(', ,', ',')
+    line = line.replace(',,', ',')
+    line = line.replace(',,', ',')
+    line = line.replace(',,', ',')
+    line = line.replace(',,', ',')
+
+
+    # Remove comma at the beginning of a line
+    line = re.sub(r'^,', '', line)
+    # Remove "BREAK" at the beginning of a line
+    line = re.sub(r'^BREAK', '', line)
+    line = re.sub(r'^\.', '', line)
+    line = re.sub(r'^\s+', '', line)
 
     return line
 
