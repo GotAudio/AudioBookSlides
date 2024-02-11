@@ -1,3 +1,4 @@
+
 # AudioBookSlides
 
 ![Turbo_RealitiesEdgeXLLCM_A1111-SD](https://github.com/GotAudio/AudioBookSlides/assets/13667229/4f30b0c5-9ab6-4940-89ca-e5ddb2235e0b)
@@ -17,6 +18,8 @@ This is a demo contact sheet showing the images generated. (Made with [VideoCS](
 [Reduced sample from Alice In Wonderland](https://github.com/GotAudio/AudioBookSlides/assets/13667229/d663dfda-2c0c-4ee7-aec2-6fe368c70fbc)
 
 This is a 38 second, 320x218 sample, reduced from 768x512. Your video dimensions are limited by your GPU VRAM.
+
+__(2021-11-2 Update: LCM support requires existing installations update ComfyUI from the Manager menu)__
 
 ### Installation of AudioBookSlides
 - __You must change the paths to your Stable Diffusion (ComfyUI or A1111) output folder path in `default_config.yaml`__
