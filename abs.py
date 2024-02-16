@@ -781,7 +781,7 @@ def main(bookname, wildcard_path=None):
         return
 
 
-    # Step 18: Run make_tEXt.py and rename_png_files.py scripts
+    # Step 18: Run png_text.py and rename_png_files.py scripts
     path_to_images = ''
     if config.get('image_generator') == 'ComfyUI':
         path_to_images = config.get('path_to_comfyui', '')
@@ -798,21 +798,11 @@ def main(bookname, wildcard_path=None):
         return
 
     file_path = os.path.join(path_to_images, '000000000.png')
+
     skip_renaming = "n"
-    while True and os.path.exists(file_path):
-        skip_renaming = input("Step 18/20: Generated image file %s already exists. Do you want to skip file renaming step? [Y/n] (Default: Y): " % file_path).strip().lower()
-
-        if not skip_renaming:  # Default to "Y" if the user presses Enter
-            skip_renaming = "y"
-
-        if skip_renaming in ["y", "n"]:
-            break
-        else:
-            print("Invalid input. Please enter 'Y' or 'N'.")
-
-    if skip_renaming == "n":
-        while True and os.path.exists(file_path):
-            skip_renaming = input("Step 18/20: Generated image file %s already exists. Do you want to skip file renaming step? [Y/n] (Default: Y): " % os.path.join(path_to_images, '000000000.png')).strip().lower()
+    if os.path.exists(file_path):
+        while True:
+            skip_renaming = input("Step 18/20: Generated image file %s already exists. Do you want to skip file renaming step? [Y/n] (Default: Y): " % file_path).strip().lower()
 
             if not skip_renaming:  # Default to "Y" if the user presses Enter
                 skip_renaming = "y"
@@ -823,28 +813,28 @@ def main(bookname, wildcard_path=None):
                 print("Invalid input. Please enter 'Y' or 'N'.")
 
     if skip_renaming == "n":
-        # Define the command to run make_tEXt.py
+        # Define the command to run png_text.py
         # removed -o (overwrite) flag. Not sure why it was enabled. Allows for faster restarts
-        make_text_cmd = f"python make_tEXt.py {path_to_images}"
+        make_text_cmd = f"python png_text.py {path_to_images}"
 
         # Define the command to run rename_png_files.py
         rename_png_cmd = f"python rename_png_files_int.py {path_to_images}"
 
         # Log the commands if debugging is enabled
         if DEBUG:
-            logging.debug("Step 18/20: Extract metadata from PNG files and save as .txt: %s", make_text_cmd)
-            logging.debug("rename_png_files.py command: %s", rename_png_cmd)
+            logging.debug("Step 18/20: Extract metadata from PNG files and save as .tEXt.txt: %s", make_text_cmd)
+            logging.debug("png_text.py command: %s", make_text_cmd)
 
         try:
-            # Execute the make_tEXt.py command
+            # Execute the png_text.py command
             result = subprocess.run(make_text_cmd, shell=True, check=True)
-            logging.info("make_tEXt.py completed successfully.")
 
             if DEBUG:
-                logging.debug("Step 18/20 Read .txt files and rename PNG files to the .srt timestamp embedded in the prompt. {ts=001234125} = HH:MM:SS,mms or 00 Hours, 12 minutes, 34.123 seconds: %s", rename_png_cmd)
+                logging.debug("Step 18.1/20 Read .txt files and rename PNG files to the .srt timestamp embedded in the prompt. {ts=001234125} = HH:MM:SS,mms or 00 Hours, 12 minutes, 34.123 seconds: %s", rename_png_cmd)
+                logging.debug("rename_png_files_int.py command: %s", rename_png_cmd)
+
             # Execute the rename_png_files.py command
             result = subprocess.run(rename_png_cmd, shell=True, check=True)
-            logging.info("rename_png_files.py completed successfully.")
 
             path_to_images = path_to_images.replace("<bookname>", bookname)  # Replace placeholder
             txt_files = glob.glob(os.path.join(path_to_images, "*.tEXt.txt"))

@@ -59,7 +59,7 @@ def process_files(file_pattern, output_file_path, log_file_path, config):  # Add
     if DEBUG2:
         print(f"Processing files with pattern {file_pattern}")
     try:
-        with open(log_file_path, 'w') as log_file, open(output_file_path, 'w', encoding='utf-8') as output_file:
+        with open(log_file_path, 'w') as log_file, open(output_file_path, 'w', encoding='cp1252') as output_file:
             for filename in glob.glob(file_pattern):
                 if DEBUG2:
                     print(f"Opening file {filename} for processing")

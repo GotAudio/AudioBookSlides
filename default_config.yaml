@@ -79,8 +79,8 @@ image_count: 0
 #Stable Diffusion will not usually place multiple named characters together on an image.  Every face tends to be the identical face.  
 #keep_actors #will remove all but n actors from a scene. Enter 99 to have no practical limit. Enter 0 to keep all UNIQUE actors. 
 #Duplicates will still be removed. A list of actors removed can be found in bookname\remove.log
-keep_actors: 2
+keep_actors: 1
 
 #if keep_actors is enabled you can select the priority for which characters to keep.  I like creature because for sci-fi I spend more time crafting descriptions
 #of creatures and hate to see them on the cuttimg-room-floor, so-to-speak.  Most if the books I read have male protoganists, so I prefer to get a few more female on-screen.
-actor_priority: "creature, actress, female"
+actor_priority: "actress, creature, female"
