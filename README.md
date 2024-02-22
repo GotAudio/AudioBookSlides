@@ -1,29 +1,25 @@
 
 # AudioBookSlides
 
-![Turbo_RealitiesEdgeXLLCM_A1111-SD](https://github.com/GotAudio/AudioBookSlides/assets/13667229/4f30b0c5-9ab6-4940-89ca-e5ddb2235e0b)
+![002333030](https://github.com/GotAudio/AudioBookSlides/assets/13667229/fce869e0-1523-4dfc-9b07-7082a1c7acdc)
 
+This sample was created without GPT API.  You can find more free audiobooks [here](https://librivox.org/).
 
-I created a sample book to test this installation. 
-Public domain Librivox [Alice in Wonderland](https://www.youtube.com/watch?v=27SwZZ8jiBc). You can find more free audiobooks [here](https://librivox.org/).
+[Contact Sheet from Venom Lethal Protector](https://github.com/GotAudio/AudioBookSlides/assets/13667229/f3d4c70a-b4b5-414f-a140-cb08ce6e7fe9)
 
-[Contact Sheet from Alice In Wonderland](https://github.com/GotAudio/AudioBookSlides/assets/13667229/acf17491-81be-42ee-a2de-230a19922d57)
+This is a demo contact sheet showing the images generated for "Venom Lethal Protector". (Made with [VideoCS](https://sourceforge.net/projects/videocs) not this program.)
 
+[Sample from Venom Lethal Protector](https://github.com/GotAudio/AudioBookSlides/assets/13667229/789dfc42-fefa-402f-b838-6301dfd009cb)
 
-This is a demo contact sheet showing the images generated. (Made with [VideoCS](https://sourceforge.net/projects/videocs) not this program.)
-
-
-[Reduced sample from Alice In Wonderland](https://github.com/GotAudio/AudioBookSlides/assets/13667229/d663dfda-2c0c-4ee7-aec2-6fe368c70fbc)
-
-This is a 38 second, 320x218 sample, reduced from 768x512. Your video dimensions are limited by your GPU VRAM.
+Sample from "Venom Lethal Protector". Click the muted speaker icon to enable audio when playing.
 
 ### 2024-2-21 Version 1.1.0 Update
 - __Removed GPT requirement. Characters and scenes can now be generated programatically.__
 - Randomized default actor assignments 
 - Changed default Stable Diffusion model to photon_v1.safetensors
 - SD LCM support requires existing installations update ComfyUI from the Manager menu
-- default_config.yaml setting __"keep_actors: 1"_  allows you to set how many characters to allow in a scene
-- default_config.yaml setting __"actor_priority: "creature, actress, female"__ to ensure creatures and woman get priority over men.
+- default_config.yaml setting _"keep_actors: 1"_  allows you to set how many characters to allow in a scene
+- default_config.yaml setting _"actor_priority: "creature, actress, female"_ to ensure creatures and woman get priority over men.
 
 
 ### Installation of AudioBookSlides
@@ -277,12 +273,12 @@ $abs/
 ## Tips on Managing Actors
 - Adding actor entries only once, and allowing replacements to be consolidated into a single select name, reduces name collision issues. See edited example below.
 - Replacing characters with actors is conducted to create consistent character appearances. This approach is simpler than trying to describe a particular character in detail.
-- Character names will be replaced with actor names from .csv files configured in `default_config.yaml`. The file will be sorted from the highest to the lowest occurrence.
+- Character names will be replaced with actor names from .csv files configured in `default_config.yaml`. The file will be sorted with actors on top and actresses below.
 - Due to the audiobook being transcribed with speech-to-text, actor names may often be misheard or misspelled. They might also be spoken in various forms, such as "John Smith", "John", "Smith", or "Mr. Smith."
 - You are responsible for identifying these cases and assigning a single actor to all variations.
 - Well-known characters like "Vampire", "Santa Claus", "Peter Rabbit", or any other character the AI already knows how to render, can be omitted.
 - The "depth" key in `default_config.yaml` controls the minimum number of times a name must appear to be included in the initial replacement list. The default value is 4.
-- While you might not need to provide an actor name for a character mentioned only once, that single instance may actually be a misspelling of the main character. Therefore, you might prefer to set the depth to 1 and manually remove any unrecognized names.
+- While you might not need to provide an actor name for a character mentioned only once, that single instance may actually be a misspelling of the main character. Therefore, you might prefer to set the depth to 1 in the config file and manually remove any unrecognized names.
 - It is important to order the various actor names from the longest to the shortest character length. For example, if the names "John" and "John Smith" both occur, place "John Smith" before "John" to ensure "John Smith" is correctly replaced.
 - Exercise caution when using actor names that are also names of characters in your book. If overlooked, you might end up replacing a part of an actor's name with a different actor.
 - Actor replacements are case-sensitive because the names you see are written in the case they appear.
@@ -343,3 +339,5 @@ $abs/
 - [X] 6) Finish Win/Whisper upgrade
 - [ ] 7) Enable Tortoise-TTS text-to-speech to convert text eBooks to .mp3 with AI narrator. 
          Sample: Cave Johnson from "Portal" video game reads "Oil Slick" by Warren Murphy.
+
+[Oil Slick, Cave Johnson](https://github.com/GotAudio/AudioBookSlides/assets/13667229/c9b740d3-feac-4213-b329-01aebc9732d7)
