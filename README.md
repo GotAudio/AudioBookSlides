@@ -277,6 +277,7 @@ $abs/
 - Due to the audiobook being transcribed with speech-to-text, actor names may often be misheard or misspelled. They might also be spoken in various forms, such as "John Smith", "John", "Smith", or "Mr. Smith."
 - You are responsible for identifying these cases and assigning a single actor to all variations.
 - Well-known characters like "Vampire", "Santa Claus", "Peter Rabbit", or any other character the AI already knows how to render, can be omitted.
+- You are not required to enter actual actors.  You can enter any name from popular culture the AI may recognize, as I did below with 'Daenerys Targaryen'
 - The "depth" key in `default_config.yaml` controls the minimum number of times a name must appear to be included in the initial replacement list. The default value is 4.
 - While you might not need to provide an actor name for a character mentioned only once, that single instance may actually be a misspelling of the main character. Therefore, you might prefer to set the depth to 1 in the config file and manually remove any unrecognized names.
 - It is important to order the various actor names from the longest to the shortest character length. For example, if the names "John" and "John Smith" both occur, place "John Smith" before "John" to ensure "John Smith" is correctly replaced.
@@ -287,6 +288,11 @@ $abs/
 - The delimiters _...@ are included in case you want to make targeted replacements or corrections to the final prompt file, specifically for actors and not other spoken text.
 - The file submitted to Stable Diffusion is named <bookname>_merged_names.txt. Before pressing return to start generating images, I often use a text editor to replace " I ", " me ", " my ", " protagonist ", " narrator " with the protagonists actor name to be sure they appear on-screen even if someone else is not saying their name.
 - As a reference, I asked ChatGPT; List the character names and descriptions in the book "Lemony Snicket - Who Could That Be at This Hour"
+- If you suspect a character's name is missing from your actor file, please follow these steps for correction:
+   1. Open the file tokenizer_vocab_2.txt. This file acts as an English dictionary from which numerous names have been removed, including those scraped from U.S. baby names, census data, and extracted from 200,000 lines of eBooks. For instance, I recently had to remove the name "Holmes" from this file.
+   2. If you believe there are still names missing after the initial edit, you can set 'use_dictionary: 0' in the config file. Proceed by deleting all files except for bookname.mp3 and bookname.srt, and re-run the generation script (for example, abs 01SherlockHolmes). This process ensures that no names from the dictionary are filtered out during name generation.
+   3. If you're not satisfied with the results, you can set 'use_speech_verbs: 0' in the config file. This adjustment bypasses the validation check that requires proper names to be immediately followed by one of 500 different verbs, which indicate actions performed by a character. After this change, the sole criterion for a word to be considered a potential character name is capitalization, though this may result in some place names being included in your actor list. Ideally, you should review the list to identify and remove any such instances.
+   4. Or you can just type the missing character into the bookname_ts_p_actors_EDIT.txt file by copying and pasteing an existing line, then change the name in order to keep proper delimiters.
 
 ### This is an example of a default vs. manually edited actor list. 
 
