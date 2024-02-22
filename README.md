@@ -3,8 +3,6 @@
 
 ![Turbo_RealitiesEdgeXLLCM_A1111-SD](https://github.com/GotAudio/AudioBookSlides/assets/13667229/4f30b0c5-9ab6-4940-89ca-e5ddb2235e0b)
 
-# Create an AI generated video slideshow from an audiobook. 
-This app was written mostly by ChatGPT. I told it the tasks I wanted and it eventually made this.
 
 I created a sample book to test this installation. 
 Public domain Librivox [Alice in Wonderland](https://www.youtube.com/watch?v=27SwZZ8jiBc). You can find more free audiobooks [here](https://librivox.org/).
@@ -19,7 +17,14 @@ This is a demo contact sheet showing the images generated. (Made with [VideoCS](
 
 This is a 38 second, 320x218 sample, reduced from 768x512. Your video dimensions are limited by your GPU VRAM.
 
-__(2021-11-2 Update: LCM support requires existing installations update ComfyUI from the Manager menu)__
+### 2024-2-21 Version 1.1.0 Update
+- __Removed GPT requirement. Characters and scenes can now be generated programatically.__
+- Randomized default actor assignments 
+- Changed default Stable Diffusion model to photon_v1.safetensors
+- SD LCM support requires existing installations update ComfyUI from the Manager menu
+- default_config.yaml setting __"keep_actors: 1"_  allows you to set how many characters to allow in a scene
+- default_config.yaml setting __"actor_priority: "creature, actress, female"__ to ensure creatures and woman get priority over men.
+
 
 ### Installation of AudioBookSlides
 - __You must change the paths to your Stable Diffusion (ComfyUI or A1111) output folder path in `default_config.yaml`__
@@ -76,7 +81,11 @@ to download the 6GB file "RealitiesEdgeXLLCM_TURBOXL.safetensors" and save it to
 \ComfyUi\models\checkpoints\RealitiesEdgeXLLCM_TURBOXL.safetensors If you already have A1111 installed, 
 you can also modify \ComfyUI\extra_model_paths.yaml and point the base path to your A1111 SD folder if 
 you prefer. ( base_path: E:\SD\stable-diffusion-webui\ )
-    
+
+2024-2-21 Update: Also download photon_v1.safetensors from here; https://civitai.com/models/84728/photon. 
+I have changed the default model to this. It generates 10 quality images per minute on my NVIDIA 3060 GPU.
+If your performance differs, it may be due to a few modifications I made to ComfyUI codebase. I can share them if requested.
+
 copy nodes_custom_sampler.py \ComfyUI\comfy_extras\nodes_custom_sampler.py
 git clone https://github.com/ltdrdata/ComfyUI-Manager.git \ComfyUI\custom_nodes
 git clone https://github.com/ltdrdata/ComfyUI-Impact-Pack.git \ComfyUI\custom_nodes
@@ -174,6 +183,10 @@ echo "Save it to '$BASE/ComfyUI/models/checkpoints/RealitiesEdgeXLLCM_TURBOXL.sa
 echo If you already have A1111 installed, you may want to copy \ComfyUI\extra_model_paths.yaml.example to \ComfyUI\extra_model_paths.yaml
 echo and point the base path to your A1111 SD folder if you prefer. ( base_path: /mnt/e/SD/stable-diffusion-webui/ )
 
+echo 2024-2-21 Update: Also download photon_v1.safetensors from here; https://civitai.com/models/84728/photon. 
+echo I have changed the default model to this. It generates 10 quality images per minute on my NVIDIA 3060 GPU.
+echo If your performance differs, it may be due to a few modifications I made to ComfyUI codebase. I can share them if requested.
+
 #18. Launch ComfyUI to download initial models and packages
 echo "Launching ComfyUI to download initial models and packages. This may take a while."
 python "$BASE/ComfyUI/main.py"
@@ -228,22 +241,22 @@ Dean Koontz - Odd Thomas - Deeply Odd Book 6. Length: 9:37, 2500 images took 5.5
 </details>
 
 
-#### GPT API Setup*
+#### Optional GPT API Setup
+- 2024-2-21 Version 1.1.0 Update. GPT is no longer required. Scripts are now included to generate character and scene data locally. (GPT does a better job though.)
 - To use the GPT API, you need to sign up for an API Key. Register and get your key [here](https://platform.openai.com).
 - Save your API key in a file named `ABS_API_KEY.txt` in the application folder.
-- The cost is approximately $2 for a 12-hour audiobook. New sign-ups might receive $20 free credit.
+- The cost is approximately $5 for a 12-hour audiobook. New sign-ups might receive $20 free credit.
 - Alternatively, use the free [LM-Studio Local GPT server](https://lmstudio.ai/). It's about 3 times slower (1 hour vs 20 minutes) and less accurate. The recommended model is [here](https://huggingface.co/TheBloke/Mistral-7B-Instruct-v0.1-GGUF).
 - Note: Not all requests have been optimized for LM-Studio. Some results may be suboptimal. This feature was utilized during development but has not been fully verified with the current installation.
-- *I also have a version that does not utilize GPT. In that version, image prompts are generated directly from the text, which can lead to often ridiculous or confusing scene transitions. Additionally, character names are generated programmatically, often resulting in inaccuracies. Instead of having around 50 nearly 100% accurate characters, you might encounter 200+ characters with frequent errors, necessitating increased effort in managing actor mappings. However, this might not be a concern for you. The process is significantly faster, taking only seconds versus 20 minutes, and avoids a $2 API fee. I can release this version if there is interest.
   
 ## Overview of Processing
 
 - The application keeps track of its workflow and can be stopped or restarted at any time.
-- If it stops or you interrupt it, you can relaunch it and it will resume from where it left off. (You may need to remove the most recent incomplete output file.)
-- The app will connect to the ChatGPT API to identify characters and generate the image prompts needed for Stable Diffusion.
-- It will connect to GPT again to extract the scene/setting information for the image prompts.
+- If it stops or you interrupt it, you can relaunch it and it will resume from where it left off. 
+- The app will connect to the ChatGPT API to identify characters if you have configured an API key. 
+- It may connect to GPT again to extract the scene/setting information for the image prompts.
 - The process will pause to allow you to modify, or keep the default, file used to replace characters with actors.
-- Default lists of actors are provided. By default, the app picks the replacement actor starting at the top of the file.
+- Default lists of actors are provided. By default, the app picks the replacement actor randomly.
 - You can create custom actor lists in the <bookname> folder by changing the books\bookname\bookname.yaml file.
 - You can add guidance to the actor description, such as "long blond hair", "20yo", NSFW, etc.
 - You must save the books/bookname/bookname_ts_p_actors_EDIT.txt as books/bookname/bookname_ts_p_actors.txt, then relaunch the app and it will continue.
@@ -262,7 +275,7 @@ $abs/
 ```
 
 ## Tips on Managing Actors
-- (2021-11-2 Recomendation update) Adding actor entries only once, and allowing replacements to be consolidated into a single select name, reduces name collision issues. See edited example below.
+- Adding actor entries only once, and allowing replacements to be consolidated into a single select name, reduces name collision issues. See edited example below.
 - Replacing characters with actors is conducted to create consistent character appearances. This approach is simpler than trying to describe a particular character in detail.
 - Character names will be replaced with actor names from .csv files configured in `default_config.yaml`. The file will be sorted from the highest to the lowest occurrence.
 - Due to the audiobook being transcribed with speech-to-text, actor names may often be misheard or misspelled. They might also be spoken in various forms, such as "John Smith", "John", "Smith", or "Mr. Smith."
@@ -328,3 +341,5 @@ $abs/
 - [X] 4) Test on system A1111 (note: some manual steps required).
 - [X] 5) Test input with different audio formats (.WAV, .AAC). (ffmpeg does not support .m4b containing images so rename those to .aac and they will work)
 - [X] 6) Finish Win/Whisper upgrade
+- [ ] 7) Enable Tortoise-TTS text-to-speech to convert text eBooks to .mp3 with AI narrator. 
+         Sample: Cave Johnson from "Portal" video game reads "Oil Slick" by Warren Murphy.

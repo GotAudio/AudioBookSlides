@@ -5,8 +5,8 @@ from setuptools import setup
 
 setup(
     name='AudioBookSlides',
-    version='1.0.0',
-    description='Create an AI generated video slideshow from an audiobook.',
+    version='1.1.0',
+    description='Create an AI generated video slideshow from an audiobook. non-GPT update',
     author='Ken Selvia',
     author_email='gotaudio@gmail.com',
     url='https://github.com/GotAudio/AudioBookSlides/',

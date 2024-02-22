@@ -21,48 +21,59 @@ def process_line(line, idx, total, api_key, default_scene):
         timestamp = timestamp_match.group(1)
         user_query = line.replace(timestamp, "").strip().replace("\n", "\\n")
 
-        system_message = (
-            "You are a set designer. I will provide sentences from a film script. Your task is to create concise set designs for each line. Aim for succinct descriptions that capture the essence of the physical environment, focusing on key elements such as furniture, decor, and lighting. Align designs with the script context. Avoid Character Actions, emotions, and dialog. If the script line doesn't provide enough information for a new scene, use or modify the default scene.\n\n"
-            + default_scene + "\n\n" + user_query
-        )
-        prompt = f"{system_message}"
+        if not api_key:
+            # Simply return the original script line without extra formatting
+            response = user_query
+        else:
+            system_message = (
+                "You are a set designer. I will provide sentences from a film script. Your task is to create concise set designs for each line. Aim for succinct descriptions that capture the essence of the physical environment, focusing on key elements such as furniture, decor, and lighting. Align designs with the script context. Avoid Character Actions, emotions, and dialog. If the script line doesn't provide enough information for a new scene, use or modify the default scene.\n\n"
+                + default_scene + "\n\n" + user_query
+            )
+            prompt = f"{system_message}"
+            response = generate_response(prompt, api_key)
 
-        response = generate_response(prompt, api_key)
+            # Update default scene if new scene is described.
+            if "Default Scene=" not in response:
+                default_scene = f"[Default Scene={response.split('.')[0]}]"
 
-        # Update default scene if new scene is described.
-        #1-11-24 Changed passed default scene to "" to prevent duplication of it.  Will add it to the first row before exiting.
-        if "Default Scene=" not in response:
-            default_scene = f"[Default Scene={response.split('.')[0]}]"
+        result_line = [timestamp, response.replace('\n', ' ').replace('""', '"') if api_key else user_query]
 
-        result_line = [timestamp, response.replace('\n', ' ')]
-
-        # Calculate the interval for updating the progress bar
-        update_interval = max(1, total // 100)
-
-        # Update progress bar only at specified intervals
-        if idx % update_interval == 0 or idx == total - 1:
-            sys.stdout.write('.')
-            sys.stdout.flush()
+        # Only update progress bar if api_key is provided
+        if api_key:
+            # Calculate the interval for updating the progress bar
+            update_interval = max(1, total // 100)
+            # Update progress bar only at specified intervals
+            if idx % update_interval == 0 or idx == total - 1:
+                sys.stdout.write('.')
+                sys.stdout.flush()
 
         return result_line
 
     return None
 
-def main(input_file, output_file, num_jobs, api_key):
+
+def main(input_file, output_file, api_key):
     with open(input_file, "r", newline="", encoding="utf-8-sig") as infile:
         lines = infile.readlines()
 
     total_lines = len(lines)
-    sys.stdout.write('[' + ' ' * 100 + ']\r[')
-    sys.stdout.flush()
 
-    default_scene = "[Default Scene=A warm, intimate recording studio with state-of-the-art equipment, soundproofing panels, and a cozy narrator's booth bathed in soft light.] "
-    results = Parallel(n_jobs=num_jobs)(delayed(process_line)(line, idx, total_lines, api_key, "") for idx, line in enumerate(lines))
+    default_scene = "[Default Scene=A warm, intimate recording studio with state-of-the-art equipment, soundproofing panels, and a cozy narrator's booth bathed in soft light.]"
+    results = []
 
-    sys.stdout.write('\n')  # Move to the next line after progress bar completion
+    if api_key:
+        # Use parallel processing when API key is available
+        sys.stdout.write('[' + ' ' * 100 + ']\r[')  # Initialize progress bar for parallel processing
+        results = Parallel(n_jobs=10)(delayed(process_line)(line, idx, total_lines, api_key, "") for idx, line in enumerate(lines))
+        sys.stdout.write('\n')  # Move to the next line after progress bar completion
+    else:
+        # Process lines sequentially without API key
+        for idx, line in enumerate(lines):
+            result = process_line(line, idx, total_lines, api_key, "")
+            if result:
+                results.append(result)
 
-    #Because I like the first image to look like a recording studio.
-    default_scene = "[Default Scene=A warm, intimate recording studio with state-of-the-art equipment, soundproofing panels, and a cozy narrator's booth bathed in soft light.] "
+    # Initialize default scene for the first image description
     if results:
         results[0] = (results[0][0], default_scene + results[0][1])
 
@@ -71,7 +82,8 @@ def main(input_file, output_file, num_jobs, api_key):
         writer = csv.writer(outfile, delimiter="\t", quoting=csv.QUOTE_ALL)
         for result_line in results:
             if result_line:
-                writer.writerow(result_line)
+                corrected_result_line = [element.replace('\t', '') for element in result_line]
+                writer.writerow(corrected_result_line)
 
 if __name__ == "__main__":
     if len(sys.argv) != 3:
@@ -80,11 +92,10 @@ if __name__ == "__main__":
 
     input_file = sys.argv[1]
     output_file = sys.argv[2]
-    num_jobs = 10  # Number of parallel jobs, adjust as needed
-
     api_key = os.environ.get('ABS_API_KEY')
     if not api_key:
-        print("OpenAI API key not found in environment variables.")
-        sys.exit(1)
+        print("OpenAI API key not found in ABS_API_KEY environment variable. GPT will not be used for scene extraction.")
+    else:
+        print("OpenAI API key found in ABS_API_KEY environment variable. Using GPT for scene extraction.")
 
-    main(input_file, output_file, num_jobs, api_key)
+    main(input_file, output_file, api_key)

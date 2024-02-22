@@ -7,6 +7,7 @@ import yaml
 import glob
 import logging
 import sys
+import re
 from pathlib import Path, PureWindowsPath
 
 # Define constants and initialize logging
@@ -15,20 +16,20 @@ DEBUG = 1  # Set to 1 for debug mode, 0 to disable
 
 logging.basicConfig(level=logging.DEBUG if DEBUG else logging.INFO)
 
-def convert_to_mp3(source_file, target_file):
-    ffmpeg_convert_cmd = f'ffmpeg -hide_banner -i "{source_file}" -acodec libmp3lame "{target_file}"'
-    return run_command(ffmpeg_convert_cmd)
-
 def concatenate_files(filelist_path, output_file):
     ffmpeg_concat_cmd = f'ffmpeg -hide_banner -f concat -safe 0 -i "{filelist_path}" -c copy "{output_file}"'
     return run_command(ffmpeg_concat_cmd)
+
+def convert_to_mp3(source_file, target_file):
+    ffmpeg_convert_cmd = f'ffmpeg -hide_banner -i "{source_file}" -acodec libmp3lame "{target_file}"'
+    return run_command(ffmpeg_convert_cmd)
 
 def handle_single_file(file_path, target_file):
     if file_path.endswith('.mp3'):
         shutil.copyfile(file_path, target_file)
         return True
     else:
-        convert_to_mp3(file_path, target_file)
+        return convert_to_mp3(file_path, target_file)
 
 def is_file_nonempty(file_path):
     """Check if the file exists and is not empty."""
@@ -154,6 +155,7 @@ def main(bookname, wildcard_path=None):
             original_path = config[key]
             config[key] = fix_path(original_path)
 
+    openai_api_key = None
 
     # Read the OpenAI API key from ABS_API_KEY.txt
     try:
@@ -161,8 +163,7 @@ def main(bookname, wildcard_path=None):
             openai_api_key = file.read().strip()
         os.environ['ABS_API_KEY'] = openai_api_key
     except Exception as e:
-        logging.info("ABS_API_KEY.txt does not contain an API key. GPT API will be unavailable %s", e)
-
+        logging.info("ABS_API_KEY.txt does not contain an API key. GPT API will be unavailable.")
 
     # Step 3: Create the MP3 file if it does not exist
     mp3_file_path = os.path.join(book_folder, f"{bookname}.mp3")
@@ -220,7 +221,7 @@ def main(bookname, wildcard_path=None):
             # Only one file, handle it directly
             single_file_path = os.path.join(dir_path, files[0])
             if not handle_single_file(single_file_path, mp3_file_path):
-                logging.error(f"Failed to copy single file to book folder {dir_path} , {wildcard_path}")
+                logging.error(f"Failed to copy single file to book folder {single_file_path} , {mp3_file_path}")
                 return False
         else:
             # Multiple files, concatenate and then convert
@@ -235,7 +236,7 @@ def main(bookname, wildcard_path=None):
             temp_output_file = os.path.splitext(filelist_path)[0] + os.path.splitext(files[0])[1]  # Use the extension of the first file
             if not concatenate_files(filelist_path, temp_output_file):
                 return False
-            if not convert_to_mp3(temp_output_file, mp3_file_path):
+            if not handle_single_file(temp_output_file, mp3_file_path):
                 return False
             os.remove(temp_output_file)
     else:
@@ -246,7 +247,7 @@ def main(bookname, wildcard_path=None):
     srt_file_path = os.path.join(book_folder, f"{bookname}.srt")
     if not os.path.exists(srt_file_path):
 
-        logging.info("Creating srt: %s", srt_file_path)
+        logging.info("Creating ssubtitle: %s", srt_file_path)
 
         # Step 4.1: construct and optionally display the whisperx_cmd
 
@@ -284,7 +285,7 @@ def main(bookname, wildcard_path=None):
             logging.error("Command failed: %s", e)
             return
     else:
-        logging.info("Already exists: %s", srt_file_path)
+        logging.info("Subtitle already exists: %s", srt_file_path)
 
     # Step 5: Modify SRT file with fix_srt.py script
     modified_srt_file_path = os.path.join(book_folder, f"{bookname}_m300.srt")
@@ -312,7 +313,7 @@ def main(bookname, wildcard_path=None):
             logging.error("Command failed: %s", e)
             return
     else:
-        logging.info("Already exists: %s", modified_srt_file_path)
+        logging.info("Merged subtitle already exists: %s", modified_srt_file_path)
 
     # Step 6: Create time-synced SRT file with make_prompts.py script
     ts_srt_file_path = os.path.join(book_folder, f"{bookname}_ts.srt")
@@ -340,32 +341,64 @@ def main(bookname, wildcard_path=None):
             logging.error("Command failed: %s", e)
             return
     else:
-        logging.info("Already exists: %s", ts_srt_file_path)
+        logging.info("Timestamped subtitle already exists: %s", ts_srt_file_path)
 
-    # Step 7: Create or verify prompt-enhanced SRT file with gen_prompts.py script
-    ts_p_srt_file_path = os.path.join(book_folder, f"{bookname}_ts_p.srt")
+
     ts_srt_file_path = os.path.join(book_folder, f"{bookname}_ts.srt")
+    ts_p_srt_file_path = os.path.join(book_folder, f"{bookname}_ts_p.srt")
 
-    # Function to execute gen_prompts.py command
-    def execute_gen_prompts():
-        gen_prompts_cmd = f"python gen_prompts.py {ts_srt_file_path} {ts_p_srt_file_path}"
-        if DEBUG:
-            logging.debug("Step 07/20: Use GPT API to create image prompts for StableDiffusion: %s", gen_prompts_cmd)
-        try:
-            result = subprocess.run(gen_prompts_cmd, shell=True, check=True)
-            return result.returncode == 0
-        except subprocess.CalledProcessError as e:
-            logging.error("Command failed: %s", e)
-            return False
+    if not openai_api_key:
+        m300_srt_filepath = os.path.join(book_folder, f"{bookname}_m300.srt")
+
+        if not os.path.exists(ts_p_srt_file_path):
+            logging.info("Generating character names : %s", ts_p_srt_file_path)
+
+            # tokenizer_vocab_2.txt is a dictionary of words that are probably not english names. If you regularly see
+            # character names you do not think are characters, add them to this list to have them excluded.
+            make_api_names_cmd = f"python combined_dictionary.py tokenizer_vocab_2.txt {m300_srt_filepath} {ts_srt_file_path} {ts_p_srt_file_path}"
+
+            if DEBUG:
+                logging.debug("Step 07/20: Generate a list of potential character names: %s", make_api_names_cmd)
+
+            try:
+                result = subprocess.run(make_api_names_cmd, shell=True, check=True)
+                if result.returncode == 0:
+                    logging.info("Created file with character names: %s", ts_p_srt_file_path)
+                else:
+                    logging.error("Failed to create file with character names: %s", ts_p_srt_file_path)
+                    return
+            except subprocess.CalledProcessError as e:
+                logging.error("Command failed: %s", e)
+                return
+        else:
+            logging.info("Timestamped characters already exists: %s", ts_p_srt_file_path)
 
     file_needs_creation = not is_file_nonempty(ts_p_srt_file_path)
     file_created_or_verified = False
 
-    if file_needs_creation:
-        logging.info("Creating prompt-enhanced srt: %s", ts_p_srt_file_path)
-        file_created_or_verified = execute_gen_prompts()
-    else:
-        logging.info("Already exists: %s", ts_p_srt_file_path)
+    if openai_api_key:
+        # Step 7: Create or verify prompt-enhanced SRT file with gen_prompts.py script
+
+        # Function to execute gen_prompts.py command
+        def execute_gen_prompts():
+            gen_prompts_cmd = f"python gen_prompts.py {ts_srt_file_path} {ts_p_srt_file_path}"
+            if DEBUG:
+                logging.debug("Step 07/20: Use GPT API to create image prompts for StableDiffusion: %s", gen_prompts_cmd)
+            try:
+                result = subprocess.run(gen_prompts_cmd, shell=True, check=True)
+                return result.returncode == 0
+            except subprocess.CalledProcessError as e:
+                logging.error("Command failed: %s", e)
+                return False
+
+        file_needs_creation = not is_file_nonempty(ts_p_srt_file_path)
+        file_created_or_verified = False
+
+        if file_needs_creation:
+            logging.info("Creating prompt-enhanced srt: %s", ts_p_srt_file_path)
+            file_created_or_verified = execute_gen_prompts()
+        else:
+            logging.info("Timestamped characters already exists: %s", ts_p_srt_file_path)
 
     # Verify line count and non-emptiness
     if file_created_or_verified or is_file_nonempty(ts_p_srt_file_path):
@@ -374,9 +407,9 @@ def main(bookname, wildcard_path=None):
         if input_lines == output_lines:
             logging.info("Verified prompt-enhanced srt with correct line count: %s", ts_p_srt_file_path)
         else:
-            logging.error("Line count mismatch or empty file in prompt-enhanced SRT file: %s", ts_p_srt_file_path)
+            logging.error("Line count mismatch or %s vs. %s", ts_srt_file_path, ts_p_srt_file_path)
             os.remove(ts_p_srt_file_path)  # Delete the empty or incorrect file
-            if file_needs_creation:
+            if file_needs_creation and openai_api_key:
                 logging.info("Attempting to recreate prompt-enhanced SRT file.")
                 file_created_or_verified = execute_gen_prompts()
                 if not file_created_or_verified:
@@ -388,104 +421,12 @@ def main(bookname, wildcard_path=None):
         return
 
 
-    '''  This was not very effective.  Use a different GPT method.
-
-    # Step 8: Match dictionary and create a new file with match_dictionary.py script.
-    m300_nodict_file_path = os.path.join(book_folder, f"{bookname}_m300_nodict.txt")
-    m300_srt_file_path = os.path.join(book_folder, f"{bookname}_m300.srt")
-    tokenizer_vocab_file = "tokenizer_vocab_2.txt"  # Assuming this file is in the current directory
-
-    if not os.path.exists(m300_nodict_file_path):
-        logging.info("Creating file with matched dictionary: %s", m300_nodict_file_path)
-
-        # Construct the match_dictionary.py command
-        match_dictionary_cmd = f"python match_dictionary.py {tokenizer_vocab_file} {m300_srt_file_path} {m300_nodict_file_path}"
-
-        # Log the command if debugging is enabled
-        if DEBUG:
-            logging.debug("match_dictionary.py command: %s", match_dictionary_cmd)
-
-        try:
-            result = subprocess.run(match_dictionary_cmd, shell=True, check=True)
-            if result.returncode == 0:
-                logging.info("Created file with matched dictionary: %s", m300_nodict_file_path)
-            else:
-                logging.error("Failed to create file with matched dictionary: %s", m300_nodict_file_path)
-                return
-        except subprocess.CalledProcessError as e:
-            logging.error("Command failed: %s", e)
-            return
-    else:
-        logging.info("Already exists: %s", m300_nodict_file_path)
-
-    '''
-    # Step 9: Create a new file with make_API_Names.py script
-    ts_srt_api_names_file_path = os.path.join(book_folder, f"{bookname}_ts_API_Names.srt")
-    ts_srt_file_path = os.path.join(book_folder, f"{bookname}_ts.srt")
-
-    if not os.path.exists(ts_srt_api_names_file_path):
-        logging.info("Creating file with API Names: %s", ts_srt_api_names_file_path)
-
-
-        # Construct the make_API_Names.py command
-        make_api_names_cmd = f"python make_API_Names.py {ts_srt_file_path} {ts_srt_api_names_file_path}"
-
-        # Log the command if debugging is enabled
-        if DEBUG:
-            logging.debug("Step 09/20: Format .srt file for use in GPT API calls: %s", make_api_names_cmd)
-
-        try:
-            result = subprocess.run(make_api_names_cmd, shell=True, check=True)
-            if result.returncode == 0:
-                logging.info("Created file with API Names: %s", ts_srt_api_names_file_path)
-            else:
-                logging.error("Failed to create file with API Names: %s", ts_srt_api_names_file_path)
-                return
-        except subprocess.CalledProcessError as e:
-            logging.error("Command failed: %s", e)
-            return
-    else:
-        logging.info("Already exists: %s", ts_srt_api_names_file_path)
-
-    ''' Bad API name extractor. Skip it. Enable the one from Step 8
-
-    # Step 10: GPT API calls. Extract names with extract_names.py script. This output file requires manual edit. Try to eliminate it.
-    # There is a better version that assigns [name] {age} <gender>. Delete this after that one is integrated.
-    # This also needs to pass api_base from yaml file to work with LM-Studio
-    ts_srt_api_names_file_path = os.path.join(book_folder, f"{bookname}_ts_API_Names.srt")
-    ts_srt_api_names_out_file_path = os.path.join(book_folder, f"{bookname}_ts_API_Names_out.srt")
-
-    if not os.path.exists(ts_srt_api_names_out_file_path):
-        logging.info("Extracting names: %s", ts_srt_api_names_out_file_path)
-
-        # Construct the extract_names.py command
-        extract_names_cmd = f"python extract_names.py {ts_srt_api_names_file_path} {ts_srt_api_names_out_file_path}"
-
-        # Log the command if debugging is enabled
-        if DEBUG:
-            logging.debug("extract_names.py command: %s", extract_names_cmd)
-
-        try:
-            result = subprocess.run(extract_names_cmd, shell=True, check=True)
-            if result.returncode == 0:
-                logging.info("Extracted names to: %s", ts_srt_api_names_out_file_path)
-            else:
-                logging.error("Failed to extract names: %s", ts_srt_api_names_out_file_path)
-                return
-        except subprocess.CalledProcessError as e:
-            logging.error("Command failed: %s", e)
-            return
-    else:
-        logging.info("Already exists: %s", ts_srt_api_names_out_file_path)
-
-    '''
-
     # Step 11: Get characters with get_characters.py script
     ts_srt_p_file_path = os.path.join(book_folder, f"{bookname}_ts_p.srt")
     ts_srt_p_characters_file_path = os.path.join(book_folder, f"{bookname}_ts_p_characters.srt")
 
     if not os.path.exists(ts_srt_p_characters_file_path):
-        logging.info("Getting characters: %s", ts_srt_p_characters_file_path)
+        logging.info("Getting characters list: %s", ts_srt_p_characters_file_path)
 
         # Construct the get_characters.py command
         get_characters_cmd = f"python get_characters.py {ts_srt_p_file_path} {ts_srt_p_characters_file_path}"
@@ -505,7 +446,7 @@ def main(bookname, wildcard_path=None):
             logging.error("Command failed: %s", e)
             return
     else:
-        logging.info("Already exists: %s", ts_srt_p_characters_file_path)
+        logging.info("Characters list already exists: %s", ts_srt_p_characters_file_path)
 
    # Step 12: Extract scenes with extract_scene.py script
     ts_srt_file_path = os.path.join(book_folder, f"{bookname}_ts.srt")
@@ -519,7 +460,7 @@ def main(bookname, wildcard_path=None):
 
         # Log the command if debugging is enabled
         if DEBUG:
-            logging.debug("Step 12/20: Use GPT API to generate scene information: %s", extract_scene_cmd)
+            logging.debug("Step 12/20: Generate scene information: %s", extract_scene_cmd)
 
         try:
             result = subprocess.run(extract_scene_cmd, shell=True, check=True)
@@ -532,15 +473,15 @@ def main(bookname, wildcard_path=None):
             logging.error("Command failed: %s", e)
             return
     else:
-        logging.info("Already exists: %s", ts_srt_p_ns_file_path)
+        logging.info("Scenes file already exists: %s", ts_srt_p_ns_file_path)
 
     # Verify line count
     input_lines = count_lines(ts_srt_file_path)
     output_lines = count_lines(ts_srt_p_ns_file_path)
     if input_lines == output_lines:
-        logging.info("Verified output file with correct line count: %s", ts_srt_p_ns_file_path)
+        logging.info("Verified scenes file with correct line count: %s", ts_srt_p_ns_file_path)
     else:
-        logging.error("Line count mismatch in output file: %s", ts_srt_p_ns_file_path)
+        logging.error("Line count mismatch in scenes file: %s", ts_srt_p_ns_file_path)
         return
 
     # Step 13: Merge two input files and create an output file
@@ -582,7 +523,7 @@ def main(bookname, wildcard_path=None):
             logging.error("Error during merging: %s", e)
             return
     else:
-        logging.info("Already exists: %s", output_file)
+        logging.info("Merged characters and scenes already exists: %s", output_file)
 
     # Step 14: Replace actors using the existing script
     male_actors_csv = config.get('actors')
@@ -591,14 +532,14 @@ def main(bookname, wildcard_path=None):
 
     # Ensure platform-independent path separators
     input_file = os.path.join("books", bookname, f"{bookname}_ts_p_characters.srt")
-    output_file = os.path.join("books", bookname, f"{bookname}_ts_p_actors_EDIT.txt")
+    edit_file = os.path.join("books", bookname, f"{bookname}_ts_p_actors_EDIT.txt")
 
-    if not os.path.exists(output_file):
-        logging.info("Step 14/20: Generating editable character and actor list from %s and saving to %s", input_file, output_file)
+    if not os.path.exists(edit_file):
+        logging.info("Step 14/20: Creating actor list from %s and saving to %s", input_file, edit_file)
 
         try:
             # Execute the existing replace_actors.py script with depth parameter
-            replace_actors_cmd = f"python  replace_actors.py {input_file} {male_actors_csv} {female_actors_csv} {output_file} {depth}"
+            replace_actors_cmd = f"python replace_actors.py {input_file} {male_actors_csv} {female_actors_csv} {edit_file} {depth}"
 
             # Log the command if debugging is enabled
             if DEBUG:
@@ -607,15 +548,13 @@ def main(bookname, wildcard_path=None):
             result = subprocess.run(replace_actors_cmd, shell=True, check=True)
 
             if result.returncode == 0:
-                logging.info("****** Actors replaced and saved to: %s You must review this file, make any corrections, and save as %s", output_file, os.path.join("books", bookname, f"{bookname}_ts_p_actors.txt"))
+                logging.info("* You must edit actors file %s, make any corrections, and save as %s", edit_file, os.path.join("books", bookname, f"{bookname}_ts_p_actors.txt"))
             else:
-                logging.error("Failed to replace actors: %s", output_file)
+                logging.error("Failed to replace actors: %s", edit_file)
                 return
         except subprocess.CalledProcessError as e:
             logging.error("Command failed: %s", e)
             return
-    else:
-        logging.info("****** Already exists: %s. You must review this file, make any corrections, and save as %s", output_file, os.path.join("books", bookname, f"{bookname}_ts_p_actors.txt"))
 
     # Step 15: Apply actors using the apply_actors.py script
     input_file = f"books/{bookname}/{bookname}_ts_p_actors.txt"
@@ -624,11 +563,11 @@ def main(bookname, wildcard_path=None):
 
     # Check if input_file exists
     if not os.path.exists(input_file):
-        logging.error("You must optionally edit, then save %s as %s before proceeding.", f"books/{bookname}/{bookname}_ts_p_actors_EDIT.txt", input_file)
+        logging.info("* You must edit actors file %s, make any corrections, and save as %s", edit_file, input_file)
         return  # Stop processing or skip to the next step
 
     if not os.path.exists(output_file):
-        logging.info("Applying actors to %s and saving to %s. Note: When choosing actors, you must take care their names are not the same as existing character names to avoid confusion.", input_file, output_file)
+        logging.info("Applying actors from %s and saving as %s.", input_file, output_file)
 
         try:
             # Execute the apply_actors.py script
@@ -648,7 +587,7 @@ def main(bookname, wildcard_path=None):
             logging.error("Command failed: %s", e)
             return
     else:
-        logging.info("Already exists: %s", output_file)
+        logging.info("Replaced actors already exists: %s", output_file)
 
     # Step 15.1: Apply actors using the apply_actors.py script
     input_file = f"books/{bookname}/{bookname}_merged_names_dup.txt"
@@ -660,7 +599,7 @@ def main(bookname, wildcard_path=None):
         return  # Stop processing or skip to the next step
 
     if not os.path.exists(output_file):
-        logging.info("Applying actors to %s and saving to %s. Note: When choosing actors, you must take care their names are not the same as existing character names to avoid confusion.", input_file, output_file)
+        logging.info("Pruning extra actors from %s and saving to %s.", input_file, output_file)
 
         try:
             # Execute the apply_actors.py script
@@ -680,7 +619,7 @@ def main(bookname, wildcard_path=None):
             logging.error("Command failed: %s", e)
             return
     else:
-        logging.info("Already exists: %s", output_file)
+        logging.info("Pruned low priority actors already exists: %s", output_file)
 
 
     # Step 16: Verify the existence of <path_to_comfyui> from config YAML
@@ -823,15 +762,13 @@ def main(bookname, wildcard_path=None):
         # Log the commands if debugging is enabled
         if DEBUG:
             logging.debug("Step 18/20: Extract metadata from PNG files and save as .tEXt.txt: %s", make_text_cmd)
-            logging.debug("png_text.py command: %s", make_text_cmd)
 
         try:
             # Execute the png_text.py command
             result = subprocess.run(make_text_cmd, shell=True, check=True)
 
             if DEBUG:
-                logging.debug("Step 18.1/20 Read .txt files and rename PNG files to the .srt timestamp embedded in the prompt. {ts=001234125} = HH:MM:SS,mms or 00 Hours, 12 minutes, 34.123 seconds: %s", rename_png_cmd)
-                logging.debug("rename_png_files_int.py command: %s", rename_png_cmd)
+                logging.debug("Step 18.1/20 Read .txt files and rename PNG files to the .srt timestamp: %s", rename_png_cmd)
 
             # Execute the rename_png_files.py command
             result = subprocess.run(rename_png_cmd, shell=True, check=True)
@@ -852,14 +789,14 @@ def main(bookname, wildcard_path=None):
     output_video_path = os.path.join(book_folder, f"{bookname}_output.avi")
 
     if not os.path.exists(output_video_path):
-        logging.info("Creating output video: %s", output_video_path)
+        logging.info("Creating silent output video: %s", output_video_path)
 
         # Construct the jobvid.py command
         jobvid_cmd = f"python jobvid.py \"{os.path.join(path_to_images, '*.png')}\" \"{output_video_path}\""
 
         # Log the command if debugging is enabled
         if DEBUG:
-            logging.debug("Step 19/20: This spawns 30 parallel ffmpeg processes to generate a ~30 second (time based on the file name) still image .AVI video from each image, then combines them:\n%s", jobvid_cmd)
+            logging.debug("Step 19/20: Parallel ffmpeg processes generate and combine still image .AVIs %s", jobvid_cmd)
 
         try:
             subprocess.run(jobvid_cmd, shell=True, check=True)
@@ -881,7 +818,7 @@ def main(bookname, wildcard_path=None):
     output_avi_path = os.path.join(book_folder, f"{bookname}.avi")
 
     if not os.path.exists(output_avi_path):
-        logging.info("Creating the final video: %s", output_avi_path)
+        logging.info("Creating the final video with audio: %s", output_avi_path)
 
         ffmpeg_cmd = (
             f'ffmpeg -hide_banner -i "books/{bookname}/{bookname}_output.avi" '
@@ -891,11 +828,11 @@ def main(bookname, wildcard_path=None):
 
         # Log the command if debugging is enabled
         if DEBUG:
-            logging.debug("Step 20/20: This combines the original mp3 audio book and the generated video. .srt is included in the same folder. You could embed it in the video if you wanted to: %s", ffmpeg_cmd)
+            logging.debug("Step 20/20: This combines the original mp3 audio book and the generated video. .srt is included in the same folder. You could embed it in the video if you wanted to: \n%s", ffmpeg_cmd)
         try:
             result = subprocess.run(ffmpeg_cmd, shell=True, check=True)
             if result.returncode == 0:
-                logging.info(f"{output_avi_path} and books/{bookname}/{bookname}.srt files created. Process complete.")
+                logging.info(f"{output_avi_path} and books/{bookname}/{bookname}.srt files created.")
 
                 temp_output_file = f"books/{bookname}/{bookname}_output.avi"
                 if os.path.exists(temp_output_file):
@@ -924,8 +861,32 @@ def check_ffmpeg_availability():
         logging.error("ffmpeg not found. Error: %s", e.output)
         return False
 
+def get_version_and_description_from_setup():
+    setup_path = 'setup.py'  # Assuming setup.py is in the same directory
+    info = {"version": "1.0", "description": "Default description"}  # Default values
+
+    # Regular expressions to match version and description
+    version_match = re.compile(r"^.*version=['\"]([^'\"]*)['\"].*$", re.M)
+    description_match = re.compile(r"^.*description=['\"]([^'\"]*)['\"].*$", re.M)
+
+    with open(setup_path, 'rt') as f:
+        setup_contents = f.read()
+
+    # Search for version
+    version_search = version_match.search(setup_contents)
+    if version_search:
+        info["version"] = version_search.group(1)
+
+    # Search for description
+    description_search = description_match.search(setup_contents)
+    if description_search:
+        info["description"] = description_search.group(1)
+
+    return info
 
 def cli():
+    setup_info = get_version_and_description_from_setup()
+    print(f"Audiobookslides (abs) version: {setup_info['version']}, {setup_info['description']}")
     parser = argparse.ArgumentParser(description='AudioBookSlides Command Line Tool')
     parser.add_argument('bookname', type=str, help='Name of the book')
     parser.add_argument('wildcard_path', nargs='?', default=None, help='Wildcard path to audio files')

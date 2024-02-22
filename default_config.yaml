@@ -1,4 +1,45 @@
 # This config file can be copied to books\<bookname>\<bookname>.yaml and any keys there will over ride the key here. actors for example.
+# Prompts for generating images. 
+pos_prompt: "  Pos: (In the style of a live action comic ) (wide angle:1.5) (wide screen movie still photograph) (hyperrealism:1.2) (8K UHD:1.2) (photorealistic:1.2) fantasy otherworldly hyperrealist highly intricate somber atmosphere awe-inspiring. award-winning glaze crime photos master study cinematic (night lighting:0.8) masterpiece best quality ultra realistic 32k RAW photo detail dslr high quality fantastical style by dramatic lighting  "
+neg_prompt: "  Neg: bad eyes, misshapen, monochrome, mutation, (easynegative:0.9)"
+
+# If image_generator is ComfyUI, folder containing ComfyUI generated images. You must start ComfyUI prior to generating images.
+# You must change the path below or you must rename the "output" images folder to <bookname> when image generation is complete
+path_to_comfyui: "H:\\ComfyUI\\<bookname>"
+
+# If image_generator is A1111, folder containing generated A1111 images. 
+# You can either change the path below, or rename the YYYY-MM-DD images folder to <bookname> when image generation is complete.
+# You must start A111, configure the UI, and select "Input from text or file" under the Scripts selector at the bottom, then drag+drop <bookname>_p_final.txt into the upload box, then wait for images to be generated.
+# I have provided a sample A1111.PNG file that you can import to load reasonable defaults.
+path_to_stablediffusion: "E:\\SD\\stable-diffusion-webui\\outputs\\txt2img-images\\<bookname>"
+
+# Workflow file name (only used for ComfyUI). I have provided a few sample workflows. The default positive prompt must start with " Pos: ", negative prompt must start with " Neg: ". model, seed, width, height, steps, cfg and prompt will be auto-generated
+# eg. Turbo_dpm_Face_API.json" or OpenDalle_Face_Api.json. Workflow may need to be configured correctly for Turbo or non Turbo. You can create ComfyUI workflow json files by clicking Save as API from the manager menu.
+#path_to_workflow: "OpenDalle_Face_Api.json"
+#path_to_workflow: "Turbo_gpu_Face_API.json"
+#path_to_workflow: "LCM_1Face_API.json"
+path_to_workflow: "Photon_1Face_Api.json"
+
+# Configuration for the image generation process. 
+#These values 2,8 are appropriate for workflow "Turbo_dpm_Face_API.json". 
+#OpenDalle_Face_Api.json will prefer values like 6, 35, and be much slower, but better quality, photon_v1 = 5.5,20, LCM_1Face_API=1.9, 5
+cfg: 5.5
+steps: 20
+
+# Image generation settings. The generated output video will be this size.  Larger is slower.  
+image_width: 768
+image_height: 512
+
+#How many images to generate with ComfyUI. Set to 0 to process all images. 
+#This lets you run a small test sample to comfirn you are happy with styles and quality settings.  (Or you can just kill the image server. The queue will reset when restarted.)
+#The output video would still be as long as the audio book regardless of this setting if you continued to process the images.
+image_count: 0
+
+#When generating actor name replacements, this setting controls the minimum number of times a name must occur in the book to be included in the default replacement list.
+#You may want to change it to 1 and manually delete any entries you do not wish to assign to an actor.  See README.md for more tips about actors.
+depth: 3
+
+#-------------------------- Less Common Edits -------------------------------
 
 #whisperX is required to generate .srt subtitle file.
 #Currently the same app. Support alternatives. eg. whisper-faster.exe (which is actually not faster)
@@ -11,63 +52,35 @@ whisperx_linux: "whisperx --model large-v2 --align_model WAV2VEC2_ASR_LARGE_LV60
 actors: actors\\male.csv
 actresses: actors\\female.csv
 
-#When generating actor name replacements, this setting controls the minimum number of times a name must occur in the book to be included in the default replacement list.
-#You may want to change it to 1 and manually delete any entries you do not wish to assign to an actor.  See README.md for more tips about actors.
-depth: 4
-
 # Paths to various dependencies and models
 # Must be either ComfyUI or A1111
 image_generator: "ComfyUI"
-
-# If image_generator is ComfyUI, folder containing ComfyUI generated images. You must start ComfyUI prior to generating images.
-# You must change the path below or you must rename the "output" images folder to <bookname> when image generation is complete
-path_to_comfyui: "H:\\ComfyUI\\<bookname>"
-
-# If image_generator is A1111, folder containing generated A1111 images. 
-# You can either change the path below, or rename the YYYY-MM-DD images folder to <bookname> when image generation is complete.
-# You must start A111, configure the UI, and select "Input from text or file" under the Scripts selector at the bottom, then drag+drop <bookname>_p_final.txt into the upload box, then wait for images to be generated.
-# I have provided a sample A1111.PNG file that you can import to load reasonable defaults.
-path_to_stablediffusion: "E:\\SD\\stable-diffusion-webui\\outputs\\txt2img-images\\<bookname>"
 
 # You must download the model files to your SD model folder. You can find them here https://civitai.com/
 # Model name. eg. "OpenDalleV1.1.safetensors" or "RealitiesEdgeXLLCM_TURBOXL.safetensors"
 # For A1111 the user will have to manually configre it in the web-ui
 # picx_10 and dreamshaper_8LCM are LCM
-#comfyui_model: "socababesTurboXL_v12Hybrid.safetensors"
-comfyui_model: "RealitiesEdgeXLLCM_TURBOXL.safetensors"
-#comfyui_model: "ishtarsGateNSFWSFW_v10TurboBoosted.safetensors"
-#comfyui_model: "turbovisionxlSuperFastXLBasedOnNew_tvxlV32Bakedvae.safetensors"
 #comfyui_model: "chilloutmix_NiPrunedFp32Fix.safetensors"
+#comfyui_model: "dreamshaper_8LCM.safetensors"
+#comfyui_model: "ishtarsGateNSFWSFW_v10TurboBoosted.safetensors"
 #comfyui_model: "OpenDalleV1.1.safetensors"
 #comfyui_model: "photon_v1.safetensors"
 #comfyui_model: "picx_10.safetensors"
+#comfyui_model: "RealitiesEdgeXLLCM_TURBOXL.safetensors"
+#comfyui_model: "RealitiesEdgeXLSDXL_TURBOXLV2.safetensors"
 #comfyui_model: "realvisxlV30Turbo_v30TurboBakedvae.safetensors"
-#comfyui_model: "dreamshaper_8LCM.safetensors"
+#comfyui_model: "socababesTurboXL_v12Hybrid.safetensors"
+#comfyui_model: "turbovisionxlSuperFastXLBasedOnNew_tvxlV32Bakedvae.safetensors"
+comfyui_model: "photon_v1.safetensors"
 
 # Workflow file name (only used for ComfyUI). I have provided a few sample workflows. The default positive prompt must start with " Pos: ", negative prompt must start with " Neg: ". model, seed, width, height, steps, cfg and prompt will be auto-generated
-# eg. Turbo_dpm_Face_API.json" or OpenDalle_Face_Api.json. Workflow may need to be configured correctly for Turbo or non Turbo. You can create ComfyUI workflow json files by clicking Save as API from the manager menu.
-path_to_workflow: "Turbo_dpm_Face_API.json"
-#path_to_workflow: "OpenDalle_Face_Api.json"
-#path_to_workflow: "Turbo_gpu_Face_API.json"
-#path_to_workflow: "Photon_1Face_Api.json"
+# eg. Turbo_dpm_Face_API.json" or OpenDalle_Face_Api.json. Workflow may need to be configured correctly for Turbo or non Turbo. You can create ComfyUI workflow json files by enabling Developer mode in settings then clicking Save as API from the manager menu.
 #path_to_workflow: "LCM_1Face_API.json"
-
-# Prompts for generating images. 
-neg_prompt: "  Neg: bad eyes, misshapen, monochrome, mutation, (easynegative:0.9)"
-pos_prompt: "  Pos: (In the style of YOUR-AUDIO-BOOK-STYLE)) (wide angle:1.5) (wide screen movie still photograph) (hyperrealism:1.2) (8K UHD:1.2) (photorealistic:1.2) fantasy otherworldly hyperrealist highly intricate somber atmosphere awe-inspiring. award-winning glaze crime photos master study cinematic (night lighting:0.8) masterpiece best quality ultra realistic 32k RAW photo detail dslr high quality fantastical style by dramatic lighting  "
-
-# Configuration for the image generation process. These values 2,8 are appropriate for workflow "Turbo_dpm_Face_API.json". OpenDalle_Face_Api.json will prefer values like 6, 35, and be much slower, but better quality
-cfg: 2
-steps: 8
-
-# Image generation settings. The generated output video will be this size.  Larger is slower.  
-image_width: 768
-image_height: 512
-
-#How many images to generate with ComfyUI. Set to 0 to process all images. 
-#This lets you run a small test sample to comfirn you are happy with styles and quality settings.  (Or you can just kill the image server. The queue will reset when restarted.)
-#The output video would still be as long as the audio book regardless of this setting if you continued to process the images.
-image_count: 0
+#path_to_workflow: "OpenDalle_Face_Api.json"
+#path_to_workflow: "Photon_1Face_Api.json"
+#path_to_workflow: "Turbo_gpu_Face_API.json"
+#path_to_workflow: "Turbo_dpm_Face_API.json"
+path_to_workflow: "Photon_1Face_Api.json"
 
 # Get character names, scenes, and image prompts from AI Language model. You can use free LM-Studio or OpenAI.  
 # For a 12 hour audio book, OpenAI-GPT3 costs less than $1 and it finishes 20 minutes.  LM-Studio takes about 1 hours. (Performed twice)
@@ -83,4 +96,4 @@ keep_actors: 1
 
 #if keep_actors is enabled you can select the priority for which characters to keep.  I like creature because for sci-fi I spend more time crafting descriptions
 #of creatures and hate to see them on the cuttimg-room-floor, so-to-speak.  Most if the books I read have male protoganists, so I prefer to get a few more female on-screen.
-actor_priority: "actress, creature, female"
+actor_priority: "creature, actress, female"

@@ -9,8 +9,9 @@ def extract_data(text, delimiter):
     return match.group(1).strip() if match else ""
 
 def is_placeholder(value):
-    placeholder_values = ["unknown", "gender", "age", "not mentioned", "n/a", "not unspecified", "unspecified", "",]
-    return value.lower() if value.lower() not in placeholder_values else None
+    placeholder_values = ["unknown", "gender", "age", "not mentioned", "n/a", "not unspecified", "unspecified", ""]
+    # Check the lowercase version of value against placeholder values without converting the original value
+    return None if value.lower() in placeholder_values else value
 
 def process_input(input_file, output_file):
     counts = defaultdict(int)
@@ -26,7 +27,7 @@ def process_input(input_file, output_file):
             for row in reader:
                 if len(row) == 2:
                     _, text = row
-                    name = extract_data(text, "[]").title()
+                    name = extract_data(text, "[]").split('_')[0].title()
                     gender = is_placeholder(extract_data(text, "{}"))
                     age = is_placeholder(extract_data(text, "()"))
 
@@ -45,8 +46,6 @@ def process_input(input_file, output_file):
                 gender = details[key]["gender"] or "unknown"
                 age = details[key]["age"] or "unknown"
                 writer.writerow([count, key, gender, age])
-
-        print("Processing completed. Output saved to", output_file)
 
     except FileNotFoundError:
         print("Input file not found.")
