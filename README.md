@@ -19,7 +19,8 @@ Sample from "Venom Lethal Protector". Click the muted speaker icon to enable aud
 - Changed default Stable Diffusion model to photon_v1.safetensors. It generates 10 images per minute on my NVIDIA 12GB 3060 GPU. [Released for $329, February 25, 2021. Amazon: $289](https://www.amazon.com/MSI-GeForce-RTX-3060-12G/dp/B08WPRMVWB) (Other sellers list for under $100. Maybe refurbished?) The 1,221 Images for the 5 hour Venom book took 2 hours to generate.
 - SD LCM support requires existing installations update ComfyUI from the Manager menu
 - default_config.yaml setting _"keep_actors: 1"_  allows you to set how many characters to allow in a scene
-- default_config.yaml setting _"actor_priority: "creature, actress, female"_ to ensure creatures and women get priority over men.
+- default_config.yaml setting _"actor_priority: "creature, actress, female"_ to ensure creatures and women get priority over men
+- default_config.yaml setting _"LUFS_target: -17"_ automatically increase volume of input files under -17 LUFS (Loudness Units Full Scale)
 
 
 ### Installation of AudioBookSlides

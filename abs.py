@@ -8,28 +8,129 @@ import glob
 import logging
 import sys
 import re
+import json
+
 from pathlib import Path, PureWindowsPath
 
 # Define constants and initialize logging
 SCRIPT_PATH = os.path.dirname(os.path.abspath(__file__))
 DEBUG = 1  # Set to 1 for debug mode, 0 to disable
 
+def extract_first_minute(file_path, temp_file="temp_first_minute.mp3"):
+    """
+    Extracts the first minute from the audio file.
+
+    :param file_path: Path to the original audio file.
+    :param temp_file: Path to save the extracted audio segment.
+    """
+    command = [
+        'ffmpeg',
+        '-i', file_path,
+        '-ss', "00:00:00",  # Start at the beginning
+        '-t', "00:01:00",  # Extract 1 minute
+        '-acodec', 'copy',  # Use the same audio codec to avoid re-encoding
+        temp_file
+    ]
+    subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
+    return temp_file
+
 logging.basicConfig(level=logging.DEBUG if DEBUG else logging.INFO)
 
-def concatenate_files(filelist_path, output_file):
-    ffmpeg_concat_cmd = f'ffmpeg -hide_banner -f concat -safe 0 -i "{filelist_path}" -c copy "{output_file}"'
+def run_command(command):
+    logging.info("Executing command: %s", command)
+    try:
+        result = subprocess.run(command, shell=True, check=True)
+        return result.returncode == 0
+    except subprocess.CalledProcessError as e:
+        logging.error("Command failed: %s", e)
+        return False
+
+def get_loudness_measurements(file_path):
+    """Analyze the file to get loudness measurements using ffmpeg."""
+    command = [
+        'ffmpeg',
+        '-i', file_path,
+        '-af', 'loudnorm=I=-23:LRA=7:print_format=json',
+        '-f', 'null',
+        '-'
+    ]
+    result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    json_start = result.stderr.find('{')
+    json_end = result.stderr.rfind('}') + 1
+    if json_start != -1 and json_end != -1:
+        loudnorm_report = result.stderr[json_start:json_end]
+        try:
+            loudness_data = json.loads(loudnorm_report)
+            return loudness_data
+        except json.JSONDecodeError:
+            return None
+
+def check_and_adjust_volume(file_path, lufs_target):
+    """
+    Checks the loudness of a given audio file and adjusts its volume.
+    Automatically targets a loudness level 2 dB above the specified LUFS_target.
+    :param file_path: Path to the audio file to check.
+    :param lufs_target: The LUFS level below which volume adjustment is triggered.
+    """
+    loudness_data = get_loudness_measurements(file_path)
+    if loudness_data:
+        integrated_loudness = float(loudness_data['input_i'])
+        logging.info(f"Detected loudness: {integrated_loudness} LUFS, Adjustment threshold: {lufs_target} LUFS")
+
+        if integrated_loudness < lufs_target:
+            # Automatically target a volume 2 dB above the threshold
+            volume_adjustment = (lufs_target - integrated_loudness) + 2
+            logging.info(f"Volume adjustment needed: +{volume_adjustment}dB to reach 2 dB above the threshold.")
+            return f"+{volume_adjustment}dB"
+        else:
+            logging.info("No volume adjustment needed.")
+    else:
+        logging.warning(f"Loudness data could not be determined for {file_path}.")
+
+    return None
+
+def adjust_volume(source_file, target_file, volume_adjustment):
+    ffmpeg_adjust_cmd = f'ffmpeg -hide_banner -i "{source_file}" -filter:a "volume={volume_adjustment}" "{target_file}"'
+    return run_command(ffmpeg_adjust_cmd)
+
+def concatenate_files(filelist_path, output_file, volume_adjustment=None):
+    if volume_adjustment:
+        ffmpeg_concat_cmd = f'ffmpeg -hide_banner -f concat -safe 0 -i "{filelist_path}" -filter:a "volume={volume_adjustment}" "{output_file}"'
+    else:
+        ffmpeg_concat_cmd = f'ffmpeg -hide_banner -f concat -safe 0 -i "{filelist_path}" -c copy "{output_file}"'
     return run_command(ffmpeg_concat_cmd)
 
-def convert_to_mp3(source_file, target_file):
-    ffmpeg_convert_cmd = f'ffmpeg -hide_banner -i "{source_file}" -acodec libmp3lame "{target_file}"'
+def convert_to_mp3(source_file, target_file, volume_adjustment=None):
+    if volume_adjustment:
+        ffmpeg_convert_cmd = f'ffmpeg -hide_banner -i "{source_file}" -acodec libmp3lame -filter:a "volume={volume_adjustment}" "{target_file}"'
+    else:
+        ffmpeg_convert_cmd = f'ffmpeg -hide_banner -i "{source_file}" -acodec libmp3lame "{target_file}"'
     return run_command(ffmpeg_convert_cmd)
 
-def handle_single_file(file_path, target_file):
-    if file_path.endswith('.mp3'):
-        shutil.copyfile(file_path, target_file)
-        return True
+
+def handle_single_file(file_path, target_file, lufs_target=None):
+    """
+    Handle copying or converting a single file. Perform a volume check and adjust the volume if necessary.
+    """
+    if lufs_target is not None:
+        # Extract the first minute for loudness analysis
+        temp_first_minute = extract_first_minute(file_path)
+        try:
+            # Perform volume check on the extracted first minute
+            volume_adjustment = check_and_adjust_volume(temp_first_minute, lufs_target)
+            if volume_adjustment:
+                logging.info(f"Adjusting volume for {file_path} by {volume_adjustment}.")
+                adjust_volume(file_path, target_file, volume_adjustment)
+        finally:
+            # Clean up the temporary file
+            os.remove(temp_first_minute)
     else:
-        return convert_to_mp3(file_path, target_file)
+        # If lufs_target is not specified, proceed as before
+        if file_path.endswith('.mp3'):
+            shutil.copyfile(file_path, target_file)
+        else:
+            convert_to_mp3(file_path, target_file)
+    return True
 
 def is_file_nonempty(file_path):
     """Check if the file exists and is not empty."""
@@ -54,15 +155,6 @@ def create_file_if_missing(source, target):
             return True
     except IOError as e:
         logging.error("Error copying file: %s", e)
-        return False
-
-def run_command(command):
-    logging.info("Executing command: %s", command)
-    try:
-        result = subprocess.run(command, shell=True, check=True)
-        return result.returncode == 0
-    except subprocess.CalledProcessError as e:
-        logging.error("Command failed: %s", e)
         return False
 
 def create_directory(path):
@@ -216,11 +308,16 @@ def main(bookname, wildcard_path=None):
         if DEBUG and files:
             logging.debug("Found %d files: %s...", len(files), files[0])
 
+
+        lufs_target = config.get('LUFS_target')
+        if lufs_target is not None:
+            logging.info(f"LUFS target {lufs_target} detected in config file. Will check file for volume.")
+
         # Process files
         if len(files) == 1:
             # Only one file, handle it directly
             single_file_path = os.path.join(dir_path, files[0])
-            if not handle_single_file(single_file_path, mp3_file_path):
+            if not handle_single_file(single_file_path, mp3_file_path, lufs_target):
                 logging.error(f"Failed to copy single file to book folder {single_file_path} , {mp3_file_path}")
                 return False
         else:
@@ -236,7 +333,9 @@ def main(bookname, wildcard_path=None):
             temp_output_file = os.path.splitext(filelist_path)[0] + os.path.splitext(files[0])[1]  # Use the extension of the first file
             if not concatenate_files(filelist_path, temp_output_file):
                 return False
-            if not handle_single_file(temp_output_file, mp3_file_path):
+
+            if not handle_single_file(temp_output_file, mp3_file_path, lufs_target):
+                logging.error("Error processing the audio file.")
                 return False
             os.remove(temp_output_file)
     else:

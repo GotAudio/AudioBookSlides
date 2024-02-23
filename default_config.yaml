@@ -11,7 +11,7 @@ path_to_comfyui: "H:\\ComfyUI\\<bookname>"
 # You can either change the path below, or rename the YYYY-MM-DD images folder to <bookname> when image generation is complete.
 # You must start A111, configure the UI, and select "Input from text or file" under the Scripts selector at the bottom, then drag+drop <bookname>_p_final.txt into the upload box, then wait for images to be generated.
 # I have provided a sample A1111.PNG file that you can import to load reasonable defaults.
-path_to_stablediffusion: "E:\\SD\\stable-diffusion-webui\\outputs\\txt2img-images\\<bookname>"
+path_to_stablediffusion: "H:\\SD\\stable-diffusion-webui\\outputs\\txt2img-images\\<bookname>"
 
 # Workflow file name (only used for ComfyUI). I have provided a few sample workflows. The default positive prompt must start with " Pos: ", negative prompt must start with " Neg: ". model, seed, width, height, steps, cfg and prompt will be auto-generated
 # eg. Turbo_dpm_Face_API.json" or OpenDalle_Face_Api.json. Workflow may need to be configured correctly for Turbo or non Turbo. You can create ComfyUI workflow json files by clicking Save as API from the manager menu.
@@ -107,3 +107,9 @@ use_speech_verbs: 0
 #If use_dictionary is 1 (default) then character detection will check a dictionary file tokenizer_vocab_2.txt for the presence of the character name. If found, the character will be skipped. This file was generated from an english dictionary from which names were removed 
 #which occured in thousands of U.S. baby names, names from census data, names of actors and celebrities, and known names from audio books.  Set to 0 to remove the restriction (may help discover characters previously omitted)
 use_dictionary: 1
+
+# LUFS_target specifies the desired loudness level for audio files in LUFS (Loudness Units Full Scale).
+# The EBU R128 standard recommends -23 LUFS for broadcast in Europe.  I found -17 is more appropriate for me.
+# Set this value according to your needs, or comment it out to disable volume checking and normalization.
+# If you are hard-of-hearing this may also be of assistance.
+#LUFS_target: -17
