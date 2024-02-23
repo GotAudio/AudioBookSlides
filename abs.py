@@ -355,7 +355,17 @@ def main(bookname, wildcard_path=None):
 
             # tokenizer_vocab_2.txt is a dictionary of words that are probably not english names. If you regularly see
             # character names you do not think are characters, add them to this list to have them excluded.
-            make_api_names_cmd = f"python combined_dictionary.py tokenizer_vocab_2.txt {m300_srt_filepath} {ts_srt_file_path} {ts_p_srt_file_path}"
+
+            use_dictionary = config.get('use_dictionary')
+
+            # Compare use_dictionary as integers
+            dictionary_file = "NONE" if use_dictionary == 0 else "tokenizer_vocab_2.txt"
+            make_api_names_cmd = f"python combined_dictionary.py {dictionary_file} {m300_srt_filepath} {ts_srt_file_path} {ts_p_srt_file_path}"
+
+            use_speech_verbs = config.get('use_speech_verbs')
+            # Append "--strict 0" to the command if use_speech_verbs is 0, comparing as integers
+            if use_speech_verbs == 0:
+                make_api_names_cmd += " --strict 0"
 
             if DEBUG:
                 logging.debug("Step 07/20: Generate a list of potential character names: %s", make_api_names_cmd)

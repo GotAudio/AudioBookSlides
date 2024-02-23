@@ -1,7 +1,7 @@
 # This config file can be copied to books\<bookname>\<bookname>.yaml and any keys there will over ride the key here. actors for example.
 # Prompts for generating images. 
-pos_prompt: "  Pos: (In the style of a live action comic ) (wide angle:1.5) (wide screen movie still photograph) (hyperrealism:1.2) (8K UHD:1.2) (photorealistic:1.2) fantasy otherworldly hyperrealist highly intricate somber atmosphere awe-inspiring. award-winning glaze crime photos master study cinematic (night lighting:0.8) masterpiece best quality ultra realistic 32k RAW photo detail dslr high quality fantastical style by dramatic lighting  "
-neg_prompt: "  Neg: bad eyes, misshapen, monochrome, mutation, (easynegative:0.9)"
+pos_prompt: "  Pos: (( style of victorian london murder mystery )) (full body:1.2) RAW photo, beautiful landscape, depth of field, full body photo , natural skin, cinematic shot "
+neg_prompt: "  Neg: bad eyes, misshapen, monochrome, mutation "
 
 # If image_generator is ComfyUI, folder containing ComfyUI generated images. You must start ComfyUI prior to generating images.
 # You must change the path below or you must rename the "output" images folder to <bookname> when image generation is complete
@@ -26,17 +26,20 @@ path_to_workflow: "Photon_1Face_Api.json"
 cfg: 5.5
 steps: 20
 
-# Image generation settings. The generated output video will be this size.  Larger is slower.  
+# Image generation settings. The generated output video will be this size.  Larger is slower.  Default 768x512  
+# Create a resized_images folder and use ffmpeg to resize images if you prefer larger; 
+#     for %%f in (*.png) do (ffmpeg -hide_banner -i "%%f" -vf scale=1152:768 "resized_images\%%~nxf")
+# Increasing the image size below will tend to just add a duplicate of a particular actor on-screen
 image_width: 768
 image_height: 512
 
 #How many images to generate with ComfyUI. Set to 0 to process all images. 
 #This lets you run a small test sample to comfirn you are happy with styles and quality settings.  (Or you can just kill the image server. The queue will reset when restarted.)
-#The output video would still be as long as the audio book regardless of this setting if you continued to process the images.
+#The output video would still be as long as the audio book regardless of this setting if you continued to process the images.  Default 0
 image_count: 0
 
 #When generating actor name replacements, this setting controls the minimum number of times a name must occur in the book to be included in the default replacement list.
-#You may want to change it to 1 and manually delete any entries you do not wish to assign to an actor.  See README.md for more tips about actors.
+#You may want to change it to 1 and manually delete any entries you do not wish to assign to an actor.  See README.md for more tips about actors.  Default 3
 depth: 3
 
 #-------------------------- Less Common Edits -------------------------------
@@ -83,17 +86,24 @@ comfyui_model: "photon_v1.safetensors"
 path_to_workflow: "Photon_1Face_Api.json"
 
 # Get character names, scenes, and image prompts from AI Language model. You can use free LM-Studio or OpenAI.  
-# For a 12 hour audio book, OpenAI-GPT3 costs less than $1 and it finishes 20 minutes.  LM-Studio takes about 1 hours. (Performed twice)
+# For a 12 hour audio book, OpenAI-GPT3 costs less than $5 and it finishes in an hour minutes.  
 
 #LM-Studio must be running and Local Server mode must be started.  I recommend this model https://huggingface.co/TheBloke/Mistral-7B-Instruct-v0.1-GGUF  ( mistral-7b-instruct-v0.1.Q6_K.gguf )
 #**** I may need to update a few scripts to run with LMS. I have not tested the most recent prompts with LMS ****
 #api_base: "http://localhost:1234/v1"
 
 #Stable Diffusion will not usually place multiple named characters together on an image.  Every face tends to be the identical face.  
-#keep_actors #will remove all but n actors from a scene. Enter 99 to have no practical limit. Enter 0 to keep all UNIQUE actors. 
-#Duplicates will still be removed. A list of actors removed can be found in bookname\remove.log
+#keep_actors will remove all but n actors from a scene. Enter 99 to have no practical limit. Enter 0 to keep all UNIQUE actors. 
+#Duplicates will still be removed. A list of actors removed can be found in bookname\remove.log  Default 1   
 keep_actors: 1
 
 #if keep_actors is enabled you can select the priority for which characters to keep.  I like creature because for sci-fi I spend more time crafting descriptions
 #of creatures and hate to see them on the cuttimg-room-floor, so-to-speak.  Most if the books I read have male protoganists, so I prefer to get a few more female on-screen.
 actor_priority: "creature, actress, female"
+
+#If use_speech_verbs is 1 (default) then character detection will require potential character names be followed by one of 500 possible verbs that commonly follow a persons name.  Set to 0 to remove the restriction (may help discover characters previously omitted)
+use_speech_verbs: 0
+
+#If use_dictionary is 1 (default) then character detection will check a dictionary file tokenizer_vocab_2.txt for the presence of the character name. If found, the character will be skipped. This file was generated from an english dictionary from which names were removed 
+#which occured in thousands of U.S. baby names, names from census data, names of actors and celebrities, and known names from audio books.  Set to 0 to remove the restriction (may help discover characters previously omitted)
+use_dictionary: 1

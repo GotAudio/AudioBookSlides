@@ -6,11 +6,6 @@ import concurrent.futures
 from collections import Counter
 import string
 
-# Function to read the dictionary file
-def read_dictionary(dict_file):
-    with open(dict_file, 'r') as file:
-        return {line.strip().lower() for line in file}
-
 # Function to preprocess words
 def preprocess_word(word):
     return word.lower(), word
@@ -31,37 +26,46 @@ def remove_trailing_punctuation(word):
 
 def process_file(input_file, dictionary, speech_verbs, strict=1):
     unique_words = {}
-    speech_verb_flags = {}  # New structure for speech verb flags
+    speech_verb_flags = {}
     with open(input_file, 'r') as infile:
         file_content = infile.read()
 
     for line_number, line in enumerate(file_content.splitlines(), 1):
         words = line.split()
         buffer = []
+        last_was_capitalized = False
+
+        speech_verb_flag = 0
+
         for i, word in enumerate(words):
-            if "'" in word or word[0].islower():
+            # Exclude words with apostrophes, digits, or internal punctuation
+            if "'" in word or word[0].isdigit() or any(c in string.punctuation for c in word.strip(string.punctuation)):
+                buffer = []
+                last_was_capitalized = False
                 continue
+
             processed_word, original_word = preprocess_word(word)
             cleaned_word = remove_trailing_punctuation(processed_word)
-            if not (is_part_in_dictionary(processed_word, dictionary) or is_part_in_dictionary(cleaned_word, dictionary)):
-                speech_verb_flag = 0  # Default flag value to 0
-                if i < len(words) - 1 and words[i + 1].strip(",.?!") in speech_verbs:
-                    speech_verb_flag = 1  # Set flag to 1 if speech verb is found
 
-                # In strict mode, only add entries with speech_verb_flag = 1 to unique_words
-                if strict == 1 and speech_verb_flag == 0:
-                    continue  # Skip adding to unique_words if strict=1 and no speech verb follows
+            # Append only if the word is capitalized, not in the dictionary, and has no disallowed internal punctuation
+            if word[0].isupper() and not is_part_in_dictionary(processed_word, dictionary) and not is_part_in_dictionary(cleaned_word, dictionary):
+                buffer.append(original_word)
+                last_was_capitalized = True
+            else:
+                # Reset if the next word is not a speech verb or if strict conditions are not met
+                buffer = []
+                last_was_capitalized = False
+                continue  # Skip appending and reset for the next word
 
-                # Append the word to the buffer; in strict=1 mode, this happens only if speech_verb_flag == 1
-                buffer.append(remove_trailing_punctuation(original_word))
-
-                # Update speech_verb_flags regardless of strict mode; this keeps track of all processed words
-                speech_verb_flags[' '.join(buffer)] = speech_verb_flag
-
-        if buffer:
-            phrase = ' '.join(buffer)
-            if phrase not in unique_words:  # This check avoids overwriting entries in unique_words
-                unique_words[phrase] = line_number
+            # Commit the buffer if the end of a sentence is reached or if followed by a speech verb
+            if buffer and (i == len(words) - 1 or words[i + 1].strip(",.?!") in speech_verbs):
+                phrase = ' '.join(buffer)
+                if phrase not in unique_words:
+                    unique_words[phrase] = line_number
+                    speech_verb_flags[phrase] = speech_verb_flag
+                buffer = []  # Clear the buffer for new accumulation
+                last_was_capitalized = False
+                speech_verb_flag = 0  # Reset flag for the next potential phrase
 
     return unique_words, speech_verb_flags
 
@@ -164,6 +168,8 @@ def write_output(output_file, matches, top_terms):
             file.write(output_line)
 
 
+import argparse
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Process some files.')
     parser.add_argument('dict_file', help='Dictionary file')
@@ -174,13 +180,18 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    dict_file = args.dict_file
+    # Attempt to read the dictionary file
+    try:
+        with open(args.dict_file, 'r') as file:
+            dictionary = {line.strip().lower() for line in file}
+    except FileNotFoundError:
+        print(f"No dictionary found ({args.dict_file}), skipping dictionary check.")
+        dictionary = set()  # Initialize dictionary as an empty set if file not found
+
     input_file1 = args.input_file1
     input_file2 = args.input_file2
     output_file = args.output_file
     strict = args.strict
-
-    dictionary = read_dictionary(dict_file)
 
     speech_verbs = [
         "acknowledged", "added", "admitted", "advised", "affirmed", "agreed", "announced", "appeared", "argued", "asked",
@@ -243,10 +254,7 @@ if __name__ == "__main__":
     ]
 
     unique_words, speech_verb_flags = process_file(input_file1, dictionary, speech_verbs, strict)
-
-    #for word, flag in speech_verb_flags.items():
-    #    print(f"Word/Phrase: '{word}', Speech Verb Flag: {flag}")
-
+    #print(unique_words)
     top_terms = preprocess_counts(input_file2, unique_words)
     #print(top_terms)
     matches = find_matches(input_file2, unique_words, top_terms)
