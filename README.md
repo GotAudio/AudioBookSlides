@@ -1,5 +1,5 @@
 
-# AudioBookSlides
+# AudioBookSlides: Create an AI generated slide show and subtitles from an audio book.
 
 ![002333030](https://github.com/GotAudio/AudioBookSlides/assets/13667229/fce869e0-1523-4dfc-9b07-7082a1c7acdc)
 
@@ -294,7 +294,7 @@ $abs/
 - If you suspect a character's name is missing from your actor file, please follow these steps for correction:
    1. Open the file tokenizer_vocab_2.txt. This file acts as an English dictionary from which numerous names have been removed, including those scraped from U.S. baby names, census data, and extracted from 200,000 lines of eBooks. For instance, I recently had to remove the name "Holmes" from this file.
    2. If you believe there are still names missing after the initial edit, you can set 'use_dictionary: 0' in the config file. Proceed by deleting all files except for bookname.mp3 and bookname.srt, and re-run the generation script (for example, abs 01SherlockHolmes). This process ensures that no names from the dictionary are filtered out during name generation.
-   3. If you're not satisfied with the results, you can set 'use_speech_verbs: 0' in the config file. This adjustment bypasses the validation check that requires proper names to be immediately followed by one of 500 different verbs, which indicate actions performed by a character. After this change, the sole criterion for a word to be considered a potential character name is capitalization, though this may result in some place names being included in your actor list. Ideally, you should review the list to identify and remove any such instances.
+   3. If you're not satisfied with the results, you can set 'use_speech_verbs: 0' in the config file. This adjustment bypasses the validation check that requires proper names to be immediately followed by one of 500 different verbs, which indicate actions performed by a character. After this change, the sole criterion for a word to be considered a potential character name is capitalization, though this may result in some place names being included in your actor list. Ideally, you should review the list to identify and remove any such instances. (This match only needs to occur once, so for a prominent character, it is very likely to happen at least once.)
    4. I do not recommend setting both of these values to 0. If you do, you will probably get every word from the beginning of every sentence. Execution time will also increase.
    5. Or you can just type the missing character into the bookname_ts_p_actors_EDIT.txt file by copying and pasteing an existing line, then change the name in order to keep proper delimiters.
 
