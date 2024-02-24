@@ -296,10 +296,12 @@ def main(bookname, wildcard_path=None):
 
         # Search for files based on the determined extension or default to common audio file types
         if file_extension:
-            files = [f for f in os.listdir(dir_path) if f.endswith(file_extension)]
+            # Make the comparison case-insensitive by converting both the filename and extension to lowercase
+            files = [f for f in os.listdir(dir_path) if f.lower().endswith(file_extension.lower())]
         else:
             extensions = ['.mp3', '.aac', '.wav']
-            files = [f for f in os.listdir(dir_path) for ext in extensions if f.endswith(ext)]
+            # Apply .lower() to both the file names and the extensions for case-insensitive matching
+            files = [f for f in os.listdir(dir_path) for ext in extensions if f.lower().endswith(ext.lower())]
 
         if not files:
             logging.error(f"No matching files found in {dir_path} for the pattern {wildcard_path}")
