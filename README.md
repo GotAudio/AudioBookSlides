@@ -60,6 +60,7 @@ pip install "%BASE%/AudioBookSlides/whisperx"
 pip install "%BASE%/AudioBookSlides"
 
 echo "Test whisperx functionality;"
+WARNING: DO NOT DO IT when whisperX displays: "To apply the upgrade to your files permanently, run `python -m pytorch_lightning.utilities.upgrade_checkpoint" 
 whisperx --model large-v2 --align_model WAV2VEC2_ASR_LARGE_LV60K_960H --max_line_count 1 --verbose False --output_format srt --language en --output_dir "%BASE%\AudioBookSlides" "%BASE%\AudioBookSlides\OneStep.mp3"
 type "%BASE%\AudioBookSlides\OneStep.srt"
 
@@ -219,6 +220,7 @@ pip install -e "$BASE/AudioBookSlides"
 
 #24. Test whisperx functionality
 echo "Testing the whisperx functionality."
+WARNING: DO NOT DO IT when whisperX displays: "To apply the upgrade to your files permanently, run `python -m pytorch_lightning.utilities.upgrade_checkpoint" 
 whisperx --model large-v2 --align_model WAV2VEC2_ASR_LARGE_LV60K_960H --max_line_count 1 --verbose False --output_format srt --language en --output_dir "$BASE/AudioBookSlides" "$BASE/AudioBookSlides/OneStep.mp3"
 cat "$BASE/AudioBookSlides/OneStep.srt"
 
