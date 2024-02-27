@@ -70,8 +70,7 @@ def process_file(input_file, dictionary, speech_verbs, strict=1):
     return unique_words, speech_verb_flags
 
 
-# Second Script Functions Modified for Integration
-def preprocess_counts(csv_file, dictionary):
+def preprocess_counts(csv_file, unique_words, strict=0):
     counts = Counter()
     male_counts = Counter()
     female_counts = Counter()
@@ -84,17 +83,29 @@ def preprocess_counts(csv_file, dictionary):
             contains_male = bool(male_pattern.search(line))
             contains_female = bool(female_pattern.search(line))
 
-            for term in dictionary:
-                term_count = line.count(term)
+            # Normalize line for non-strict comparison
+            line_lower = line.lower()
+            for term in unique_words:
+                # Determine if term needs to be case-sensitive
+                term_to_count = term if strict and term[0].isupper() else term.lower()
+
+                if ' ' in term:  # Handle multi-word terms
+                    term_count = line.count(term) if strict and term[0].isupper() else line_lower.count(term.lower())
+                else:  # Handle single-word terms
+                    # Use regex to match whole words, considering strict flag for capitalization
+                    pattern = re.compile(r'\b{}\b'.format(re.escape(term)), re.IGNORECASE if not strict or not term[0].isupper() else 0)
+                    term_count = len(pattern.findall(line if strict and term[0].isupper() else line_lower))
+
                 counts[term] += term_count
                 if contains_male:
                     male_counts[term] += term_count
                 if contains_female:
                     female_counts[term] += term_count
 
-    top_terms = {term: (counts[term], male_counts[term], female_counts[term]) for term in dictionary if counts[term] > 0}
+    top_terms = {term: (counts[term], male_counts[term], female_counts[term]) for term in unique_words if counts[term] > 0}
 
     return top_terms
+
 
 def find_matches(csv_file, dictionary, top_terms):
     """Finds matches for dictionary terms in the context of speech verbs and compiles associated counts.
@@ -255,7 +266,7 @@ if __name__ == "__main__":
 
     unique_words, speech_verb_flags = process_file(input_file1, dictionary, speech_verbs, strict)
     #print(unique_words)
-    top_terms = preprocess_counts(input_file2, unique_words)
+    top_terms = preprocess_counts(input_file2, unique_words, strict)
     #print(top_terms)
     matches = find_matches(input_file2, unique_words, top_terms)
     #print(matches)

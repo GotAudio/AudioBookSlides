@@ -54,7 +54,7 @@ def process_input(input_file, output_file):
 
 if __name__ == "__main__":
     if len(sys.argv) != 3:
-        print("Usage: python script.py <input_file> <output_file>")
+        print("Usage: python get_characters.py _ts_p.srt _ts_p_characters.srt")
         sys.exit(1)
 
     input_file = sys.argv[1]
