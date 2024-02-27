@@ -119,8 +119,7 @@ def find_matches(csv_file, dictionary, top_terms):
                 lowest_count_term = None
                 lowest_count = None
                 for term in dictionary:
-                    # Match terms based on their exact case
-                    if re.search(r'\b' + re.escape(term) + r'\b', line):
+                    if re.search(r'\b' + re.escape(term) + r'\b', line, re.IGNORECASE):
                         count, male_count, female_count = top_terms.get(term, (0, 0, 0))
                         # Update the term with the lowest count if this is the first term checked or if its count is lower than the current lowest
                         if lowest_count is None or count < lowest_count:
@@ -133,6 +132,7 @@ def find_matches(csv_file, dictionary, top_terms):
     except FileNotFoundError:
         print(f"Error: CSV file '{csv_file}' not found.")
         sys.exit(1)
+    print (matches)
     return matches
 
 
