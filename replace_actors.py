@@ -84,7 +84,7 @@ def process_input(characters_file, male_actors_file, female_actors_file, output_
 
 if __name__ == "__main__":
     if len(sys.argv) < 5 or len(sys.argv) > 6:
-        print("Usage: python replace_actors.py <characters_file> <male_actors_file> <female_actors_file> <output_file> [depth]")
+        print("Usage: python replace_actors.py _ts_p_characters.srt <male_actors_file> <female_actors_file> _ts_p_actors_EDIT.txt [depth]")
         sys.exit(1)
 
     characters_file = sys.argv[1]

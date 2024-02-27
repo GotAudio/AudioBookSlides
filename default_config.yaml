@@ -100,7 +100,7 @@ keep_actors: 1
 
 #if keep_actors is enabled you can select the priority for which characters to keep.  I like creature because for sci-fi I spend more time crafting descriptions
 #of creatures and hate to see them on the cuttimg-room-floor, so-to-speak.  Most if the books I read have male protoganists, so I prefer to get a few more female on-screen.
-actor_priority: "actress, female, actor, creature, male"
+actor_priority: "creature, actress, actor"
 
 #If use_speech_verbs is 1 (default) then character detection will require potential character names be followed by one of 500 possible verbs that commonly follow a persons name.  Set to 0 to remove the restriction (may help discover characters previously omitted)
 use_speech_verbs: 1

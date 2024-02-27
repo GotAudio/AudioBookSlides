@@ -96,7 +96,7 @@ if __name__ == "__main__":
     import sys
 
     if len(sys.argv) != 4:
-        print("Usage: script.py replacements.txt input.txt output.txt")
+        print("Usage: script.py _ts_p_actors.txt _merged.txt _merged_names_dup.txt ")
         sys.exit(1)
 
     main(sys.argv[1], sys.argv[2], sys.argv[3])

@@ -67,12 +67,16 @@ def process_files(file_pattern, output_file_path, log_file_path, config):  # Add
     except Exception as e:
         print(f"Failed to process files: {e}")
 
+import re
+from itertools import permutations
+
 def remove_duplicate_patterns(filename, log_file, output_file, config):
     import re
     pattern = re.compile(r'(_[^@]*@)')
     line_number = 0
     keep_actors = int(config.get('keep_actors', 0))  # Default to 0 if not specified
     actor_priority = config.get('actor_priority', '').split(', ') if config.get('actor_priority') else None
+    last_match = None  # Initialize variable to keep track of the last match
 
     with open(filename, 'r') as file:
         for line in file:
@@ -81,10 +85,16 @@ def remove_duplicate_patterns(filename, log_file, output_file, config):
             seen = set()
             found_unique = [x for x in found if not (x in seen or seen.add(x))]
 
+            # Sort based on actor_priority, if specified
             if actor_priority:
                 sorted_found = sorted(found_unique, key=lambda x: next((actor_priority.index(actor) for actor in actor_priority if actor in x), float('inf')))
             else:
                 sorted_found = found_unique
+
+            # Avoid back-to-back duplicates
+            if last_match and last_match in sorted_found and len(sorted_found) > 1:
+                # Move the last match to the end if it's not the only choice
+                sorted_found.append(sorted_found.pop(sorted_found.index(last_match)))
 
             if keep_actors > 0:
                 matches_to_keep = sorted_found[:keep_actors]
@@ -96,6 +106,10 @@ def remove_duplicate_patterns(filename, log_file, output_file, config):
             # Remove all matches to ensure a clean slate
             for match in found:
                 line = line.replace(match, '')
+
+            # Update last_match based on the new matches to keep
+            if matches_to_keep:
+                last_match = matches_to_keep[-1]  # Update the last match to the last in the list to be reinserted
 
             # Reinsert matches to keep with a space after the trailing @, in the correct priority order
             for match in reversed(matches_to_keep):
@@ -109,7 +123,6 @@ def remove_duplicate_patterns(filename, log_file, output_file, config):
                 log_file.write(log_entry)
 
             output_file.write(line)
-
 
 def main():
     if DEBUG2:
