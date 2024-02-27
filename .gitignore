@@ -3,6 +3,7 @@ OneStep.srt
 _models/
 .cache/
 ABS_API_KEY.txt
+ABS_API_KEY.txt.offline
 AudioBookSlides.egg-info
 temp_output.srt
 books/

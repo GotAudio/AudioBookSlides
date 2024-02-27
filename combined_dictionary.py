@@ -129,7 +129,7 @@ def write_output(output_file, matches, top_terms):
         for keyname, term_tuple_list in matches.items():
             if not term_tuple_list:  # Check if there are no terms for this keyname
                 # Output a row with placeholders if no terms
-                output_line = f'"{keyname}"\t"[PROPER NAME], {{GENDER}}, (AGE), <CLOTHING>, physical activity."\n'
+                output_line = f'"{keyname}"\t"[], {{}}, (), <>, "\n'
                 file.write(output_line)
                 continue  # Skip to the next iteration
 
@@ -159,7 +159,7 @@ def write_output(output_file, matches, top_terms):
             # Check if name is empty and set the output format accordingly
             if character_name == "" or character_name.upper() == "PROPER NAME":
                 # Use placeholders for all fields
-                output_line = f'"{keyname}"\t"[PROPER NAME], {gender_label}, {age}, <CLOTHING>, physical activity."\n'
+                output_line = f'"{keyname}"\t"[], {{}}, (), <>, "\n'
             else:
                 # Format the output line to match the required format, including actual description
                 output_line = f'"{keyname}"\t"[{character_name}]", {gender_label}, {age}, <>, "\n'
@@ -172,10 +172,10 @@ import argparse
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Process some files.')
-    parser.add_argument('dict_file', help='Dictionary file')
-    parser.add_argument('input_file1', help='First input file')
-    parser.add_argument('input_file2', help='Second input file')
-    parser.add_argument('output_file', help='Output file')
+    parser.add_argument('dict_file', help='tokenizer_vocab_2.txt dictionary file')
+    parser.add_argument('input_file1', help='_m300.srt input file')
+    parser.add_argument('input_file2', help='_ts.srt m300 with timestamps input file')
+    parser.add_argument('output_file', help='_ts_p.srt Output file')
     parser.add_argument('--strict', type=int, choices=[0, 1], default=1, help='Strict mode (default: 1)')
 
     args = parser.parse_args()
@@ -219,7 +219,7 @@ if __name__ == "__main__":
         "swooped", "swung", "teased", "thought", "thrashed", "threatened", "tickled", "tilted", "took", "tore",
         "tossed", "trapped", "trickled", "tried", "trusted", "tugged", "tumbled", "turned", "twisted", "twitched",
         "unfurled", "unspooled", "urged", "used", "walked", "wanted", "warned", "was", "watched", "whispered",
-        "widened", "wielded", "wished", "wondered", "wove", "wrapped", "wrenched", "writhed", "yanked", "here","in","is",
+        "widened", "wielded", "wished", "wondered", "wove", "wrapped", "wrenched", "writhed", "yanked", "here","is",
         "accepted", "accompanied", "accomplished", "accounted", "accustomed", "activities", "acts", "address", "addressed", "advertised", "affected", "aided", "aids", "aligned", "alleged", "allotted",
         "altered", "always", "answered", "anticipated", "appreciated", "appropriated", "approved", "armed", "assigned", "assisted", "assured", "attached", "attended", "attributed", "authorized",
         "backhanded", "baked", "banks", "barred", "batted", "betrothed", "bleached", "bleed", "blessed", "blotted", "bobbed", "bothered", "bowed", "bragged", "branded", "bred",

@@ -625,7 +625,9 @@ def main(bookname, wildcard_path=None):
                         if len(fields) >= 2:
                             key, value = fields[0], fields[1]
                             if key in data_dict:
-                                merged_line = f"{value}\t{data_dict[key]}\t{key}\n"
+                                # KAS Do not include actors. We will do that later after they have been filtered and pruned
+                                #merged_line = f"{value}\t{data_dict[key]}\t{key}\n"
+                                merged_line = f"{data_dict[key]}\t{key}\n"
                                 merged_file.write(merged_line)
 
             logging.info("Merged files to: %s", output_file)
@@ -635,6 +637,8 @@ def main(bookname, wildcard_path=None):
             return
     else:
         logging.info("Merged characters and scenes already exists: %s", output_file)
+
+
 
     # Step 14: Replace actors using the existing script
     male_actors_csv = config.get('actors')

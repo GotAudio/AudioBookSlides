@@ -74,6 +74,7 @@ image_generator: "ComfyUI"
 #comfyui_model: "realvisxlV30Turbo_v30TurboBakedvae.safetensors"
 #comfyui_model: "socababesTurboXL_v12Hybrid.safetensors"
 #comfyui_model: "turbovisionxlSuperFastXLBasedOnNew_tvxlV32Bakedvae.safetensors"
+#comfyui_model: "rundiffusionFX_v10.safetensors"
 comfyui_model: "photon_v1.safetensors"
 
 # Workflow file name (only used for ComfyUI). I have provided a few sample workflows. The default positive prompt must start with " Pos: ", negative prompt must start with " Neg: ". model, seed, width, height, steps, cfg and prompt will be auto-generated
@@ -99,10 +100,10 @@ keep_actors: 1
 
 #if keep_actors is enabled you can select the priority for which characters to keep.  I like creature because for sci-fi I spend more time crafting descriptions
 #of creatures and hate to see them on the cuttimg-room-floor, so-to-speak.  Most if the books I read have male protoganists, so I prefer to get a few more female on-screen.
-actor_priority: "creature, actress, female"
+actor_priority: "actress, female, actor, creature, male"
 
 #If use_speech_verbs is 1 (default) then character detection will require potential character names be followed by one of 500 possible verbs that commonly follow a persons name.  Set to 0 to remove the restriction (may help discover characters previously omitted)
-use_speech_verbs: 0
+use_speech_verbs: 1
 
 #If use_dictionary is 1 (default) then character detection will check a dictionary file tokenizer_vocab_2.txt for the presence of the character name. If found, the character will be skipped. This file was generated from an english dictionary from which names were removed 
 #which occured in thousands of U.S. baby names, names from census data, names of actors and celebrities, and known names from audio books.  Set to 0 to remove the restriction (may help discover characters previously omitted)

@@ -68,6 +68,7 @@ def process_files(file_pattern, output_file_path, log_file_path, config):  # Add
         print(f"Failed to process files: {e}")
 
 def remove_duplicate_patterns(filename, log_file, output_file, config):
+    import re
     pattern = re.compile(r'(_[^@]*@)')
     line_number = 0
     keep_actors = int(config.get('keep_actors', 0))  # Default to 0 if not specified
@@ -96,9 +97,9 @@ def remove_duplicate_patterns(filename, log_file, output_file, config):
             for match in found:
                 line = line.replace(match, '')
 
-            # Reinsert matches to keep
-            for match in matches_to_keep:
-                line = match + line
+            # Reinsert matches to keep with a space after the trailing @, in the correct priority order
+            for match in reversed(matches_to_keep):
+                line = match + " " + line
 
             # Log removed matches with the specified format
             match_count = 0

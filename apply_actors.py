@@ -8,8 +8,8 @@ def load_replacements(file_path):
             if len(parts) == 2:
                 key_value = parts[1].split(',', 1)
                 if len(key_value) == 2:
-                    key = key_value[0].strip()
-                    value = key_value[1].strip()
+                    key = key_value[0]
+                    value = key_value[1]+' '
                     replacements[key] = value
     return replacements
 
@@ -45,7 +45,7 @@ def process_line(line):
 
     # Replace specific values with a single space
     replace_with_space = [
-        "NOT SPECIFIED", "Not mentioned", "physical activity", "plural",
+        "Not Specified", "NOT SPECIFIED", "Not mentioned", "physical activity", "plural",
         "N/A", "n/a", "GENDER", "gender", "(AGE)", "PROPER NAME", "Unnamed",
         "UNKNOWN", "unknown", "CLOTHING", "clothing", "unspecified", "<none>",
         "UNSPECIFIED", "not mentioned", "( )", "< >", "{ }", "()", "<>", "{}"
@@ -59,6 +59,7 @@ def process_line(line):
     line = re.sub(r',\s*\.', '.', line)
     line = re.sub(r'\.\s*,', '.', line)
     line = re.sub(r'^\.\s*', '', line)
+    line = line.replace("\\", " ")
 
     # Normalize the spaces around commas
     line = re.sub(r'\s*,\s*', ', ', line)
@@ -76,7 +77,7 @@ def process_line(line):
     line = line.replace(',,', ',')
     line = line.replace(',,', ',')
     line = line.replace(',,', ',')
-
+    line = line.replace("''", "'")
 
     # Remove comma at the beginning of a line
     line = re.sub(r'^,', '', line)
