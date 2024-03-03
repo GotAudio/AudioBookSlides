@@ -244,7 +244,7 @@ Dean Koontz - Odd Thomas - Deeply Odd Book 6. Length: 9:37, 2500 images took 5.5
 - 2024-2-21 Version 1.1.0 Update. GPT is no longer required. Scripts are now included to generate character and scene data locally. (GPT does a better job though.)
 - To use the GPT API, you need to sign up for an API Key. Register and get your key [here](https://platform.openai.com).
 - Save your API key in a file named `ABS_API_KEY.txt` in the application folder.
-- The cost is approximately $5 for a 12-hour audiobook. New sign-ups might receive $20 free credit.
+- The cost is approximately $1 for a 12-hour audiobook. New sign-ups might receive $20 free credit.
 - Alternatively, use the free [LM-Studio Local GPT server](https://lmstudio.ai/). It's about 3 times slower (1 hour vs 20 minutes) and less accurate. The recommended model is [here](https://huggingface.co/TheBloke/Mistral-7B-Instruct-v0.1-GGUF).
 - Note: Not all requests have been optimized for LM-Studio. Some results may be suboptimal. This feature was utilized during development but has not been fully verified with the current installation.
   
