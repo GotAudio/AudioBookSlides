@@ -9121,7 +9121,6 @@ donor
 donors
 dons
 dont
-donut
 donuts
 doo
 doodle
@@ -17965,6 +17964,7 @@ lombard
 lombardi
 lomond
 lon
+london
 londonmarathon
 lone
 lonel
@@ -19677,7 +19677,6 @@ money
 mong
 monger
 mongers
-mongo
 mongolia
 mongolian
 moni

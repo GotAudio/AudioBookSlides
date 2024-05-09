@@ -1,7 +1,7 @@
 # This config file can be copied to books\<bookname>\<bookname>.yaml and any keys there will over ride the key here. actors for example.
 # Prompts for generating images. 
-pos_prompt: "  Pos: (( style of victorian london murder mystery )) (full body:1.2) RAW photo, beautiful landscape, depth of field, full body photo , natural skin, cinematic shot "
-neg_prompt: "  Neg: bad eyes, misshapen, monochrome, mutation "
+pos_prompt: " [caucasian], (fantastical), (best quality), (perfect details), (professional photo) "
+neg_prompt: " shirtless, painting, monochrome, freckles, asian, bad quality, low quality, low face detail, low resolution, bad anatomy "
 
 # If image_generator is ComfyUI, folder containing ComfyUI generated images. You must start ComfyUI prior to generating images.
 # You must change the path below or you must rename the "output" images folder to <bookname> when image generation is complete
@@ -75,6 +75,7 @@ image_generator: "ComfyUI"
 #comfyui_model: "socababesTurboXL_v12Hybrid.safetensors"
 #comfyui_model: "turbovisionxlSuperFastXLBasedOnNew_tvxlV32Bakedvae.safetensors"
 #comfyui_model: "rundiffusionFX_v10.safetensors"
+#comfyui_model: "realisticVisionV51_v51VAE.safetensors"
 comfyui_model: "photon_v1.safetensors"
 
 # Workflow file name (only used for ComfyUI). I have provided a few sample workflows. The default positive prompt must start with " Pos: ", negative prompt must start with " Neg: ". model, seed, width, height, steps, cfg and prompt will be auto-generated
@@ -92,6 +93,9 @@ path_to_workflow: "Photon_1Face_Api.json"
 #LM-Studio must be running and Local Server mode must be started.  I recommend this model https://huggingface.co/TheBloke/Mistral-7B-Instruct-v0.1-GGUF  ( mistral-7b-instruct-v0.1.Q6_K.gguf )
 #**** I may need to update a few scripts to run with LMS. I have not tested the most recent prompts with LMS ****
 #api_base: "http://localhost:1234/v1"
+
+#output video_format must be "mp4" or "avi". (Default is avi)
+video_format: "mp4"
 
 #Stable Diffusion will not usually place multiple named characters together on an image.  Every face tends to be the identical face.  
 #keep_actors will remove all but n actors from a scene. Enter 99 to have no practical limit. Enter 0 to keep all UNIQUE actors. 

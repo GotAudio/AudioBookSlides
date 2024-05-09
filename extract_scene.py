@@ -58,7 +58,7 @@ def main(input_file, output_file, api_key):
 
     total_lines = len(lines)
 
-    default_scene = "[Default Scene=A warm, intimate recording studio with state-of-the-art equipment, soundproofing panels, and a cozy narrator's booth bathed in soft light.]"
+    default_scene = "[((Default View=A warm intimate recording studio with state-of-the-art equipment, soundproofing panels, large clear windows, a cozy narrator's booth bathed in soft light.))]"
     results = []
 
     if api_key:

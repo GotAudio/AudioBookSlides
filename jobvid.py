@@ -6,13 +6,16 @@ import fnmatch
 import time
 import platform
 
-def process_image(image_file, output_folder, frame_count, idx, total):
+def process_image(image_file, output_folder, frame_count, idx, total, video_format):
     img = cv2.imread(image_file)
-    video_file = os.path.join(output_folder, os.path.basename(image_file).replace('png', 'avi'))
+    video_file = os.path.join(output_folder, os.path.basename(image_file).replace('png', video_format))
     height, width, layers = img.shape
     size = (width, height)
 
-    out = cv2.VideoWriter(video_file, cv2.VideoWriter_fourcc(*'XVID'), 30, size)
+    if video_format == "avi":
+        out = cv2.VideoWriter(video_file, cv2.VideoWriter_fourcc(*'XVID'), 30, size)
+    else:
+        out = cv2.VideoWriter(video_file, cv2.VideoWriter_fourcc(*'mp4v'), 30, size)
 
 #    fourcc = cv2.VideoWriter_fourcc(*'MPEG')
 #    out = cv2.VideoWriter(video_file,fourcc, 20.0, (768,768))
@@ -28,8 +31,7 @@ def process_image(image_file, output_folder, frame_count, idx, total):
         sys.stdout.write('.')
         sys.stdout.flush()
 
-def main(input_wildcard, output_video):
-
+def main(input_wildcard, output_video, video_format='avi'):
 
     start_time = time.time()
     if os.path.dirname(input_wildcard):
@@ -127,7 +129,7 @@ def main(input_wildcard, output_video):
     sys.stdout.flush()
     sys.stdout.write('\b' * 101)
 
-    Parallel(n_jobs=-1, backend="threading")(delayed(process_image)(os.path.join(image_folder, img), output_folder, frame_count, idx, total_images) for idx, (img, frame_count) in enumerate(zip(images, frame_counts)))
+    Parallel(n_jobs=-1, backend="threading")(delayed(process_image)(os.path.join(image_folder, img), output_folder, frame_count, idx, total_images, video_format) for idx, (img, frame_count) in enumerate(zip(images, frame_counts)))
 
     sys.stdout.write('\n')  # Move to the next line after progress bar completion
 
@@ -138,7 +140,7 @@ def main(input_wildcard, output_video):
     file_list = os.path.join(output_folder, 'file_list.txt')
     with open(file_list, 'w') as f:
         for img in images:
-            video_file = os.path.basename(img).replace('png', 'avi')
+            video_file = os.path.basename(img).replace('png', video_format)
             video_file_abs_path = os.path.abspath(os.path.join(output_folder, video_file))
             f.write(f"file '{video_file_abs_path}'\n")
 
@@ -151,19 +153,29 @@ def main(input_wildcard, output_video):
     elapsed_time = time.time() - start_time
     elapsed_time_formatted = time.strftime("%H:%M:%S", time.gmtime(elapsed_time))
 
+    q = '"' if platform.system() == 'Windows' else "'"
+
     # automatic ffmpeg invocation and cleanup
-    print(f"\nffmpeg -hide_banner -f concat -safe 0 -i {file_list} -c copy {output_video}")
-    os.system(f"ffmpeg  -hide_banner -f concat -safe 0 -i {file_list} -c copy {output_video}")
+    print(f"\nffmpeg -hide_banner -f concat -safe 0 -i {file_list} -c copy {q}{output_video}{q}")
+    os.system(f"ffmpeg  -hide_banner -f concat -safe 0 -i {file_list} -c copy {q}{output_video}{q}")
 
     # Check if the output_video file exists
     if os.path.exists(output_video):
-        os.system(f"rm -r {output_folder}")
+        os.system(f"rm -r {q}{output_folder}{q}")
     else:
-        print(f"Error: The output video file {output_video} does not exist.")
+        print(f"Error: The output video file {q}{output_video}{q} does not exist.")
         sys.exit(1)
 
 if __name__ == "__main__":
-    if len(sys.argv) != 3:
-        print("Usage: python script.py <input_wildcard> <output_video>")
+    if len(sys.argv) < 3 or len(sys.argv) > 4:
+        print("Usage: python script.py <input_wildcard> <output_video> [video_format]")
         sys.exit(1)
-    main(sys.argv[1], sys.argv[2])
+
+    input_wildcard = sys.argv[1]
+    output_video = sys.argv[2]
+    video_format = 'avi'  # default format
+
+    if len(sys.argv) == 4:
+        video_format = sys.argv[3]
+
+    main(input_wildcard, output_video, video_format)

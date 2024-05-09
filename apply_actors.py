@@ -14,7 +14,7 @@ def load_replacements(file_path):
     return replacements
 
 def replace_in_file(input_path, replacements, output_path):
-    with open(input_path, 'r') as file:
+    with open(input_path, 'r', encoding='utf-8') as file:
         lines = file.readlines()
 
     with open(output_path, 'w') as file:

@@ -24,51 +24,50 @@ def remove_trailing_punctuation(word):
     return word
 
 
-def process_file(input_file, dictionary, speech_verbs, strict=1):
+def process_file(csv_file, dictionary, speech_verbs, strict=1):
     unique_words = {}
     speech_verb_flags = {}
-    with open(input_file, 'r') as infile:
-        file_content = infile.read()
-
-    for line_number, line in enumerate(file_content.splitlines(), 1):
-        words = line.split()
-        buffer = []
-        last_was_capitalized = False
-
-        speech_verb_flag = 0
-
-        for i, word in enumerate(words):
-            # Exclude words with apostrophes, digits, or internal punctuation
-            if "'" in word or word[0].isdigit() or any(c in string.punctuation for c in word.strip(string.punctuation)):
-                buffer = []
-                last_was_capitalized = False
-                continue
-
-            processed_word, original_word = preprocess_word(word)
-            cleaned_word = remove_trailing_punctuation(processed_word)
-
-            # Append only if the word is capitalized, not in the dictionary, and has no disallowed internal punctuation
-            if word[0].isupper() and not is_part_in_dictionary(processed_word, dictionary) and not is_part_in_dictionary(cleaned_word, dictionary):
-                buffer.append(original_word)
-                last_was_capitalized = True
+    with open(csv_file, 'r', encoding='utf-8-sig') as infile:
+        for line_number, line in enumerate(infile, 1):
+            # Ignore lines that do not contain the expected tab separation (e.g., timestamps)
+            if '\t' in line:
+                _, text = line.split('\t', 1)
+                text = text.strip('"')
             else:
-                # Reset if the next word is not a speech verb or if strict conditions are not met
-                buffer = []
-                last_was_capitalized = False
-                continue  # Skip appending and reset for the next word
+                continue  # Skip lines without proper format
 
-            # Commit the buffer if the end of a sentence is reached or if followed by a speech verb
-            if buffer and (i == len(words) - 1 or words[i + 1].strip(",.?!") in speech_verbs):
-                phrase = ' '.join(buffer)
-                if phrase not in unique_words:
-                    unique_words[phrase] = line_number
-                    speech_verb_flags[phrase] = speech_verb_flag
-                buffer = []  # Clear the buffer for new accumulation
-                last_was_capitalized = False
-                speech_verb_flag = 0  # Reset flag for the next potential phrase
+            words = text.split()
+            buffer = []
+            last_was_capitalized = False
+
+            for i, word in enumerate(words):
+                # Exclude words with apostrophes, digits, or internal punctuation
+                if "'" in word or word[0].isdigit() or any(c in string.punctuation for c in word.strip(string.punctuation)):
+                    buffer = []
+                    last_was_capitalized = False
+                    continue
+
+                processed_word, original_word = preprocess_word(word)
+                cleaned_word = remove_trailing_punctuation(processed_word)
+
+                if word[0].isupper() and not is_part_in_dictionary(processed_word, dictionary) and not is_part_in_dictionary(cleaned_word, dictionary):
+                    buffer.append(original_word)
+                    last_was_capitalized = True
+                else:
+                    buffer = []
+                    last_was_capitalized = False
+                    continue  # Skip appending and reset for the next word
+
+                # Commit the buffer if the end of a sentence is reached or if followed by a speech verb
+                if buffer and (i == len(words) - 1 or words[i + 1].strip(",.?!") in speech_verbs):
+                    phrase = ' '.join(buffer)
+                    if phrase not in unique_words:
+                        unique_words[phrase] = line_number
+                        speech_verb_flags[phrase] = 0  # Keeping the speech_verb_flag logic, though it's not updated in this snippet
+                    buffer = []  # Clear the buffer for new accumulation
+                    last_was_capitalized = False
 
     return unique_words, speech_verb_flags
-
 
 def preprocess_counts(csv_file, unique_words, strict=0):
     counts = Counter()
@@ -107,8 +106,8 @@ def preprocess_counts(csv_file, unique_words, strict=0):
     return top_terms
 
 
-def find_matches(csv_file, dictionary, top_terms):
-    """Finds matches for dictionary terms in the context of speech verbs and compiles associated counts.
+def find_matches(csv_file, unique_words, top_terms):
+    """Finds matches for unique_words terms in the context of speech verbs and compiles associated counts.
     Only includes the term with the smallest count for each timestamp."""
     matches = {}
     try:
@@ -118,7 +117,7 @@ def find_matches(csv_file, dictionary, top_terms):
                 timestamp = timestamp_match.group(1) if timestamp_match else "unknown"
                 lowest_count_term = None
                 lowest_count = None
-                for term in dictionary:
+                for term in unique_words:
                     # Match terms based on their exact case
                     if re.search(r'\b' + re.escape(term) + r'\b', line):
                         count, male_count, female_count = top_terms.get(term, (0, 0, 0))
@@ -185,8 +184,8 @@ import argparse
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Process some files.')
     parser.add_argument('dict_file', help='tokenizer_vocab_2.txt dictionary file')
-    parser.add_argument('input_file1', help='_m300.srt input file')
-    parser.add_argument('input_file2', help='_ts.srt m300 with timestamps input file')
+    parser.add_argument('m300_file', help='_m300.srt input file')
+    parser.add_argument('csv_file', help='_ts.srt m300 with timestamps input file')
     parser.add_argument('output_file', help='_ts_p.srt Output file')
     parser.add_argument('--strict', type=int, choices=[0, 1], default=1, help='Strict mode (default: 1)')
 
@@ -200,8 +199,8 @@ if __name__ == "__main__":
         print(f"No dictionary found ({args.dict_file}), skipping dictionary check.")
         dictionary = set()  # Initialize dictionary as an empty set if file not found
 
-    input_file1 = args.input_file1
-    input_file2 = args.input_file2
+    m300_file = args.m300_file
+    csv_file = args.csv_file
     output_file = args.output_file
     strict = args.strict
 
@@ -265,10 +264,13 @@ if __name__ == "__main__":
         "whirred", "whizzed", "winded", "witness", "works", "worms", "worried", "wrinkled", "yaws", "yeahs", "zigzagged", "zipped"
     ]
 
-    unique_words, speech_verb_flags = process_file(input_file1, dictionary, speech_verbs, strict)
+    unique_words, speech_verb_flags = process_file(csv_file, dictionary, speech_verbs, strict)
     #print(unique_words)
-    top_terms = preprocess_counts(input_file2, unique_words, strict)
+    top_terms = preprocess_counts(csv_file, unique_words, strict)
     #print(top_terms)
-    matches = find_matches(input_file2, unique_words, top_terms)
+    matches = find_matches(csv_file, unique_words, top_terms)
     #print(matches)
     write_output(output_file, matches, top_terms)
+
+
+

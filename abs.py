@@ -138,7 +138,7 @@ def is_file_nonempty(file_path):
 
 def count_lines(filepath):
     try:
-        with open(filepath, 'r', encoding='utf-8-sig') as file:
+        with open(filepath, 'r', encoding='utf-8') as file:
             return sum(1 for _ in file)
     except IOError as e:
         logging.error("Error reading file %s: %s", filepath, e)
@@ -194,6 +194,8 @@ def fix_path(old_path):
 
 def main(bookname, wildcard_path=None):
     # Step 1: Create the folder books\<bookname> if it does not exist
+
+    q = '"' if platform.system() == 'Windows' else "'"
 
     book_folder = os.path.join('books', bookname)
     if not create_directory(book_folder):
@@ -360,7 +362,7 @@ def main(bookname, wildcard_path=None):
         os.environ['TF_CPP_MIN_LOG_LEVEL'] = '1'
 
         # Construct whisperx_cmd using the base command from config and appending the dynamic directory and file path
-        whisperx_cmd = f"{config[key]} {output_dir} {mp3_file_path}"
+        whisperx_cmd = f'{config[key]} {q}{output_dir}{q} {q}{mp3_file_path}{q}'
 
         # Log the command if debugging is enabled
         if DEBUG:
@@ -396,7 +398,7 @@ def main(bookname, wildcard_path=None):
         logging.info("Creating modified srt: %s", modified_srt_file_path)
 
         # Construct the fix_srt.py command
-        fix_srt_cmd = f"python fix_srt.py -join 300 {original_srt_file_path} {modified_srt_file_path}"
+        fix_srt_cmd = f'python fix_srt.py -join 300 "{original_srt_file_path}" "{modified_srt_file_path}"'
 
         # Log the command if debugging is enabled
         if DEBUG:
@@ -424,7 +426,7 @@ def main(bookname, wildcard_path=None):
         logging.info("Creating time-stamped srt: %s", ts_srt_file_path)
 
         # Construct the make_prompts.py command
-        make_prompts_cmd = f"python make_prompts.py {modified_srt_file_path} {ts_srt_file_path}"
+        make_prompts_cmd = f'python make_prompts.py {q}{modified_srt_file_path}{q} {q}{ts_srt_file_path}{q}'
 
         # Log the command if debugging is enabled
         if DEBUG:
@@ -461,7 +463,7 @@ def main(bookname, wildcard_path=None):
 
             # Compare use_dictionary as integers
             dictionary_file = "NONE" if use_dictionary == 0 else "tokenizer_vocab_2.txt"
-            make_api_names_cmd = f"python combined_dictionary.py {dictionary_file} {m300_srt_filepath} {ts_srt_file_path} {ts_p_srt_file_path}"
+            make_api_names_cmd = f'python combined_dictionary.py {dictionary_file} {q}{m300_srt_filepath}{q} {q}{ts_srt_file_path}{q} {q}{ts_p_srt_file_path}{q}'
 
             use_speech_verbs = config.get('use_speech_verbs')
             # Append "--strict 0" to the command if use_speech_verbs is 0, comparing as integers
@@ -492,7 +494,7 @@ def main(bookname, wildcard_path=None):
 
         # Function to execute gen_prompts.py command
         def execute_gen_prompts():
-            gen_prompts_cmd = f"python gen_prompts.py {ts_srt_file_path} {ts_p_srt_file_path}"
+            gen_prompts_cmd = f"python gen_prompts.py {q}{ts_srt_file_path}{q} {q}{ts_p_srt_file_path}{q}"
             if DEBUG:
                 logging.debug("Step 07/20: Use GPT API to create image prompts for StableDiffusion: %s", gen_prompts_cmd)
             try:
@@ -540,7 +542,7 @@ def main(bookname, wildcard_path=None):
         logging.info("Getting characters list: %s", ts_srt_p_characters_file_path)
 
         # Construct the get_characters.py command
-        get_characters_cmd = f"python get_characters.py {ts_srt_p_file_path} {ts_srt_p_characters_file_path}"
+        get_characters_cmd = f'python get_characters.py {q}{ts_srt_p_file_path}{q} {q}{ts_srt_p_characters_file_path}{q}'
 
         # Log the command if debugging is enabled
         if DEBUG:
@@ -567,7 +569,7 @@ def main(bookname, wildcard_path=None):
         logging.info("Extracting scenes: %s", ts_srt_p_ns_file_path)
 
         # Construct the extract_scene.py command
-        extract_scene_cmd = f"python extract_scene.py {ts_srt_file_path} {ts_srt_p_ns_file_path}"
+        extract_scene_cmd = f'python extract_scene.py {q}{ts_srt_file_path}{q} {q}{ts_srt_p_ns_file_path}{q}'
 
         # Log the command if debugging is enabled
         if DEBUG:
@@ -656,7 +658,7 @@ def main(bookname, wildcard_path=None):
 
         try:
             # Execute the existing replace_actors.py script with depth parameter
-            replace_actors_cmd = f"python replace_actors.py {input_file} {male_actors_csv} {female_actors_csv} {edit_file} {depth}"
+            replace_actors_cmd = f'python replace_actors.py {q}{input_file}{q} {q}{male_actors_csv}{q} {q}{female_actors_csv}{q} {q}{edit_file}{q} {depth}'
 
             # Log the command if debugging is enabled
             if DEBUG:
@@ -688,7 +690,7 @@ def main(bookname, wildcard_path=None):
 
         try:
             # Execute the apply_actors.py script
-            apply_actors_cmd = f"python apply_actors.py {input_file} {merged_file} {output_file}"
+            apply_actors_cmd = f'python apply_actors.py {q}{input_file}{q} {q}{merged_file}{q} {q}{output_file}{q}'
 
             # Log the command if debugging is enabled
             if DEBUG:
@@ -720,7 +722,7 @@ def main(bookname, wildcard_path=None):
 
         try:
             # Execute the apply_actors.py script
-            apply_actors_cmd = f"python remove_all_other_actors.py {input_file} {output_file} --bookname {bookname}"
+            apply_actors_cmd = f'python remove_all_other_actors.py {q}{input_file}{q} {q}{output_file}{q} --bookname {q}{bookname}{q}'
 
             # Log the command if debugging is enabled
             if DEBUG:
@@ -768,10 +770,10 @@ def main(bookname, wildcard_path=None):
 
             logging.info("Generating images using ComfyUI")
             run_comfy_cmd = (
-                f"python run_comfy_wf_api.py --ckpt_name \"{comfyui_model}\" "
+                f"python run_comfy_wf_api.py --ckpt_name {q}{comfyui_model}{q} "
                 f"--cfg {cfg} --steps {steps} --count {image_count} "
                 f"--width {image_width} --height {image_height} "
-                f"{input_file} {workflow_path} --bookname {bookname}"
+                f"{q}{input_file}{q} {workflow_path} --bookname {q}{bookname}{q} "
             )
 
             if DEBUG:
@@ -871,10 +873,10 @@ def main(bookname, wildcard_path=None):
     if skip_renaming == "n":
         # Define the command to run png_text.py
         # removed -o (overwrite) flag. Not sure why it was enabled. Allows for faster restarts
-        make_text_cmd = f"python png_text.py {path_to_images}"
+        make_text_cmd = f"python png_text.py {q}{path_to_images}{q}"
 
         # Define the command to run rename_png_files.py
-        rename_png_cmd = f"python rename_png_files_int.py {path_to_images}"
+        rename_png_cmd = f"python rename_png_files_int.py {q}{path_to_images}{q}"
 
         # Log the commands if debugging is enabled
         if DEBUG:
@@ -903,17 +905,18 @@ def main(bookname, wildcard_path=None):
         print("Skipping file renaming step as per user choice.")
 
     # Step 19: Create an output video if it doesn't exist
-    output_video_path = os.path.join(book_folder, f"{bookname}_output.avi")
+    video_format = config.get('video_format', 'avi')
+    output_video_path = os.path.join(book_folder, f"{bookname}_output.{video_format}")
 
     if not os.path.exists(output_video_path):
         logging.info("Creating silent output video: %s", output_video_path)
 
         # Construct the jobvid.py command
-        jobvid_cmd = f"python jobvid.py \"{os.path.join(path_to_images, '*.png')}\" \"{output_video_path}\""
+        jobvid_cmd = f"python jobvid.py {q}{os.path.join(path_to_images, '*.png')}{q} {q}{output_video_path}{q} {video_format}"
 
         # Log the command if debugging is enabled
         if DEBUG:
-            logging.debug("Step 19/20: Parallel ffmpeg processes generate and combine still image .AVIs %s", jobvid_cmd)
+            logging.debug("Step 19/20: Parallel ffmpeg processes generate and combine still image ."+video_format+" %s", jobvid_cmd)
 
         try:
             subprocess.run(jobvid_cmd, shell=True, check=True)
@@ -932,16 +935,24 @@ def main(bookname, wildcard_path=None):
         logging.info("Output video already exists: %s", output_video_path)
 
     # Step 20: Create the final video if it doesn't already exist
-    output_avi_path = os.path.join(book_folder, f"{bookname}.avi")
+    output_avi_path = os.path.join(book_folder, f"{bookname}.{video_format}")
 
     if not os.path.exists(output_avi_path):
         logging.info("Creating the final video with audio: %s", output_avi_path)
 
-        ffmpeg_cmd = (
-            f'ffmpeg -hide_banner -i "books/{bookname}/{bookname}_output.avi" '
-            f'-i "books/{bookname}/{bookname}.mp3" '
-            f'-c:v copy -map 0:v:0 -map 1:a:0 "{output_avi_path}"'
-        )
+        if video_format == "mp4":
+            ffmpeg_cmd = (
+                f'ffmpeg -hide_banner -i "books/{bookname}/{bookname}_output.{video_format}" '
+                f'-i "books/{bookname}/{bookname}.mp3" '
+                f'-sub_charenc UTF-8 -i "books/{bookname}/{bookname}.srt" '
+                f'-map 0:v:0 -map 1:a:0 -map 2:s:0 -c:v copy -c:a copy -c:s mov_text {q}{output_avi_path}{q}'
+            )
+        else:
+            ffmpeg_cmd = (
+                f'ffmpeg -hide_banner -i "books/{bookname}/{bookname}_output.{video_format}" '
+                f'-i "books/{bookname}/{bookname}.mp3" '
+                f'-c:v copy -map 0:v:0 -map 1:a:0 {q}{output_avi_path}{q}'
+            )
 
         # Log the command if debugging is enabled
         if DEBUG:
@@ -949,14 +960,14 @@ def main(bookname, wildcard_path=None):
         try:
             result = subprocess.run(ffmpeg_cmd, shell=True, check=True)
             if result.returncode == 0:
-                logging.info(f"{output_avi_path} and books/{bookname}/{bookname}.srt files created.")
+                logging.info(f"{q}{output_avi_path}{q} and {q}books/{bookname}/{bookname}.srt{q} files created.")
 
-                temp_output_file = f"books/{bookname}/{bookname}_output.avi"
+                temp_output_file = os.path.join("books", bookname, f"{bookname}_output.{video_format}")
                 if os.path.exists(temp_output_file):
                     try:
                         os.remove(temp_output_file)
                     except OSError:
-                        pass  # Do nothing if there's an error
+                        pass
         except subprocess.CalledProcessError as e:
             logging.error("Command failed: %s", e)
     else:
@@ -986,18 +997,22 @@ def get_version_and_description_from_setup():
     version_match = re.compile(r"^.*version=['\"]([^'\"]*)['\"].*$", re.M)
     description_match = re.compile(r"^.*description=['\"]([^'\"]*)['\"].*$", re.M)
 
-    with open(setup_path, 'rt') as f:
-        setup_contents = f.read()
+    try:
+        with open(setup_path, 'rt') as f:
+            setup_contents = f.read()
 
-    # Search for version
-    version_search = version_match.search(setup_contents)
-    if version_search:
-        info["version"] = version_search.group(1)
+        # Search for version
+        version_search = version_match.search(setup_contents)
+        if version_search:
+            info["version"] = version_search.group(1)
 
-    # Search for description
-    description_search = description_match.search(setup_contents)
-    if description_search:
-        info["description"] = description_search.group(1)
+        # Search for description
+        description_search = description_match.search(setup_contents)
+        if description_search:
+            info["description"] = description_search.group(1)
+    except FileNotFoundError:
+        # Ignore file not found error and keep the default values
+        pass
 
     return info
 
