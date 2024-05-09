@@ -1,7 +1,7 @@
 # This config file can be copied to books\<bookname>\<bookname>.yaml and any keys there will over ride the key here. actors for example.
 # Prompts for generating images. 
-pos_prompt: " [caucasian], (fantastical), (best quality), (perfect details), (professional photo) "
-neg_prompt: " shirtless, painting, monochrome, freckles, asian, bad quality, low quality, low face detail, low resolution, bad anatomy "
+Pos: " [caucasian], (fantastical), (best quality), (perfect details), (professional photo) "
+Neg: " shirtless, painting, monochrome, freckles, asian, bad quality, low quality, low face detail, low resolution, bad anatomy "
 
 # If image_generator is ComfyUI, folder containing ComfyUI generated images. You must start ComfyUI prior to generating images.
 # You must change the path below or you must rename the "output" images folder to <bookname> when image generation is complete

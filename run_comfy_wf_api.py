@@ -89,7 +89,7 @@ def load_and_process_config(SCRIPT_PATH, bookname):
             print("Warning: Error reading default YAML file. Proceeding with an empty configuration.")
 
     if DEBUG2:
-        print("Default config pos_prompt:", config.get("pos_prompt"))
+        print("Default config Pos:", config.get("Pos"))
 
     if bookname:
         book_config_path = os.path.join(SCRIPT_PATH, 'books', bookname, f"{bookname}.yaml")
@@ -109,7 +109,7 @@ def load_and_process_config(SCRIPT_PATH, bookname):
                 print(f"Book-specific config file not found at {book_config_path}. Using default config.")
 
     if DEBUG2:
-        print("Merged config pos_prompt:", config.get("pos_prompt"))
+        print("Merged config Pos:", config.get("Pos"))
 
     return replace_bookname_recursive(config, bookname) if bookname else config
 
@@ -142,7 +142,7 @@ if __name__ == "__main__":
     default_neg_prompt = prompt_config.get(neg_key, {}).get("inputs", {}).get("text", "")
 
     # Update the negative prompt once, using config value or default
-    final_neg_prompt = config.get("neg_prompt", default_neg_prompt)
+    final_neg_prompt = config.get("Neg", default_neg_prompt)
     if neg_key:
         prompt_config[neg_key]["inputs"]["text"] = final_neg_prompt
 
@@ -157,7 +157,7 @@ if __name__ == "__main__":
                 text_prompt = replace_tabs_with_space(text_prompt)
 
                 # Determine the positive prompt to use (config or default)
-                final_pos_prompt = config.get("pos_prompt", default_pos_prompt)
+                final_pos_prompt = config.get("Pos", default_pos_prompt)
 
                 # Update positive prompt in workflow configuration
                 if pos_key:
