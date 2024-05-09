@@ -54,31 +54,44 @@ def load_and_process_config(SCRIPT_PATH, bookname):
         print("Merged config pos_prompt:", config.get("pos_prompt"))
 
     return replace_bookname_recursive(config, bookname) if bookname else config
+import glob
 
-def process_files(file_pattern, output_file_path, log_file_path, config):  # Added config parameter
-    if DEBUG2:
-        print(f"Processing files with pattern {file_pattern}")
-    try:
-        with open(log_file_path, 'w') as log_file, open(output_file_path, 'w', encoding='cp1252') as output_file:
-            for filename in glob.glob(file_pattern):
+def process_files(file_pattern, output_file_path, log_file_path, config):
+    encodings = ['utf-8', 'cp1252']  # List of encodings you expect to encounter
+    with open(log_file_path, 'w') as log_file, open(output_file_path, 'w', encoding='utf-8') as output_file:
+        for filename in glob.glob(file_pattern):
+            if DEBUG2:
+                print(f"Opening file {filename} for processing")
+            file_processed = False
+            for encoding in encodings:
+                try:
+                    remove_duplicate_patterns(filename, log_file, output_file, config, encoding)
+                    file_processed = True
+                    break  # Stop trying encodings once successful
+                except UnicodeDecodeError as e:
+                    if DEBUG2:
+                        print(f"Failed to decode {filename} with {encoding}: {e}")
+            if not file_processed:
+                log_file.write(f"Failed to process {filename}: No valid encoding found.\n")
                 if DEBUG2:
-                    print(f"Opening file {filename} for processing")
-                remove_duplicate_patterns(filename, log_file, output_file, config)  # Pass config to the function
-    except Exception as e:
-        print(f"Failed to process files: {e}")
+                    print(f"Failed to process {filename}: No valid encoding found.")
 
-import re
+
+
 from itertools import permutations
 
-def remove_duplicate_patterns(filename, log_file, output_file, config):
-    import re
-    pattern = re.compile(r'(_[^@]*@)')
+import re
+
+def remove_duplicate_patterns(filename, log_file, output_file, config, encoding):
+    # Compiled regex pattern that does not cross line boundaries
+    pattern = re.compile(r'(_[^@\n]*@)')
     line_number = 0
     keep_actors = int(config.get('keep_actors', 0))  # Default to 0 if not specified
     actor_priority = config.get('actor_priority', '').split(', ') if config.get('actor_priority') else None
     last_match = None  # Initialize variable to keep track of the last match
 
-    with open(filename, 'r') as file:
+    # Open the file with the given encoding
+    with open(filename, 'r', encoding=encoding) as file:
         for line in file:
             line_number += 1
             found = pattern.findall(line)
