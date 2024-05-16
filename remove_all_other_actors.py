@@ -54,10 +54,11 @@ def load_and_process_config(SCRIPT_PATH, bookname):
         print("Merged config pos_prompt:", config.get("pos_prompt"))
 
     return replace_bookname_recursive(config, bookname) if bookname else config
-import glob
 
 def process_files(file_pattern, output_file_path, log_file_path, config):
     encodings = ['utf-8', 'cp1252']  # List of encodings you expect to encounter
+    seen_lines = set()  # Set to keep track of seen lines
+
     with open(log_file_path, 'w') as log_file, open(output_file_path, 'w', encoding='utf-8') as output_file:
         for filename in glob.glob(file_pattern):
             if DEBUG2:
@@ -65,7 +66,7 @@ def process_files(file_pattern, output_file_path, log_file_path, config):
             file_processed = False
             for encoding in encodings:
                 try:
-                    remove_duplicate_patterns(filename, log_file, output_file, config, encoding)
+                    remove_duplicate_patterns(filename, log_file, output_file, config, encoding, seen_lines)
                     file_processed = True
                     break  # Stop trying encodings once successful
                 except UnicodeDecodeError as e:
@@ -76,15 +77,8 @@ def process_files(file_pattern, output_file_path, log_file_path, config):
                 if DEBUG2:
                     print(f"Failed to process {filename}: No valid encoding found.")
 
-
-
-from itertools import permutations
-
-import re
-
-def remove_duplicate_patterns(filename, log_file, output_file, config, encoding):
-    # Compiled regex pattern that does not cross line boundaries
-    pattern = re.compile(r'(_[^@\n]*@)')
+def remove_duplicate_patterns(filename, log_file, output_file, config, encoding, seen_lines):
+    pattern = re.compile(r'(_[^@]*@)')
     line_number = 0
     keep_actors = int(config.get('keep_actors', 0))  # Default to 0 if not specified
     actor_priority = config.get('actor_priority', '').split(', ') if config.get('actor_priority') else None
@@ -135,7 +129,11 @@ def remove_duplicate_patterns(filename, log_file, output_file, config, encoding)
                 log_entry = f"[{line_number:05}.{match_count:02}] {match}\n"
                 log_file.write(log_entry)
 
-            output_file.write(line)
+            # Write the line to the output file if it hasn't been seen before
+            # This is work-around to ensure each input line is output once becausI could not figure out what was causing random duplicates
+            if line not in seen_lines:
+                seen_lines.add(line)
+                output_file.write(line)
 
 def main():
     if DEBUG2:
