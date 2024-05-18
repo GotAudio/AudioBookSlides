@@ -4,16 +4,28 @@ import csv
 import re
 import os
 from joblib import Parallel, delayed
+import time
 
 def generate_response(prompt, api_key):
     openai.api_key = api_key
-    response = openai.Completion.create(
-        model="gpt-3.5-turbo-instruct-0914",
-        prompt=prompt,
-        temperature=0,
-        max_tokens=250
-    )
-    return response.choices[0].text.strip()
+    max_retries = 5
+    retry_delay = 1  # initial delay in seconds
+
+    for attempt in range(max_retries):
+        try:
+            response = openai.Completion.create(
+                model="gpt-3.5-turbo-instruct-0914",
+                prompt=prompt,
+                temperature=0,
+                max_tokens=250
+            )
+            return response.choices[0].text.strip()
+        except openai.error.RateLimitError as e:
+            if attempt < max_retries - 1:
+                time.sleep(retry_delay)
+                #retry_delay *= 2  # exponential backoff
+            else:
+                raise e
 
 def process_line(line, idx, total, api_key):
     timestamp_match = re.search(r"({ts=\d+})", line)
@@ -64,7 +76,7 @@ if __name__ == "__main__":
 
     input_file = sys.argv[1]
     output_file = sys.argv[2]
-    num_jobs = 10  # Number of parallel jobs, adjust as needed
+    num_jobs = 5  # Number of parallel jobs, adjust as needed
 
     api_key = os.environ.get('ABS_API_KEY')
     if not api_key:

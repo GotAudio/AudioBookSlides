@@ -4,6 +4,28 @@ import csv
 import re
 import os
 from joblib import Parallel, delayed
+import time
+
+def generate_response(prompt, api_key):
+    openai.api_key = api_key
+    max_retries = 5
+    retry_delay = 1  # initial delay in seconds
+
+    for attempt in range(max_retries):
+        try:
+            response = openai.Completion.create(
+                model="gpt-3.5-turbo-instruct-0914",
+                prompt=prompt,
+                temperature=0,
+                max_tokens=250
+            )
+            return response.choices[0].text.strip()
+        except openai.error.RateLimitError as e:
+            if attempt < max_retries - 1:
+                time.sleep(retry_delay)
+                #retry_delay *= 2  # exponential backoff
+            else:
+                raise e
 
 def generate_response(prompt, api_key):
     openai.api_key = api_key
@@ -64,7 +86,7 @@ def main(input_file, output_file, api_key):
     if api_key:
         # Use parallel processing when API key is available
         sys.stdout.write('[' + ' ' * 100 + ']\r[')  # Initialize progress bar for parallel processing
-        results = Parallel(n_jobs=10)(delayed(process_line)(line, idx, total_lines, api_key, "") for idx, line in enumerate(lines))
+        results = Parallel(n_jobs=5)(delayed(process_line)(line, idx, total_lines, api_key, "") for idx, line in enumerate(lines))
         sys.stdout.write('\n')  # Move to the next line after progress bar completion
     else:
         # Process lines sequentially without API key
