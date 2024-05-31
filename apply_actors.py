@@ -13,22 +13,41 @@ def load_replacements(file_path):
                     replacements[key] = value
     return replacements
 
-def replace_in_file(input_path, replacements, output_path):
-    with open(input_path, 'r', encoding='utf-8') as file:
-        lines = file.readlines()
+def replace_in_file(input_path, replacements, output_path, log_file_path):
+    encodings = ['utf-8', 'cp1252']  # List of encodings you expect to encounter
+    file_processed = False
 
-    with open(output_path, 'w') as file:
-        for line in lines:
-            # Perform replacements for exact case matches
-            for key, value in replacements.items():
-                if key in line:
-                    line = line.replace(key, value)
-            # Replace uppercase names with mixed case replacements
-            for key, value in replacements.items():
-                if key.upper() in line:
-                    line = line.replace(key.upper(), value)
-            line = process_line(line)
-            file.write(line)
+    with open(log_file_path, 'w') as log_file:
+        for encoding in encodings:
+            try:
+                with open(input_path, 'r', encoding=encoding) as file:
+                    lines = file.readlines()
+
+                with open(output_path, 'w', encoding='utf-8') as file:
+                    for line in lines:
+                        # Perform replacements for exact case matches
+                        for key, value in replacements.items():
+                            if key in line:
+                                line = line.replace(key, value)
+                        # Replace uppercase names with mixed case replacements
+                        for key, value in replacements.items():
+                            if key.upper() in line:
+                                line = line.replace(key.upper(), value)
+                        line = process_line(line)
+                        file.write(line)
+
+                file_processed = True
+                break  # Stop trying encodings once successful
+
+            except UnicodeDecodeError as e:
+                if DEBUG2:
+                    print(f"Failed to decode {input_path} with {encoding}: {e}")
+
+        if not file_processed:
+            log_file.write(f"Failed to process {input_path}: No valid encoding found.\n")
+            if DEBUG2:
+                print(f"Failed to process {input_path}: No valid encoding found.")
+
 
 def process_line(line):
     # Replace tab with a space
