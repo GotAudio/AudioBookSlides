@@ -42,7 +42,7 @@ Ensure each package is correctly installed and configured before using AudioBook
 <pre><code>
 
 mamba create -n abs python=3.10 cudnn cuda-libraries cuda-runtime cuda-libraries-dev -c conda-forge -c nvidia
-
+mamba activate abs
 SET BASE=H:\win
 pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
 mamba install zlib -c conda-forge
